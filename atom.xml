@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://yuufen.com/blog/</id>
+    <title>YuuFen</title>
+    <updated>2020-02-28T17:05:21.161Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://yuufen.com/blog/"/>
+    <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://yuufen.com/blog/images/avatar.png</logo>
+    <icon>https://yuufen.com/blog/favicon.ico</icon>
+    <rights>All rights reserved 2020, YuuFen</rights>
+    <entry>
+        <title type="html"><![CDATA[制作个人主页的技术总结]]></title>
+        <id>https://yuufen.com/blog/post/how-i-make-my-personal-website/</id>
+        <link href="https://yuufen.com/blog/post/how-i-make-my-personal-website/">
+        </link>
+        <updated>2020-02-28T10:27:58.000Z</updated>
+        <content type="html"><![CDATA[<p>一直都想搭个个人主页，但是因为没有什么特别的 Idea，而自己的设计着实体现出标准的工科直男气息，所以也就一直拖着没开始。直到在知乎看到了 zhangwenli 小姐姐的作品，着实被惊艳到。因为小姐姐是基于旧版本的 vue cli 实现的，并且当时我的技能点基本都点在了 React 上，所以本着顺便学习 Vue 的目的，我使用 vue cli3(4) 重新实现了一遍这个项目。做完之后也学到了很多东西。</p>
+<h2 id="架构">架构</h2>
+<p>这里应该有图，但我画在草稿纸上了(oh shift)。</p>
+<h2 id="目录结构">目录结构</h2>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog//post-images/1582896479729.png" alt="" loading="lazy"></figure>
+<p>这是我的博客最后的目录结构。说实话第一眼看到她的目录结构我是有点懵逼的，最明显的就是 SCSS 和组件分离，并且 SCSS 和组件都统一全局声明，看着有点像 React，和我接触到的其他 vue 项目相差很大，可能是因为在 vue cli3 之后比较少见，但确实非常方便，样式和组件之间的关系更加清晰明了，也可以更方便的统一配置管理。</p>
+<h2 id="提取配置和工具类-工具函数">提取配置和工具类 / 工具函数</h2>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog//post-images/1582896974166.png" alt="" loading="lazy"></figure>
+<p>将可配置的尽量提出来变成可配置的，是降低工程复杂度的最佳方式之一，无论这个配置看起来和程序主题耦合的多么深。博客的可配置项从各个应用的图标标题，到 app 分组，以及相册，需要从一开始就定下来。</p>
+<p>而工具类 / 工具函数的提取是我所欠缺的，因为我平时做些小工程，初期分析架构时很少会细致到这一步，导致会出现重复代码，或者某个组件具体代码可读性比较差，可能中期或者结束了还要花费时间去重构。这也是吸取了一个教训，初期架构的时候就要在意可复用的工具类，编码时发现又可能可复用一些东西就及时提出来，不要觉得可能以后用不到就直接放着了。</p>
+<h2 id="一些细节">一些细节</h2>
+<p>举一些在原版中没有找到解决方法的问题</p>
+<h3 id="resize-的监听">resize 的监听</h3>
+<p>因为背景是通过 canvas 画的，所以当 resize 后需要计算各元素的宽高度，再重新调用绘图函数画出背景。子元素需要等待父元素 resize 后才能获取到正确的宽高度。张姐采用的解决方案是先监听 resize 事件计算出宽高度再 new 根组件，在 vue cli3 中并不适用。于是我在子组件中监听父组件的 resize。</p>
+<h3 id="左右滑动的动画">左右滑动的动画</h3>
+<p>张姐的版本并没有做滑动的动画（我看到她给 scroll 加了一个 transition，但这并不会有效果…），我用定时器完成了这个。</p>
+<h3 id="屏蔽了移动端浏览器左右滑手势的前进后退">屏蔽了移动端浏览器左右滑手势的前进后退</h3>
+<p>原版 Slider 组件左右滑动时会触发浏览器的前进后退，很影响使用。我就直接 prevent 了 touchmove 事件的冒泡。</p>
+<h3 id="实现在-app-界面时按返回键返回首页">实现在 app 界面时按返回键返回首页</h3>
+<p>原版在 app 界面，习惯性的点击返回键的话会直接关闭 web 页面。我通过 history 和 popstate 事件解决了这一点，并模仿 app 实现了双击返回退出。</p>
+<h3 id="代码风格">代码风格</h3>
+<ol>
+<li>之前写 SCSS 都是能套多少层就套多少层，看了她的代码才知道这样不行，可读性不好还影响性能；</li>
+<li>写多了弹性布局都快忘记传统布局咋写的了，以后要多结合使用；</li>
+<li>原来用伪元素可以画出叉叉……</li>
+<li>多多提取工具类工具函数，降低工程复杂度</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[你好呀，陌生人]]></title>
+        <id>https://yuufen.com/blog/post/hello-stranger/</id>
+        <link href="https://yuufen.com/blog/post/hello-stranger/">
+        </link>
+        <updated>2018-12-11T16:00:00.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>欢迎来到我的小站呀，很高兴遇见你！</p>
+</blockquote>
+<h2 id="关于本站">🏠 关于本站</h2>
+<p>因为笔记太多太杂，决定定期写写博客整理整理笔记。</p>
+<p><s>然后因为各种原因失去了动力</s></p>
+<p><s>看了看一年前的博文发现自己真的变化了蛮多的</s></p>
+<p>总之现在又开始了</p>
+<h2 id="关于我">👨‍💻 关于我</h2>
+<p>我目前大二在读，我的职业规划是前端工程师，拥有一年以上的前端项目开发经验，当然基础也没有落下！我的专业是电子信息，所以我还了解一些嵌入式开发（当然只是一些些），对Python和TensorFlow也有一定的涉猎。我正在努力寻找暑期实习！</p>
+<p>在以下位置找到有关我的更多信息：</p>
+<p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://yuufen.com/" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
+<h2 id="兴趣爱好">⛹ 兴趣爱好</h2>
+<p><strong>摄影</strong>、羽毛球、轮滑、尤克里里</p>
+]]></content>
+    </entry>
+</feed>
