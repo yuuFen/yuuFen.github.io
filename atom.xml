@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://yuufen.com/blog/</id>
+    <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-02-28T17:05:21.161Z</updated>
+    <updated>2020-02-28T17:22:07.725Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://yuufen.com/blog/"/>
+    <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
-    <subtitle>温故而知新</subtitle>
+    <subtitle>希望你可以记住我</subtitle>
     <logo>https://yuufen.com/blog/images/avatar.png</logo>
     <icon>https://yuufen.com/blog/favicon.ico</icon>
     <rights>All rights reserved 2020, YuuFen</rights>
@@ -20,10 +20,10 @@
 <h2 id="架构">架构</h2>
 <p>这里应该有图，但我画在草稿纸上了(oh shift)。</p>
 <h2 id="目录结构">目录结构</h2>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog//post-images/1582896479729.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1582896479729.png" alt="" loading="lazy"></figure>
 <p>这是我的博客最后的目录结构。说实话第一眼看到她的目录结构我是有点懵逼的，最明显的就是 SCSS 和组件分离，并且 SCSS 和组件都统一全局声明，看着有点像 React，和我接触到的其他 vue 项目相差很大，可能是因为在 vue cli3 之后比较少见，但确实非常方便，样式和组件之间的关系更加清晰明了，也可以更方便的统一配置管理。</p>
 <h2 id="提取配置和工具类-工具函数">提取配置和工具类 / 工具函数</h2>
-<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog//post-images/1582896974166.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1582896974166.png" alt="" loading="lazy"></figure>
 <p>将可配置的尽量提出来变成可配置的，是降低工程复杂度的最佳方式之一，无论这个配置看起来和程序主题耦合的多么深。博客的可配置项从各个应用的图标标题，到 app 分组，以及相册，需要从一开始就定下来。</p>
 <p>而工具类 / 工具函数的提取是我所欠缺的，因为我平时做些小工程，初期分析架构时很少会细致到这一步，导致会出现重复代码，或者某个组件具体代码可读性比较差，可能中期或者结束了还要花费时间去重构。这也是吸取了一个教训，初期架构的时候就要在意可复用的工具类，编码时发现又可能可复用一些东西就及时提出来，不要觉得可能以后用不到就直接放着了。</p>
 <h2 id="一些细节">一些细节</h2>

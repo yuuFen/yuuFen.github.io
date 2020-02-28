@@ -3,10 +3,10 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>制作个人主页的技术总结 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog//favicon.ico?v=1582909514908">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1582910505233">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
-<link rel="stylesheet" href="https://yuufen.com/blog//styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="制作个人主页的技术总结 | YuuFen - Atom Feed" href="https://yuufen.com/blog//atom.xml">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="制作个人主页的技术总结 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -20,14 +20,14 @@
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="https://yuufen.com/blog/">
-  <img class="avatar" src="https://yuufen.com/blog//images/avatar.png?v=1582909514908" alt="">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1582910505233" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
   </h1>
   <p class="site-description">
-    温故而知新
+    希望你可以记住我
   </p>
   <div class="menu-container">
     
@@ -59,9 +59,21 @@
   <div class="social-container">
     
       
-    
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
       
     
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
       
     
       
@@ -96,10 +108,10 @@
 <h2 id="架构">架构</h2>
 <p>这里应该有图，但我画在草稿纸上了(oh shift)。</p>
 <h2 id="目录结构">目录结构</h2>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog//post-images/1582896479729.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1582896479729.png" alt="" loading="lazy"></figure>
 <p>这是我的博客最后的目录结构。说实话第一眼看到她的目录结构我是有点懵逼的，最明显的就是 SCSS 和组件分离，并且 SCSS 和组件都统一全局声明，看着有点像 React，和我接触到的其他 vue 项目相差很大，可能是因为在 vue cli3 之后比较少见，但确实非常方便，样式和组件之间的关系更加清晰明了，也可以更方便的统一配置管理。</p>
 <h2 id="提取配置和工具类-工具函数">提取配置和工具类 / 工具函数</h2>
-<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog//post-images/1582896974166.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1582896974166.png" alt="" loading="lazy"></figure>
 <p>将可配置的尽量提出来变成可配置的，是降低工程复杂度的最佳方式之一，无论这个配置看起来和程序主题耦合的多么深。博客的可配置项从各个应用的图标标题，到 app 分组，以及相册，需要从一开始就定下来。</p>
 <p>而工具类 / 工具函数的提取是我所欠缺的，因为我平时做些小工程，初期分析架构时很少会细致到这一步，导致会出现重复代码，或者某个组件具体代码可读性比较差，可能中期或者结束了还要花费时间去重构。这也是吸取了一个教训，初期架构的时候就要在意可复用的工具类，编码时发现又可能可复用一些东西就及时提出来，不要觉得可能以后用不到就直接放着了。</p>
 <h2 id="一些细节">一些细节</h2>
@@ -161,7 +173,7 @@
 
         <div class="site-footer">
   Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="https://yuufen.com/blog//atom.xml" target="_blank">
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
     <i class="ri-rss-line"></i> RSS
   </a>
 </div>
