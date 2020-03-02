@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-02-28T17:22:07.725Z</updated>
+    <updated>2020-03-02T07:51:09.629Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -11,9 +11,31 @@
     <icon>https://yuufen.com/blog/favicon.ico</icon>
     <rights>All rights reserved 2020, YuuFen</rights>
     <entry>
+        <title type="html"><![CDATA[你好呀，陌生人]]></title>
+        <id>https://yuufen.com/blog/post/about/</id>
+        <link href="https://yuufen.com/blog/post/about/">
+        </link>
+        <updated>2030-12-31T16:00:00.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>欢迎来到我的小站呀，很高兴遇见你！🤝</p>
+</blockquote>
+<h2 id="关于本站">🏠 关于本站</h2>
+<p>因为笔记太多太杂，决定定期写写博客整理整理笔记。</p>
+<p><s>然后因为各种原因失去了动力</s></p>
+<p><s>看了看一年前的博文发现自己真的变化了蛮多的</s></p>
+<p>总之现在又开始了</p>
+<h2 id="关于我">👨‍💻 关于我</h2>
+<p>我目前大二在读，我的职业规划是前端工程师，拥有一年以上的前端项目开发经验，当然基础也没有落下！我的专业是电子信息，所以我还了解一些嵌入式开发（当然只是一些些），对Python和TensorFlow也有一定的涉猎。我正在努力寻找暑期实习！</p>
+<p>在以下位置找到有关我的更多信息：</p>
+<p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://yuufen.com/" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
+<h2 id="兴趣爱好">⛹ 兴趣爱好</h2>
+<p><strong>摄影</strong>、羽毛球、轮滑、尤克里里</p>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[制作个人主页的技术总结]]></title>
-        <id>https://yuufen.com/blog/post/how-i-make-my-personal-website/</id>
-        <link href="https://yuufen.com/blog/post/how-i-make-my-personal-website/">
+        <id>https://yuufen.com/blog/post/gsBr49oPO/</id>
+        <link href="https://yuufen.com/blog/post/gsBr49oPO/">
         </link>
         <updated>2020-02-28T10:27:58.000Z</updated>
         <content type="html"><![CDATA[<p>一直都想搭个个人主页，但是因为没有什么特别的 Idea，而自己的设计着实体现出标准的工科直男气息，所以也就一直拖着没开始。直到在知乎看到了 zhangwenli 小姐姐的作品，着实被惊艳到。因为小姐姐是基于旧版本的 vue cli 实现的，并且当时我的技能点基本都点在了 React 上，所以本着顺便学习 Vue 的目的，我使用 vue cli3(4) 重新实现了一遍这个项目。做完之后也学到了很多东西。</p>
@@ -46,25 +68,365 @@
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[你好呀，陌生人]]></title>
-        <id>https://yuufen.com/blog/post/hello-stranger/</id>
-        <link href="https://yuufen.com/blog/post/hello-stranger/">
+        <title type="html"><![CDATA[函数柯里化]]></title>
+        <id>https://yuufen.com/blog/post/gxNr15aBN/</id>
+        <link href="https://yuufen.com/blog/post/gxNr15aBN/">
         </link>
-        <updated>2018-12-11T16:00:00.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>欢迎来到我的小站呀，很高兴遇见你！</p>
-</blockquote>
-<h2 id="关于本站">🏠 关于本站</h2>
-<p>因为笔记太多太杂，决定定期写写博客整理整理笔记。</p>
-<p><s>然后因为各种原因失去了动力</s></p>
-<p><s>看了看一年前的博文发现自己真的变化了蛮多的</s></p>
-<p>总之现在又开始了</p>
-<h2 id="关于我">👨‍💻 关于我</h2>
-<p>我目前大二在读，我的职业规划是前端工程师，拥有一年以上的前端项目开发经验，当然基础也没有落下！我的专业是电子信息，所以我还了解一些嵌入式开发（当然只是一些些），对Python和TensorFlow也有一定的涉猎。我正在努力寻找暑期实习！</p>
-<p>在以下位置找到有关我的更多信息：</p>
-<p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://yuufen.com/" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
-<h2 id="兴趣爱好">⛹ 兴趣爱好</h2>
-<p><strong>摄影</strong>、羽毛球、轮滑、尤克里里</p>
+        <updated>2020-02-27T06:16:25.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="柯里化从何而来">柯里化从何而来</h2>
+<p>柯里化, 即 Currying 的音译。Currying 是编译原理层面实现多参函数的一个技术。</p>
+<p>在编码过程中，身为码农的我们本质上所进行的工作就是——将复杂问题分解为多个可编程的小问题。</p>
+<p>Currying 为实现多参函数提供了一个递归降解的实现思路——把接受多个参数的函数变换成接受一个单一参数（最初函数的第一个参数）的函数，并且返回接受余下的参数而且返回结果的新函数，在某些编程语言中（如 Haskell），是通过 Currying 技术支持多参函数这一语言特性的。</p>
+<p>所以 Currying 原本是一门编译原理层面的技术，用途是实现多参函数。</p>
+<h2 id="实现原理">实现原理</h2>
+<pre><code class="language-js">let _fn = curry(function(a, b, c, d, e) {
+  console.log(a + b + c + d + e)
+})
+
+// 目标：
+_fn(1, 2, 3, 4, 5) // 15
+_fn(1)(2, 3)(4)(5) // 15
+_fn(1)(2)(3)(4)(5) // 15
+
+// 实现，可以把 _curry() 提取出来
+function curry(fn, len = fn.length) {
+  return function _curry(...args) {
+    if (args.length &gt;= len) {
+      return fn.apply(this, args)
+    }
+    return function(...params) {
+      _args = [...args, ...params]
+
+      if (_args.length &gt;= len) {
+        return fn.apply(this, _args)
+      } else {
+        return _curry.call(this, ..._args)
+      }
+    }
+  }
+}
+</code></pre>
+<h2 id="currying-使用场景">Currying 使用场景</h2>
+<h3 id="参数复用">参数复用</h3>
+<p>固定不变的参数，实现参数复用是 Currying 的主要用途之一。<br>
+上文中的 increment, addTen 是一个参数复用的实例。对 add 方法固定第一个参数为 10 后，改方法就变成了一个将接受的变量值加 10 的方法。</p>
+<h3 id="延迟执行">延迟执行</h3>
+<p>延迟执行也是 Currying 的一个重要使用场景，同样 bind 和箭头函数也能实现同样的功能。<br>
+在前端开发中，一个常见的场景就是为标签绑定 onClick 事件，同时考虑为绑定的方法传递参数。</p>
+<h2 id="为什么需要-currying">为什么需要 Currying</h2>
+<h3 id="为了多参函数复用性">为了多参函数复用性</h3>
+<p>Currying 让人眼前一亮的地方在于，让人觉得函数还能这样子复用。</p>
+<p>通过一行代码，将 add 函数转换为 increment，addTen 等。</p>
+<p>对于 Currying 的复杂实现中，以 Lodash 为列，提供了 placeholder 的神奇操作。对多参函数的复用玩出花样。</p>
+<pre><code class="language-js">import _ from 'loadsh'
+
+function abc(a, b, c) {
+  return [a, b, c]
+}
+
+var curried = _.curry(abc)
+
+// Curried with placeholders.
+curried(1)(_, 3)(2)
+// =&gt; [1, 2, 3]
+</code></pre>
+<h3 id="为函数式编程而生">为函数式编程而生</h3>
+<p>Currying 是为函数式而生的东西。应运着有一整套函数式编程的东西，纯函数、compose、container 等等事物。（可阅读《mostly-adequate-guide》 ）<br>
+假如要写 Pointfree Javascript 风格的代码，那么 Currying 是不可或缺的。<br>
+要使用 compose，要使用 container 等事物，我们也需要 Currying。</p>
+<h2 id="为什么不需要-currying">为什么不需要 Currying</h2>
+<h3 id="currying-的一些特性有其他解决方案">Currying 的一些特性有其他解决方案</h3>
+<p>如果我们只是想提前绑定参数，那么我们有很多好几个现成的选择，bind，箭头函数等，而且性能比 Curring 更好。</p>
+<h3 id="currying-陷于函数式编程">Currying 陷于函数式编程</h3>
+<p>在本文中，提供了一个 trueCurrying 的实现，这个实现也是最符合 Currying 定义的，也提供 了 bind，箭头函数等不具备的“新奇”特性——可持续的 Currying（这个词是本人临时造的）。<br>
+但是这个“新奇”特性的应用并非想象得那么广泛。<br>
+其原因在于，Currying 是函数式编程的产物，它生于函数式编程，也服务于函数式编程。<br>
+而 JavaScript 并非真正的函数式编程语言，相比 Haskell 等函数式编程语言，JavaScript 使用 Currying 等函数式特性有额外的性能开销，也缺乏类型推导。<br>
+从而把 JavaScript 代码写得符合函数式编程思想和规范的项目都较少，从而也限制了 Currying 等技术在 JavaScript 代码中的普遍使用。<br>
+假如我们还没有准备好去写函数式编程规范的代码，仅需要在 JSX 代码中提前绑定一次参数，那么 bind 或箭头函数就足够了。</p>
+<h2 id="结论">结论</h2>
+<ol>
+<li>Currying 在 JavaScript 中是“低性能”的，但是这些性能在绝大多数场景，是可以忽略的。</li>
+<li>Currying 的思想极大地助于提升函数的复用性。</li>
+<li>Currying 生于函数式编程，也陷于函数式编程。假如没有准备好写纯正的函数式代码，那么 Currying 有更好的替代品。</li>
+<li>函数式编程及其思想，是值得关注、学习和应用的事物。所以在文末再次安利 JavaScript 程序员阅读此书 —— 《mostly-adequate-guide》</li>
+</ol>
+<p>部分转载于 https://juejin.im/post/5af13664f265da0ba266efcf</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[JS事件循环、Promise详解]]></title>
+        <id>https://yuufen.com/blog/post/pzNr19oSC/</id>
+        <link href="https://yuufen.com/blog/post/pzNr19oSC/">
+        </link>
+        <updated>2020-02-27T04:58:58.000Z</updated>
+        <content type="html"><![CDATA[<p>https://juejin.im/post/5b73d7a6518825610072b42b<br>
+https://juejin.im/post/5dc028dcf265da4d4b5fe94f</p>
+<p>1 5 6 2 3 4 7 8 9</p>
+<pre><code class="language-js">console.log('1')
+
+setTimeout(() =&gt; {  //  宏任务
+    console.log('2')
+    new Promise((resolve) =&gt; {  // 同步
+        console.log('3')
+        resolve()
+    }).then(() =&gt; {  // 微任务
+        console.log('4')
+    })
+})
+
+new Promise((resolve) =&gt; {  //同步
+    console.log('5')
+    resolve()
+}).then(() =&gt; {  // 微任务
+    console.log('6')
+})
+
+setTimeout(() =&gt; {  // 宏任务
+    console.log('7')
+    new Promise((resolve) =&gt; {  // 同步
+        console.log('8')
+        resolve()
+    }).then(() =&gt; {  // 微任务
+        console.log('9')
+    })
+})
+</code></pre>
+<hr>
+<pre><code class="language-js">new Promise((resolve, reject) =&gt; {
+  console.log(&quot;外部promise&quot;);
+  resolve();
+})
+  .then(() =&gt; {
+    console.log(&quot;外部第一个then&quot;);
+    return new Promise((resolve, reject) =&gt; {
+      console.log(&quot;内部promise&quot;);
+      resolve();
+    })
+    .then(() =&gt; {
+    console.log(&quot;内部第一个then&quot;);
+    })
+    .then(() =&gt; {
+    console.log(&quot;内部第二个then&quot;);
+    });
+  })
+  .then(() =&gt; {
+    console.log(&quot;外部第二个then&quot;);
+  });
+
+// 外部promise
+// 外部第一个then
+// 内部promise
+// 内部第一个then
+// 内部第二个then
+// 外部第二个then
+</code></pre>
+<pre><code class="language-js">new Promise((resolve, reject) =&gt; {
+  console.log(&quot;外部promise&quot;);
+  resolve();
+})
+  .then(() =&gt; {
+    console.log(&quot;外部第一个then&quot;);
+    new Promise((resolve, reject) =&gt; {
+      console.log(&quot;内部promise&quot;);
+      resolve();
+    })
+      .then(() =&gt; {
+        console.log(&quot;内部第一个then&quot;);
+      })
+      .then(() =&gt; {
+        console.log(&quot;内部第二个then&quot;);
+      });
+  })
+  .then(() =&gt; {
+    console.log(&quot;外部第二个then&quot;);
+  });
+
+// 外部promise
+// 外部第一个then
+// 内部promise
+// 内部第一个then
+// 外部第二个then
+// 内部第二个then
+</code></pre>
+<pre><code class="language-js">new Promise((resolve, reject) =&gt; {
+  console.log(&quot;外部promise&quot;);
+  resolve();
+})
+  .then(() =&gt; {
+    console.log(&quot;外部第一个then&quot;);
+    let p = new Promise((resolve, reject) =&gt; {
+      console.log(&quot;内部promise&quot;);
+      resolve();
+    })
+    p.then(() =&gt; {
+        console.log(&quot;内部第一个then&quot;);
+      })
+    p.then(() =&gt; {
+        console.log(&quot;内部第二个then&quot;);
+      });
+  })
+  .then(() =&gt; {
+    console.log(&quot;外部第二个then&quot;);
+  });
+
+// 外部promise
+// 外部第一个then
+// 内部promise
+// 内部第一个then
+// 内部第二个then
+// 外部第二个then
+</code></pre>
+<pre><code class="language-js">let p = new Promise((resolve, reject) =&gt; {
+  console.log(&quot;外部promise&quot;);
+  resolve();
+})
+p.then(() =&gt; {
+    console.log(&quot;外部第一个then&quot;);
+    new Promise((resolve, reject) =&gt; {
+      console.log(&quot;内部promise&quot;);
+      resolve();
+    })
+      .then(() =&gt; {
+        console.log(&quot;内部第一个then&quot;);
+      })
+      .then(() =&gt; {
+        console.log(&quot;内部第二个then&quot;);
+      });
+  })
+p.then(() =&gt; {
+    console.log(&quot;外部第二个then&quot;);
+  });
+  
+// 外部promise
+// 外部第一个then
+// 内部promise
+// 外部第二个then
+// 内部第一个then
+// 内部第二个then
+</code></pre>
+<pre><code class="language-js">new Promise((resolve, reject) =&gt; {
+  console.log(&quot;外部promise&quot;);
+  resolve();
+})
+  .then(() =&gt; {
+    console.log(&quot;外部第一个then&quot;);
+    new Promise((resolve, reject) =&gt; {
+      console.log(&quot;内部promise&quot;);
+      resolve();
+    })
+      .then(() =&gt; {
+        console.log(&quot;内部第一个then&quot;);
+      })
+      .then(() =&gt; {
+        console.log(&quot;内部第二个then&quot;);
+      });
+    return new Promise((resolve, reject) =&gt; {
+      console.log(&quot;内部promise2&quot;);
+      resolve();
+    })
+      .then(() =&gt; {
+        console.log(&quot;内部第一个then2&quot;);
+      })
+      .then(() =&gt; {
+        console.log(&quot;内部第二个then2&quot;);
+      });
+  })
+  .then(() =&gt; {
+    console.log(&quot;外部第二个then&quot;);
+  });
+
+// 外部promise
+// 外部第一个then
+// 内部promise
+// 内部promise2
+// 内部第一个then
+// 内部第一个then2
+// 内部第二个then
+// 内部第二个then2
+// 外部第二个then
+</code></pre>
+<h2 id="promisea-和-webkit-的-promise-的实现差异">Promise/A+ 和 webkit 的 Promise 的实现差异</h2>
+<pre><code class="language-js">new Promise((resolve, reject) =&gt; {
+  console.log('外部promise');
+  resolve();
+})
+  .then(() =&gt; {
+    console.log('外部第一个then');
+    new Promise((resolve, reject) =&gt; {
+      console.log('内部promise');
+      resolve();
+    })
+      .then(() =&gt; {
+        console.log('内部第一个then');
+        return Promise.resolve();
+      })
+      .then(() =&gt; {
+        console.log('内部第二个then');
+      })
+  })
+  .then(() =&gt; {
+    console.log('外部第二个then');
+  })
+  .then(() =&gt; {
+    console.log('外部第三个then');
+  })
+</code></pre>
+<h3 id="promisea-的实现">Promise/A+ 的实现：</h3>
+<p>执行 return Promise.resolve() ，创建一个 Promise 实例，将 Promise 实例设置为 resolve 状态，这个 Promise.resolve() 是同步的，且该 Promise 已经完成了，所以他并不会影响到其他 then 的注册。所以上述我们分析是完全正确的。<br>
+如下是 Promise.resolve 的实现，我们发现，完全是同步的，所以不影响最终结果。</p>
+<pre><code class="language-js">Promise.resolve = function (value) {
+  if (value instanceof Promise) return value;
+  if (value === null) return NULL;
+  if (value === undefined) return UNDEFINED;
+  if (value === true) return TRUE;
+  if (value === false) return FALSE;
+  if (value === 0) return ZERO;
+  if (value === '') return EMPTYSTRING;
+  if (typeof value === 'object' || typeof value === 'function') {
+    try {
+      var then = value.then;
+      if (typeof then === 'function') {
+        return new Promise(then.bind(value));
+      }
+    } catch (ex) {
+      return new Promise(function (resolve, reject) {
+        reject(ex);
+      });
+    }
+  }
+  return valuePromise(value);
+};
+</code></pre>
+<h3 id="promise-的-浏览器webkit的实现">Promise 的 浏览器(webkit)的实现：</h3>
+<p>执行 return Promise.resolve() ，创建一个 Promise 实例，执行 resolve ，此时将该 Promise 的 resolve 的 value（这里是undefined） 进入微任务队列，将该 Promise 的状态扭转为 resolve。然后接着执行了之前注册好的 &quot;外部第二个then&quot; ,然后注册 “外部第三个then” ，接着执行 “内部第一个then” 的 return 的 resolve 的这个 undefined value 的 Promise，执行完成之后，然后注册下一个then ,但是没有下一个 then 了，执行完成，整个 return 任务完成，本次同步任务也执行完成，接着执行注册的 “外部第三个then” ，执行完成之后，注册 “外部第四个then”，此时 ”内部第一个then“ 执行完成，注册 ”内部第二个then”，最后执行完“外部第四个then”，再执行 刚刚注册的“内部第二个then”.<br>
+源代码如下：</p>
+<pre><code class="language-cpp">void Promise::Resolver::Resolve(Handle&lt;Value&gt; value) {
+  i::Handle&lt;i::JSObject&gt; promise = Utils::OpenHandle(this);
+  i::Isolate* isolate = promise-&gt;GetIsolate();
+  LOG_API(isolate, &quot;Promise::Resolver::Resolve&quot;);
+  ENTER_V8(isolate);
+  EXCEPTION_PREAMBLE(isolate);
+  i::Handle&lt;i::Object&gt; argv[] = { promise, Utils::OpenHandle(*value) };
+  has_pending_exception = i::Execution::Call(
+      isolate,
+      isolate-&gt;promise_resolve(),
+      isolate-&gt;factory()-&gt;undefined_value(),
+      arraysize(argv), argv,
+      false).is_null();
+  EXCEPTION_BAILOUT_CHECK(isolate, /* void */ ;);
+}
+</code></pre>
+<pre><code class="language-js">PromiseResolve = function PromiseResolve(promise, x) {
+    PromiseDone(promise, +1, x, promiseOnResolve)
+}
+function PromiseDone(promise, status, value, promiseQueue) {
+    if (GET_PRIVATE(promise, promiseStatus) === 0) {
+        PromiseEnqueue(value, GET_PRIVATE(promise, promiseQueue), status);
+        PromiseSet(promise, status, value);
+    }
+}
+</code></pre>
 ]]></content>
     </entry>
 </feed>
