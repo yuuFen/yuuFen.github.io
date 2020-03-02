@@ -1,0 +1,277 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>做博客的目的与大致记录 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583179413306">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="做博客的目的与大致记录 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="
+第一篇博文，留作纪念
+才发现那天是圣诞节，祝大家圣诞快乐🎉
+
+目的与简介
+我一直都有记笔记的习惯，但是并不会去主动整理，于是图片也好，文本也好，都散落在各个文件夹或是抽屉里。于是就有了搭建一个博客整理笔记的念头。选择的是最简单的 hex..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583179413306" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              做博客的目的与大致记录
+            </h2>
+            <div class="post-info">
+              <span>
+                2018-12-25
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <blockquote>
+<p>第一篇博文，留作纪念<br>
+才发现那天是圣诞节，祝大家圣诞快乐🎉</p>
+</blockquote>
+<h2 id="目的与简介">目的与简介</h2>
+<p>我一直都有记笔记的习惯，但是并不会去主动整理，于是图片也好，文本也好，都散落在各个文件夹或是抽屉里。于是就有了搭建一个博客整理笔记的念头。选择的是最简单的 hexo + github ，以后会考虑尝试 python + WAMP 。虽然最开始只想做个技术博客，但<s>或许以后反而会以日常生活为主</s>。</p>
+<p>这篇博客简单记述了我在使用 hexo 搭载博客的过程中走过的路和跌过的坑。目的是总结这三天看了许多教程的成果以及尝试 markdown 的排版。</p>
+<h2 id="配置环境">配置环境</h2>
+<p>安装 Hexo 之前，需要安装环境 Node.js 和 Git 。最新版官网下载太慢，我选择的是老版本的国内镜像。安装过程都是下一步，这里就不累述了。<br>
+安装完成后在 cmd 输入以下代码：</p>
+<pre><code>node -v
+npm -v
+git --version
+</code></pre>
+<p>返回了版本号，安装成功。</p>
+<h2 id="安装hexo">安装hexo</h2>
+<p>安装好 node.js 和 git 后，可以通过 npm 来安装 Hexo 。</p>
+<pre><code>npm install -g hexo-cli
+</code></pre>
+<h2 id="初始化hexo">初始化Hexo</h2>
+<p>在博客根目录输入以下代码：</p>
+<pre><code>hexo init
+npm install
+</code></pre>
+<p>提示了两个 WARN ，WINDOWS 用户可以忽略。</p>
+<h2 id="建站">建站</h2>
+<p>hexo 的命令我就不细说了，有中文的帮助文档。</p>
+<h2 id="部署到github">部署到github</h2>
+<p>这里的花了我很长时间，有以下几个要点：</p>
+<h3 id="创建仓库">创建仓库</h3>
+<p>仓库名需要用<code>用户名.github.io</code>的形式。</p>
+<h3 id="添加部署路径">添加部署路径</h3>
+<ul>
+<li>属性和内容之间有一个空格；</li>
+<li>需要配置SSH等参数，这部分搜git就有很多相关教程。</li>
+</ul>
+<h3 id="安装插件">安装插件</h3>
+<p>输入命令行<code>npm install hexo-deployer-git --save</code>安装插件的时候，报错提示<code>This package is no longer maintained</code>该插件不再维护。<br>
+这里需要安装cnpm：</p>
+<pre><code>npm install cnpm -g --tegistry=https://registry.npm.taobao.org
+</code></pre>
+<p>安装过程中报错：</p>
+<pre><code>npm WARN deprecated socks@1.1.10: If using 2.x branch, please upgrade to at least 2.1.6 to avoid a serious bug with socket data flow and an import issue introduced in 2.1.0
+</code></pre>
+<p>是因为npm的一个包版本太低，因为是WARN，就忽略了。然后用淘宝NPM镜像的<code>hexo-deployer-git</code>试了一下：</p>
+<pre><code>cnpm install hexo-deployer-git --save
+</code></pre>
+<p>安装成功了。</p>
+<h3 id="发布">发布</h3>
+<p>在根目录打开 git bash ，键入：</p>
+<pre><code>hexo d -g
+</code></pre>
+<p>提示<code>git:done</code>，部署成功，至此我完成了一个可以即时访问的个人博客。</p>
+<h2 id="域名申请">域名申请</h2>
+<h3 id="购买域名">购买域名</h3>
+<p>我在 <a href="https://my.freenom.com/clientarea.php">Freenom</a> 上获取了这个免费域名，freenom 提供了 tk、ml、ga、cf、gq 这几类后缀的免费域名。tk域名，意为 Talker（说话的人）。.tk 域名是南太平洋岛国托克劳的顶级域名, .ml 是非洲国家马里的后缀, .ga 域名为加蓬国家顶级域名后缀, .cf 是中非共和国的后缀, .gq 域名是赤道几内亚国家地区顶级域名。</p>
+<h3 id="解析域名">解析域名</h3>
+<p>虽然freenom自身也能进行DNS解析，但是毕竟不适合国内的朋友使用。所以我使用了国内的 <a href="https://www.cloudxns.net/">CloudXNS</a> ，需要实名认证。</p>
+<h2 id="域名绑定page服务">域名绑定Page服务</h2>
+<h3 id="添加纪录">添加纪录</h3>
+<figure data-type="image" tabindex="1"><img src="https://dooyuu-1258391541.cos.ap-shanghai.myqcloud.com/%E7%AC%94%E8%AE%B0/QQ%E6%88%AA%E5%9B%BE20181227172233.png" alt="CloudXNS记录" loading="lazy"></figure>
+<h3 id="配置page服务">配置Page服务</h3>
+<p>在根目录下的sourse目录下新建文件CNAME，用Sublime打开填入刚获得的域名。<br>
+然后用sublime打开站点配置文件，查找 skip_render ，改为</p>
+<pre><code>skip_render:
+  - README.md  
+  - CNAME
+</code></pre>
+<p>这个指令可以防止每次hexo重新渲染把它们清除掉。这里的README.md可有可无，最好还是有，因为每个github项目都需要一个readme文件，添加位置和CNAME一样。</p>
+<p>至此，这个个人博客就大致上完成了！</p>
+<hr>
+<h2 id="总结">总结</h2>
+<p>摸索了一段时间才完成的，还是很有成就感的，比较遗憾的是并没有很好地记录下自己搭建这么一个网站的过程。以后会好好写博客的！</p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E7%9B%AE%E7%9A%84%E4%B8%8E%E7%AE%80%E4%BB%8B">目的与简介</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE%E7%8E%AF%E5%A2%83">配置环境</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85hexo">安装hexo</a></li>
+<li><a href="#%E5%88%9D%E5%A7%8B%E5%8C%96hexo">初始化Hexo</a></li>
+<li><a href="#%E5%BB%BA%E7%AB%99">建站</a></li>
+<li><a href="#%E9%83%A8%E7%BD%B2%E5%88%B0github">部署到github</a>
+<ul>
+<li><a href="#%E5%88%9B%E5%BB%BA%E4%BB%93%E5%BA%93">创建仓库</a></li>
+<li><a href="#%E6%B7%BB%E5%8A%A0%E9%83%A8%E7%BD%B2%E8%B7%AF%E5%BE%84">添加部署路径</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85%E6%8F%92%E4%BB%B6">安装插件</a></li>
+<li><a href="#%E5%8F%91%E5%B8%83">发布</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9F%9F%E5%90%8D%E7%94%B3%E8%AF%B7">域名申请</a>
+<ul>
+<li><a href="#%E8%B4%AD%E4%B9%B0%E5%9F%9F%E5%90%8D">购买域名</a></li>
+<li><a href="#%E8%A7%A3%E6%9E%90%E5%9F%9F%E5%90%8D">解析域名</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9F%9F%E5%90%8D%E7%BB%91%E5%AE%9Apage%E6%9C%8D%E5%8A%A1">域名绑定Page服务</a>
+<ul>
+<li><a href="#%E6%B7%BB%E5%8A%A0%E7%BA%AA%E5%BD%95">添加纪录</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AEpage%E6%9C%8D%E5%8A%A1">配置Page服务</a></li>
+</ul>
+</li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

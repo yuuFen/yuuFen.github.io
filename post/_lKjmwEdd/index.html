@@ -1,0 +1,380 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>设计模式总结（都在码里） | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583179413306">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="设计模式总结（都在码里） | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="pub / sub（订阅 / 发布模式，观察者模式）
+优点
+解耦，降低代码入侵性
+原始：
+ModuleA
+  import B
+  B.action()
+ModuleB
+  action() {
+    import C
+    C.act..." />
+    <meta name="keywords" content="JS" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583179413306" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              设计模式总结（都在码里）
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-03-01
+              </span>
+              <span>
+                3 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
+                  # JS
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="pub-sub订阅-发布模式观察者模式">pub / sub（订阅 / 发布模式，观察者模式）</h2>
+<h3 id="优点">优点</h3>
+<p>解耦，降低代码入侵性</p>
+<pre><code class="language-js">原始：
+ModuleA
+  import B
+  B.action()
+ModuleB
+  action() {
+    import C
+    C.action()
+  }
+ModuleC
+  action() {
+    doSomething()
+  }
+
+观察者：
+Event
+ModuleA
+  event.$emit()
+ModuleB
+  event.$on()
+  event.$emit()
+ModuleC
+  event.$on()
+</code></pre>
+<h3 id="目标-实现">目标 &amp; 实现</h3>
+<p>参考 vue</p>
+<pre><code class="language-js">// 实现：
+class Event {
+  constructor() {
+    this.callback = {}
+  }
+
+  $on(name, fn) {
+    ;(this.callback[name] || (this.callback[name] = [])).push(fn)
+  }
+
+  $emit(name, ...args) {
+    const cbs = this.callback[name]
+    if (cbs) {
+      cbs.forEach((cb) =&gt; {
+        cb.call(this, ...args)
+      })
+    }
+  }
+
+  $off(name) {
+    this.callback[name] = null
+  }
+}
+
+// 目标：
+let event = new Event()
+// 监听
+event.$on('event1', (...args) =&gt; {
+  console.log('event1', ...args)
+})
+event.$on('event1', (...args) =&gt; {
+  console.log('event1 again', ...args)
+})
+// 触发
+event.$emit('event1', 1, 2, 3)
+// 解绑
+console.log('-'.repeat(20))
+event.$off('event1')
+event.$emit('event1', 1, 2, 3) // 测试
+</code></pre>
+<h2 id="单例模式">单例模式</h2>
+<p>保证一个类仅有一个实例，并提供一个访问它的全局访问点。</p>
+<h3 id="适用场景">适用场景</h3>
+<p>如：</p>
+<ol>
+<li>弹窗，无论点击多少次都只被创建一次。</li>
+<li>redux 的 store，全局唯一</li>
+</ol>
+<h3 id="简单实例">简单实例</h3>
+<pre><code class="language-js">// 新建弹窗，期望弹窗全局唯一
+// 伪代码:
+// function createModalLayer() {
+//   // 闭包储存单例实例
+//   let result
+//   return function() {
+//     return result || (result = 新建弹窗)
+//   }
+// }
+// 提取：
+// 高阶函数：
+function getSingle(fn) {
+  let result
+  return function() {
+    return result || (result = fn.apply(this, arguments))
+  }
+}
+function createModalLayer() {
+  console.log('新建弹窗')
+  const div = document.createElement('div')
+  div.innerHTML = new Date()
+  div.className = 'modal'
+  div.style.display = 'none'
+  document.body.appendChild(div)
+  div.addEventListener(
+    'click',
+    function() {
+      div.style.display = 'none'
+    },
+    false,
+  )
+  return div
+}
+
+createModalLayer = getSingle(createModalLayer)
+
+document.getElementById('modal-btn').addEventListener('click', function() {
+  // 新建弹窗
+  const modalLayer = createModalLayer()
+  modalLayer.style.display = 'block'
+})
+</code></pre>
+<h2 id="策略模式">策略模式</h2>
+<h3 id="分析">分析</h3>
+<p>KISS 原则 keep it simple and stupid</p>
+<p>策略模式指定义一系列算法，把他们一个个封装起来，并使他们可以相互替换。</p>
+<p>目的是将算法的使用和实现分离。</p>
+<p>一个基于策略模式的程序至少由两部分组成。第一部分是一组策略类（可变），封装了具体的算法，负责具体的计算过程；第二部分是环境类 Context（不变），Context 接收客户的请求，随后将请求委托给某一个策略类。要做到这一点，说明 Context 中要维持对某个策略对象的引用。</p>
+<h3 id="实例">实例</h3>
+<p>原始（面条式代码）：</p>
+<pre><code class="language-js">let form = 获取表单
+form.onSubmit = function() {
+  if (form.name.value === '') {
+    弹出错误消息
+  }
+  if (form.password.value === '') {
+    弹出错误消息
+  }
+  if (form.password.value.length &lt; 5) {
+    弹出错误消息
+  }
+  正则等等
+}
+</code></pre>
+<p>策略模式（具体看 element 的表单验证 https://github.com/ElemeFE/element/blob/dev/packages/form/src/form.vue ），其他例子：</p>
+<pre><code class="language-js">// 1. 策略
+// 可以使用配置
+const policy = {
+  S: function(salary) {
+    return salary * 4
+  },
+  A: function(salary) {
+    return salary * 3
+  },
+  B: function(salary) {
+    return salary * 2
+  },
+  C: function(salary) {
+    return salary
+  },
+}
+// 2. 使用
+function calculate(level, salary) {
+  return policy[level] ? policy[level](salary) : 0
+}
+</code></pre>
+<h2 id="代理模式">代理模式</h2>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#pub-sub%E8%AE%A2%E9%98%85-%E5%8F%91%E5%B8%83%E6%A8%A1%E5%BC%8F%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F">pub / sub（订阅 / 发布模式，观察者模式）</a>
+<ul>
+<li><a href="#%E4%BC%98%E7%82%B9">优点</a></li>
+<li><a href="#%E7%9B%AE%E6%A0%87-%E5%AE%9E%E7%8E%B0">目标 &amp; 实现</a></li>
+</ul>
+</li>
+<li><a href="#%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F">单例模式</a>
+<ul>
+<li><a href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF">适用场景</a></li>
+<li><a href="#%E7%AE%80%E5%8D%95%E5%AE%9E%E4%BE%8B">简单实例</a></li>
+</ul>
+</li>
+<li><a href="#%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F">策略模式</a>
+<ul>
+<li><a href="#%E5%88%86%E6%9E%90">分析</a></li>
+<li><a href="#%E5%AE%9E%E4%BE%8B">实例</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F">代理模式</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/gsBr49oPO/">
+              <h3 class="post-title">
+                制作个人主页的技术总结
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

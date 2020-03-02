@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-03-02T07:51:09.629Z</updated>
+    <updated>2020-03-02T20:03:48.510Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -15,21 +15,209 @@
         <id>https://yuufen.com/blog/post/about/</id>
         <link href="https://yuufen.com/blog/post/about/">
         </link>
-        <updated>2030-12-31T16:00:00.000Z</updated>
+        <updated>2024-02-28T16:00:00.000Z</updated>
         <content type="html"><![CDATA[<blockquote>
 <p>欢迎来到我的小站呀，很高兴遇见你！🤝</p>
 </blockquote>
 <h2 id="关于本站">🏠 关于本站</h2>
 <p>因为笔记太多太杂，决定定期写写博客整理整理笔记。</p>
 <p><s>然后因为各种原因失去了动力</s></p>
-<p><s>看了看一年前的博文发现自己真的变化了蛮多的</s></p>
+<p><s>因此搞丢了好多笔记啊啊啊啊啊啊啊😭😭😭</s></p>
+<p><s>看了看一年前的博文发现自己真的变化了蛮多的（加油💪）</s></p>
 <p>总之现在又开始了</p>
-<h2 id="关于我">👨‍💻 关于我</h2>
+<h2 id="关于我">🐟 关于我</h2>
 <p>我目前大二在读，我的职业规划是前端工程师，拥有一年以上的前端项目开发经验，当然基础也没有落下！我的专业是电子信息，所以我还了解一些嵌入式开发（当然只是一些些），对Python和TensorFlow也有一定的涉猎。我正在努力寻找暑期实习！</p>
 <p>在以下位置找到有关我的更多信息：</p>
 <p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://yuufen.com/" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
-<h2 id="兴趣爱好">⛹ 兴趣爱好</h2>
-<p><strong>摄影</strong>、羽毛球、轮滑、尤克里里</p>
+<h2 id="兴趣爱好">🎨 兴趣爱好</h2>
+<p><strong>摄影</strong>、羽毛球、轮滑，and playing!</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[浏览器渲染架构]]></title>
+        <id>https://yuufen.com/blog/post/tWNxkYDGN/</id>
+        <link href="https://yuufen.com/blog/post/tWNxkYDGN/">
+        </link>
+        <updated>2020-03-02T13:34:56.000Z</updated>
+        <summary type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583166954595.png" alt="" loading="lazy"></figure>
+]]></summary>
+        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583166954595.png" alt="" loading="lazy"></figure>
+<!-- more -->
+<p>js 动画 / CSS 动画</p>
+<p>查表：https://csstriggers.com/</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[设计模式总结（都在码里）]]></title>
+        <id>https://yuufen.com/blog/post/_lKjmwEdd/</id>
+        <link href="https://yuufen.com/blog/post/_lKjmwEdd/">
+        </link>
+        <updated>2020-03-01T06:51:31.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="pub-sub订阅-发布模式观察者模式">pub / sub（订阅 / 发布模式，观察者模式）</h2>
+<h3 id="优点">优点</h3>
+<p>解耦，降低代码入侵性</p>
+<pre><code class="language-js">原始：
+ModuleA
+  import B
+  B.action()
+ModuleB
+  action() {
+    import C
+    C.action()
+  }
+ModuleC
+  action() {
+    doSomething()
+  }
+
+观察者：
+Event
+ModuleA
+  event.$emit()
+ModuleB
+  event.$on()
+  event.$emit()
+ModuleC
+  event.$on()
+</code></pre>
+<h3 id="目标-实现">目标 &amp; 实现</h3>
+<p>参考 vue</p>
+<pre><code class="language-js">// 实现：
+class Event {
+  constructor() {
+    this.callback = {}
+  }
+
+  $on(name, fn) {
+    ;(this.callback[name] || (this.callback[name] = [])).push(fn)
+  }
+
+  $emit(name, ...args) {
+    const cbs = this.callback[name]
+    if (cbs) {
+      cbs.forEach((cb) =&gt; {
+        cb.call(this, ...args)
+      })
+    }
+  }
+
+  $off(name) {
+    this.callback[name] = null
+  }
+}
+
+// 目标：
+let event = new Event()
+// 监听
+event.$on('event1', (...args) =&gt; {
+  console.log('event1', ...args)
+})
+event.$on('event1', (...args) =&gt; {
+  console.log('event1 again', ...args)
+})
+// 触发
+event.$emit('event1', 1, 2, 3)
+// 解绑
+console.log('-'.repeat(20))
+event.$off('event1')
+event.$emit('event1', 1, 2, 3) // 测试
+</code></pre>
+<h2 id="单例模式">单例模式</h2>
+<p>保证一个类仅有一个实例，并提供一个访问它的全局访问点。</p>
+<h3 id="适用场景">适用场景</h3>
+<p>如：</p>
+<ol>
+<li>弹窗，无论点击多少次都只被创建一次。</li>
+<li>redux 的 store，全局唯一</li>
+</ol>
+<h3 id="简单实例">简单实例</h3>
+<pre><code class="language-js">// 新建弹窗，期望弹窗全局唯一
+// 伪代码:
+// function createModalLayer() {
+//   // 闭包储存单例实例
+//   let result
+//   return function() {
+//     return result || (result = 新建弹窗)
+//   }
+// }
+// 提取：
+// 高阶函数：
+function getSingle(fn) {
+  let result
+  return function() {
+    return result || (result = fn.apply(this, arguments))
+  }
+}
+function createModalLayer() {
+  console.log('新建弹窗')
+  const div = document.createElement('div')
+  div.innerHTML = new Date()
+  div.className = 'modal'
+  div.style.display = 'none'
+  document.body.appendChild(div)
+  div.addEventListener(
+    'click',
+    function() {
+      div.style.display = 'none'
+    },
+    false,
+  )
+  return div
+}
+
+createModalLayer = getSingle(createModalLayer)
+
+document.getElementById('modal-btn').addEventListener('click', function() {
+  // 新建弹窗
+  const modalLayer = createModalLayer()
+  modalLayer.style.display = 'block'
+})
+</code></pre>
+<h2 id="策略模式">策略模式</h2>
+<h3 id="分析">分析</h3>
+<p>KISS 原则 keep it simple and stupid</p>
+<p>策略模式指定义一系列算法，把他们一个个封装起来，并使他们可以相互替换。</p>
+<p>目的是将算法的使用和实现分离。</p>
+<p>一个基于策略模式的程序至少由两部分组成。第一部分是一组策略类（可变），封装了具体的算法，负责具体的计算过程；第二部分是环境类 Context（不变），Context 接收客户的请求，随后将请求委托给某一个策略类。要做到这一点，说明 Context 中要维持对某个策略对象的引用。</p>
+<h3 id="实例">实例</h3>
+<p>原始（面条式代码）：</p>
+<pre><code class="language-js">let form = 获取表单
+form.onSubmit = function() {
+  if (form.name.value === '') {
+    弹出错误消息
+  }
+  if (form.password.value === '') {
+    弹出错误消息
+  }
+  if (form.password.value.length &lt; 5) {
+    弹出错误消息
+  }
+  正则等等
+}
+</code></pre>
+<p>策略模式（具体看 element 的表单验证 https://github.com/ElemeFE/element/blob/dev/packages/form/src/form.vue ），其他例子：</p>
+<pre><code class="language-js">// 1. 策略
+// 可以使用配置
+const policy = {
+  S: function(salary) {
+    return salary * 4
+  },
+  A: function(salary) {
+    return salary * 3
+  },
+  B: function(salary) {
+    return salary * 2
+  },
+  C: function(salary) {
+    return salary
+  },
+}
+// 2. 使用
+function calculate(level, salary) {
+  return policy[level] ? policy[level](salary) : 0
+}
+</code></pre>
+<h2 id="代理模式">代理模式</h2>
 ]]></content>
     </entry>
     <entry>
@@ -155,278 +343,84 @@ curried(1)(_, 3)(2)
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[JS事件循环、Promise详解]]></title>
-        <id>https://yuufen.com/blog/post/pzNr19oSC/</id>
-        <link href="https://yuufen.com/blog/post/pzNr19oSC/">
+        <title type="html"><![CDATA[做博客的目的与大致记录]]></title>
+        <id>https://yuufen.com/blog/post/azDr69oSX/</id>
+        <link href="https://yuufen.com/blog/post/azDr69oSX/">
         </link>
-        <updated>2020-02-27T04:58:58.000Z</updated>
-        <content type="html"><![CDATA[<p>https://juejin.im/post/5b73d7a6518825610072b42b<br>
-https://juejin.im/post/5dc028dcf265da4d4b5fe94f</p>
-<p>1 5 6 2 3 4 7 8 9</p>
-<pre><code class="language-js">console.log('1')
-
-setTimeout(() =&gt; {  //  宏任务
-    console.log('2')
-    new Promise((resolve) =&gt; {  // 同步
-        console.log('3')
-        resolve()
-    }).then(() =&gt; {  // 微任务
-        console.log('4')
-    })
-})
-
-new Promise((resolve) =&gt; {  //同步
-    console.log('5')
-    resolve()
-}).then(() =&gt; {  // 微任务
-    console.log('6')
-})
-
-setTimeout(() =&gt; {  // 宏任务
-    console.log('7')
-    new Promise((resolve) =&gt; {  // 同步
-        console.log('8')
-        resolve()
-    }).then(() =&gt; {  // 微任务
-        console.log('9')
-    })
-})
+        <updated>2018-12-25T10:35:40.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>第一篇博文，留作纪念<br>
+才发现那天是圣诞节，祝大家圣诞快乐🎉</p>
+</blockquote>
+<h2 id="目的与简介">目的与简介</h2>
+<p>我一直都有记笔记的习惯，但是并不会去主动整理，于是图片也好，文本也好，都散落在各个文件夹或是抽屉里。于是就有了搭建一个博客整理笔记的念头。选择的是最简单的 hexo + github ，以后会考虑尝试 python + WAMP 。虽然最开始只想做个技术博客，但<s>或许以后反而会以日常生活为主</s>。</p>
+<p>这篇博客简单记述了我在使用 hexo 搭载博客的过程中走过的路和跌过的坑。目的是总结这三天看了许多教程的成果以及尝试 markdown 的排版。</p>
+<h2 id="配置环境">配置环境</h2>
+<p>安装 Hexo 之前，需要安装环境 Node.js 和 Git 。最新版官网下载太慢，我选择的是老版本的国内镜像。安装过程都是下一步，这里就不累述了。<br>
+安装完成后在 cmd 输入以下代码：</p>
+<pre><code>node -v
+npm -v
+git --version
 </code></pre>
+<p>返回了版本号，安装成功。</p>
+<h2 id="安装hexo">安装hexo</h2>
+<p>安装好 node.js 和 git 后，可以通过 npm 来安装 Hexo 。</p>
+<pre><code>npm install -g hexo-cli
+</code></pre>
+<h2 id="初始化hexo">初始化Hexo</h2>
+<p>在博客根目录输入以下代码：</p>
+<pre><code>hexo init
+npm install
+</code></pre>
+<p>提示了两个 WARN ，WINDOWS 用户可以忽略。</p>
+<h2 id="建站">建站</h2>
+<p>hexo 的命令我就不细说了，有中文的帮助文档。</p>
+<h2 id="部署到github">部署到github</h2>
+<p>这里的花了我很长时间，有以下几个要点：</p>
+<h3 id="创建仓库">创建仓库</h3>
+<p>仓库名需要用<code>用户名.github.io</code>的形式。</p>
+<h3 id="添加部署路径">添加部署路径</h3>
+<ul>
+<li>属性和内容之间有一个空格；</li>
+<li>需要配置SSH等参数，这部分搜git就有很多相关教程。</li>
+</ul>
+<h3 id="安装插件">安装插件</h3>
+<p>输入命令行<code>npm install hexo-deployer-git --save</code>安装插件的时候，报错提示<code>This package is no longer maintained</code>该插件不再维护。<br>
+这里需要安装cnpm：</p>
+<pre><code>npm install cnpm -g --tegistry=https://registry.npm.taobao.org
+</code></pre>
+<p>安装过程中报错：</p>
+<pre><code>npm WARN deprecated socks@1.1.10: If using 2.x branch, please upgrade to at least 2.1.6 to avoid a serious bug with socket data flow and an import issue introduced in 2.1.0
+</code></pre>
+<p>是因为npm的一个包版本太低，因为是WARN，就忽略了。然后用淘宝NPM镜像的<code>hexo-deployer-git</code>试了一下：</p>
+<pre><code>cnpm install hexo-deployer-git --save
+</code></pre>
+<p>安装成功了。</p>
+<h3 id="发布">发布</h3>
+<p>在根目录打开 git bash ，键入：</p>
+<pre><code>hexo d -g
+</code></pre>
+<p>提示<code>git:done</code>，部署成功，至此我完成了一个可以即时访问的个人博客。</p>
+<h2 id="域名申请">域名申请</h2>
+<h3 id="购买域名">购买域名</h3>
+<p>我在 <a href="https://my.freenom.com/clientarea.php">Freenom</a> 上获取了这个免费域名，freenom 提供了 tk、ml、ga、cf、gq 这几类后缀的免费域名。tk域名，意为 Talker（说话的人）。.tk 域名是南太平洋岛国托克劳的顶级域名, .ml 是非洲国家马里的后缀, .ga 域名为加蓬国家顶级域名后缀, .cf 是中非共和国的后缀, .gq 域名是赤道几内亚国家地区顶级域名。</p>
+<h3 id="解析域名">解析域名</h3>
+<p>虽然freenom自身也能进行DNS解析，但是毕竟不适合国内的朋友使用。所以我使用了国内的 <a href="https://www.cloudxns.net/">CloudXNS</a> ，需要实名认证。</p>
+<h2 id="域名绑定page服务">域名绑定Page服务</h2>
+<h3 id="添加纪录">添加纪录</h3>
+<figure data-type="image" tabindex="1"><img src="https://dooyuu-1258391541.cos.ap-shanghai.myqcloud.com/%E7%AC%94%E8%AE%B0/QQ%E6%88%AA%E5%9B%BE20181227172233.png" alt="CloudXNS记录" loading="lazy"></figure>
+<h3 id="配置page服务">配置Page服务</h3>
+<p>在根目录下的sourse目录下新建文件CNAME，用Sublime打开填入刚获得的域名。<br>
+然后用sublime打开站点配置文件，查找 skip_render ，改为</p>
+<pre><code>skip_render:
+  - README.md  
+  - CNAME
+</code></pre>
+<p>这个指令可以防止每次hexo重新渲染把它们清除掉。这里的README.md可有可无，最好还是有，因为每个github项目都需要一个readme文件，添加位置和CNAME一样。</p>
+<p>至此，这个个人博客就大致上完成了！</p>
 <hr>
-<pre><code class="language-js">new Promise((resolve, reject) =&gt; {
-  console.log(&quot;外部promise&quot;);
-  resolve();
-})
-  .then(() =&gt; {
-    console.log(&quot;外部第一个then&quot;);
-    return new Promise((resolve, reject) =&gt; {
-      console.log(&quot;内部promise&quot;);
-      resolve();
-    })
-    .then(() =&gt; {
-    console.log(&quot;内部第一个then&quot;);
-    })
-    .then(() =&gt; {
-    console.log(&quot;内部第二个then&quot;);
-    });
-  })
-  .then(() =&gt; {
-    console.log(&quot;外部第二个then&quot;);
-  });
-
-// 外部promise
-// 外部第一个then
-// 内部promise
-// 内部第一个then
-// 内部第二个then
-// 外部第二个then
-</code></pre>
-<pre><code class="language-js">new Promise((resolve, reject) =&gt; {
-  console.log(&quot;外部promise&quot;);
-  resolve();
-})
-  .then(() =&gt; {
-    console.log(&quot;外部第一个then&quot;);
-    new Promise((resolve, reject) =&gt; {
-      console.log(&quot;内部promise&quot;);
-      resolve();
-    })
-      .then(() =&gt; {
-        console.log(&quot;内部第一个then&quot;);
-      })
-      .then(() =&gt; {
-        console.log(&quot;内部第二个then&quot;);
-      });
-  })
-  .then(() =&gt; {
-    console.log(&quot;外部第二个then&quot;);
-  });
-
-// 外部promise
-// 外部第一个then
-// 内部promise
-// 内部第一个then
-// 外部第二个then
-// 内部第二个then
-</code></pre>
-<pre><code class="language-js">new Promise((resolve, reject) =&gt; {
-  console.log(&quot;外部promise&quot;);
-  resolve();
-})
-  .then(() =&gt; {
-    console.log(&quot;外部第一个then&quot;);
-    let p = new Promise((resolve, reject) =&gt; {
-      console.log(&quot;内部promise&quot;);
-      resolve();
-    })
-    p.then(() =&gt; {
-        console.log(&quot;内部第一个then&quot;);
-      })
-    p.then(() =&gt; {
-        console.log(&quot;内部第二个then&quot;);
-      });
-  })
-  .then(() =&gt; {
-    console.log(&quot;外部第二个then&quot;);
-  });
-
-// 外部promise
-// 外部第一个then
-// 内部promise
-// 内部第一个then
-// 内部第二个then
-// 外部第二个then
-</code></pre>
-<pre><code class="language-js">let p = new Promise((resolve, reject) =&gt; {
-  console.log(&quot;外部promise&quot;);
-  resolve();
-})
-p.then(() =&gt; {
-    console.log(&quot;外部第一个then&quot;);
-    new Promise((resolve, reject) =&gt; {
-      console.log(&quot;内部promise&quot;);
-      resolve();
-    })
-      .then(() =&gt; {
-        console.log(&quot;内部第一个then&quot;);
-      })
-      .then(() =&gt; {
-        console.log(&quot;内部第二个then&quot;);
-      });
-  })
-p.then(() =&gt; {
-    console.log(&quot;外部第二个then&quot;);
-  });
-  
-// 外部promise
-// 外部第一个then
-// 内部promise
-// 外部第二个then
-// 内部第一个then
-// 内部第二个then
-</code></pre>
-<pre><code class="language-js">new Promise((resolve, reject) =&gt; {
-  console.log(&quot;外部promise&quot;);
-  resolve();
-})
-  .then(() =&gt; {
-    console.log(&quot;外部第一个then&quot;);
-    new Promise((resolve, reject) =&gt; {
-      console.log(&quot;内部promise&quot;);
-      resolve();
-    })
-      .then(() =&gt; {
-        console.log(&quot;内部第一个then&quot;);
-      })
-      .then(() =&gt; {
-        console.log(&quot;内部第二个then&quot;);
-      });
-    return new Promise((resolve, reject) =&gt; {
-      console.log(&quot;内部promise2&quot;);
-      resolve();
-    })
-      .then(() =&gt; {
-        console.log(&quot;内部第一个then2&quot;);
-      })
-      .then(() =&gt; {
-        console.log(&quot;内部第二个then2&quot;);
-      });
-  })
-  .then(() =&gt; {
-    console.log(&quot;外部第二个then&quot;);
-  });
-
-// 外部promise
-// 外部第一个then
-// 内部promise
-// 内部promise2
-// 内部第一个then
-// 内部第一个then2
-// 内部第二个then
-// 内部第二个then2
-// 外部第二个then
-</code></pre>
-<h2 id="promisea-和-webkit-的-promise-的实现差异">Promise/A+ 和 webkit 的 Promise 的实现差异</h2>
-<pre><code class="language-js">new Promise((resolve, reject) =&gt; {
-  console.log('外部promise');
-  resolve();
-})
-  .then(() =&gt; {
-    console.log('外部第一个then');
-    new Promise((resolve, reject) =&gt; {
-      console.log('内部promise');
-      resolve();
-    })
-      .then(() =&gt; {
-        console.log('内部第一个then');
-        return Promise.resolve();
-      })
-      .then(() =&gt; {
-        console.log('内部第二个then');
-      })
-  })
-  .then(() =&gt; {
-    console.log('外部第二个then');
-  })
-  .then(() =&gt; {
-    console.log('外部第三个then');
-  })
-</code></pre>
-<h3 id="promisea-的实现">Promise/A+ 的实现：</h3>
-<p>执行 return Promise.resolve() ，创建一个 Promise 实例，将 Promise 实例设置为 resolve 状态，这个 Promise.resolve() 是同步的，且该 Promise 已经完成了，所以他并不会影响到其他 then 的注册。所以上述我们分析是完全正确的。<br>
-如下是 Promise.resolve 的实现，我们发现，完全是同步的，所以不影响最终结果。</p>
-<pre><code class="language-js">Promise.resolve = function (value) {
-  if (value instanceof Promise) return value;
-  if (value === null) return NULL;
-  if (value === undefined) return UNDEFINED;
-  if (value === true) return TRUE;
-  if (value === false) return FALSE;
-  if (value === 0) return ZERO;
-  if (value === '') return EMPTYSTRING;
-  if (typeof value === 'object' || typeof value === 'function') {
-    try {
-      var then = value.then;
-      if (typeof then === 'function') {
-        return new Promise(then.bind(value));
-      }
-    } catch (ex) {
-      return new Promise(function (resolve, reject) {
-        reject(ex);
-      });
-    }
-  }
-  return valuePromise(value);
-};
-</code></pre>
-<h3 id="promise-的-浏览器webkit的实现">Promise 的 浏览器(webkit)的实现：</h3>
-<p>执行 return Promise.resolve() ，创建一个 Promise 实例，执行 resolve ，此时将该 Promise 的 resolve 的 value（这里是undefined） 进入微任务队列，将该 Promise 的状态扭转为 resolve。然后接着执行了之前注册好的 &quot;外部第二个then&quot; ,然后注册 “外部第三个then” ，接着执行 “内部第一个then” 的 return 的 resolve 的这个 undefined value 的 Promise，执行完成之后，然后注册下一个then ,但是没有下一个 then 了，执行完成，整个 return 任务完成，本次同步任务也执行完成，接着执行注册的 “外部第三个then” ，执行完成之后，注册 “外部第四个then”，此时 ”内部第一个then“ 执行完成，注册 ”内部第二个then”，最后执行完“外部第四个then”，再执行 刚刚注册的“内部第二个then”.<br>
-源代码如下：</p>
-<pre><code class="language-cpp">void Promise::Resolver::Resolve(Handle&lt;Value&gt; value) {
-  i::Handle&lt;i::JSObject&gt; promise = Utils::OpenHandle(this);
-  i::Isolate* isolate = promise-&gt;GetIsolate();
-  LOG_API(isolate, &quot;Promise::Resolver::Resolve&quot;);
-  ENTER_V8(isolate);
-  EXCEPTION_PREAMBLE(isolate);
-  i::Handle&lt;i::Object&gt; argv[] = { promise, Utils::OpenHandle(*value) };
-  has_pending_exception = i::Execution::Call(
-      isolate,
-      isolate-&gt;promise_resolve(),
-      isolate-&gt;factory()-&gt;undefined_value(),
-      arraysize(argv), argv,
-      false).is_null();
-  EXCEPTION_BAILOUT_CHECK(isolate, /* void */ ;);
-}
-</code></pre>
-<pre><code class="language-js">PromiseResolve = function PromiseResolve(promise, x) {
-    PromiseDone(promise, +1, x, promiseOnResolve)
-}
-function PromiseDone(promise, status, value, promiseQueue) {
-    if (GET_PRIVATE(promise, promiseStatus) === 0) {
-        PromiseEnqueue(value, GET_PRIVATE(promise, promiseQueue), status);
-        PromiseSet(promise, status, value);
-    }
-}
-</code></pre>
+<h2 id="总结">总结</h2>
+<p>摸索了一段时间才完成的，还是很有成就感的，比较遗憾的是并没有很好地记录下自己搭建这么一个网站的过程。以后会好好写博客的！</p>
 ]]></content>
     </entry>
 </feed>
