@@ -2,26 +2,20 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>设计模式总结（都在码里） | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583179413306">
+<title>常见设计模式总结（都在码里） | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583263172090">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="设计模式总结（都在码里） | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="常见设计模式总结（都在码里） | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <meta name="description" content="pub / sub（订阅 / 发布模式，观察者模式）
-优点
-解耦，降低代码入侵性
-原始：
-ModuleA
-  import B
-  B.action()
-ModuleB
-  action() {
-    import C
-    C.act..." />
+    <meta name="description" content="总结
+创建设计模式：单例、工厂、建造者
+结构化设计模式：代理、装饰器、外观、享元、适配器、
+行为型：观察者、策略、中介者、迭代器、责任链、模板方法、备忘录
+vue &amp; element / react &amp; redux 的源码值..." />
     <meta name="keywords" content="JS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
@@ -31,7 +25,7 @@ ModuleB
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583179413306" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583263172090" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -96,14 +90,14 @@ ModuleB
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              设计模式总结（都在码里）
+              常见设计模式总结（都在码里）
             </h2>
             <div class="post-info">
               <span>
                 2020-03-01
               </span>
               <span>
-                3 min read
+                15 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
@@ -114,7 +108,12 @@ ModuleB
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <h2 id="pub-sub订阅-发布模式观察者模式">pub / sub（订阅 / 发布模式，观察者模式）</h2>
+                <h2 id="总结">总结</h2>
+<p>创建设计模式：单例、工厂、建造者</p>
+<p>结构化设计模式：代理、装饰器、外观、享元、适配器、</p>
+<p>行为型：观察者、策略、中介者、迭代器、责任链、模板方法、备忘录</p>
+<p>vue &amp; element / react &amp; redux 的源码值得学习</p>
+<h2 id="pub-sub订阅-发布模式观察者模式">pub / sub（订阅 / 发布模式，观察者模式）</h2>
 <h3 id="优点">优点</h3>
 <p>解耦，降低代码入侵性</p>
 <pre><code class="language-js">原始：
@@ -191,7 +190,7 @@ event.$emit('event1', 1, 2, 3) // 测试
 <li>弹窗，无论点击多少次都只被创建一次。</li>
 <li>redux 的 store，全局唯一</li>
 </ol>
-<h3 id="简单实例">简单实例</h3>
+<h3 id="简单举例">简单举例</h3>
 <pre><code class="language-js">// 新建弹窗，期望弹窗全局唯一
 // 伪代码:
 // function createModalLayer() {
@@ -240,7 +239,7 @@ document.getElementById('modal-btn').addEventListener('click', function() {
 <p>策略模式指定义一系列算法，把他们一个个封装起来，并使他们可以相互替换。</p>
 <p>目的是将算法的使用和实现分离。</p>
 <p>一个基于策略模式的程序至少由两部分组成。第一部分是一组策略类（可变），封装了具体的算法，负责具体的计算过程；第二部分是环境类 Context（不变），Context 接收客户的请求，随后将请求委托给某一个策略类。要做到这一点，说明 Context 中要维持对某个策略对象的引用。</p>
-<h3 id="实例">实例</h3>
+<h3 id="举例">举例</h3>
 <p>原始（面条式代码）：</p>
 <pre><code class="language-js">let form = 获取表单
 form.onSubmit = function() {
@@ -279,12 +278,306 @@ function calculate(level, salary) {
 }
 </code></pre>
 <h2 id="代理模式">代理模式</h2>
+<p>定义：为一个对象提供一个占用品或占位符，以便控制对它的访问。</p>
+<p>常用的虚拟代理形式：某花销很大的操作，可通过虚拟代理的方式延迟到需要它的时候再创建（如使用虚拟代理实现图片懒加载）。</p>
+<h3 id="适用场景-2">适用场景</h3>
+<ol>
+<li>图片懒加载的方式：先通过一张 loading 图占位，然后同通过异步的方式加载图片，等图片加载好了再把完成的图片加载到 img 标签里面。</li>
+</ol>
+<pre><code class="language-js">// 给图片实例一个setSrc方法，先设置loading，再显示图片
+const imgFunc = (function() {
+  let imgNode = document.createElement('img')
+  document.body.appendChild(imgNode)
+  return {
+    setSrc: function(src) {
+      // 耗时
+      imgNode.src = src
+    },
+  }
+})()
+// 使用代理模式，增加 loading
+const proxyImage = (function() {
+  let img = new Image()
+  // 加载完毕，再设置
+  img.onload = function() {
+    setTimeout(() =&gt; {
+      imgFunc.setSrc(this.src)
+    }, 500)
+  }
+  return {
+    setSrc(src) {
+      // 先设置 loading
+      imgFunc.setSrc('loading.gif')
+      img.src = src
+    },
+  }
+})()
+proxyImage.setSrc('https://yuufen.com/album/photography/2.jpg')
+</code></pre>
+<ol start="2">
+<li>通过一个代理函数收集一段时间之内的请求，最后一次性发送给服务器。</li>
+</ol>
+<pre><code class="language-js">var synchronousFile = function(id) {
+  console.log('开始同步⽂文件，id 为: ' + id)
+}
+var proxySynchronousFile = (function() {
+  var cache = [], // 保存⼀一段时间内需要同步的 ID
+    timer // 定时器
+  return function(id) {
+    cache.push(id)
+    if (timer) {
+      // 保证不不会覆盖已经启动的定时器器
+      return
+    }
+    timer = setTimeout(function() {
+      synchronousFile(cache.join(','))
+      clearTimeout(timer) // 清空定时器器
+      timer = null
+      cache.length = 0 // 清空 ID 集合
+    }, 2000)
+  } // 2 秒后向本体发送需要同步的 ID 集合
+})()
+var checkbox = document.getElementsByTagName('input')
+for (var i = 0, c; (c = checkbox[i++]); ) {
+  c.onclick = function() {
+    if (this.checked === true) {
+      proxySynchronousFile(this.id)
+    }
+  }
+}
+</code></pre>
+<ol start="3">
+<li>
+<p>函数的防抖节流。</p>
+</li>
+<li>
+<p>React 的 CSS 代理。</p>
+</li>
+</ol>
+<h2 id="中介者模式">中介者模式</h2>
+<p>如 redux / vuex，把共享的数据抽离成一个单独的 store，每个都通过 store 这个中介来操作对象。</p>
+<p>适用场景：如购物车需求，存在商品选择表单、颜色选择表单、购买数量表单等，都会触发 change 事件。</p>
+<p>通过中介者来转发处理这些事件，实现各个事件之间的解耦，仅仅维护中介者对象即可。</p>
+<h2 id="装饰器模式">装饰器模式</h2>
+<h3 id="和代理模式的异同">和代理模式的异同</h3>
+<p>两种模式都描述了怎样为对象提供一定程度上的间接引用，他们的实现部分都保留了对另外一个对象的引用，并且向那个对象发送请求。</p>
+<p>代理模式和装饰器模式最重要的区别在于它们的意图和设计目的。</p>
+<p>代理模式的目的是，当直接访问本体不方便或者不符合需要时，为这个本体提供一个替代者。本体定义了关键功能，而代理提供或拒绝对它的访问，或者在访问本体之前做一些额外的事情。</p>
+<p>装饰器模式的作用则是为对象动态的加入行为。</p>
+<h3 id="举例-2">举例</h3>
+<p>如 React 的高阶组件</p>
+<pre><code class="language-js">import React from 'react'
+
+// 统计渲染日志
+const withLog = (Component) =&gt; {
+  class NewComponent extends React.Component {
+    componentWillMount() {
+      console.time('componentRender')
+    }
+	  render() {
+      return &lt;Component {...this.props}&gt;&lt;/Component&gt;
+    }
+    componentDidMount() {
+      console.timeEnd('componentRender')
+    }
+  }
+  return NewComponent
+}
+export {withLog}
+
+// 装饰
+@withLog
+class XXX
+
+// 或者
+// class XXX
+// XXX = withLog(XXX)
+</code></pre>
+<pre><code class="language-js">// 依此可以在配置文件中实现统一配置
+Function.prototype.before = function(beforefn) {
+  var __self = this // 保存对原函数的引用
+  return function() {
+    //返回包含原函数和新函数的“代理”函数
+    beforefn.apply(this, arguments) // 新函数在原函数之前执行，并保证 this 不被劫持
+    return __self.apply(this, arguments) // 返回原函数的执行结构，并保证 this 不被劫持
+  }
+}
+Function.prototype.after = function(afterfn) {
+  var __self = this
+  return function() {
+    var ret = __self.apply(this, arguments)
+    afterfn.apply(this, arguments)
+    return ret
+  }
+}
+</code></pre>
+<h2 id="外观模式">外观模式</h2>
+<p>涉及到兼容性、参数支持多格式等，对外暴露统一的 API，内部判断实现。让 API 更精简。</p>
+<h2 id="工厂模式">工厂模式</h2>
+<p>提供创建对象的接口，把成员对象的创建工作转交给一个外部对象。好处在于消除对象之间的耦合（也就是相互影响）。常见的例子：弹窗、Message，对外提供 api，调用 api 新建一个弹窗或者 Message 的实例。</p>
+<h3 id="举例-3">举例</h3>
+<p>https://github.com/ElemeFE/element/blob/dev/packages/notification/src/main.js</p>
+<h2 id="建造者模式-builder">建造者模式 builder</h2>
+<p>和工厂模式相比，参与了更多或更复杂的创建的过程。</p>
+<pre><code class="language-js">var Person = function(name, work) {
+  var _person = new Human()
+  _person.name = new Named(name)
+  _person.work = new Work(work)
+  return _person
+}
+var person = new Person('Ming', 'code')
+console.log(person)
+</code></pre>
+<h2 id="迭代器模式">迭代器模式</h2>
+<blockquote>
+<p>迭代器器模式是指提供⼀种⽅法顺序访问⼀个聚合对象中的各个元素，⽽又不要暴露该对象的内部表示。迭代器模式可以把迭代的过程从业务逻辑中分离出来,在使用迭代器模式之后，即使不关心对象的内部构造，也可以按顺序访问其中的每个元素</p>
+</blockquote>
+<p>each、map 等等等等太多了</p>
+<pre><code class="language-js">var each = function(ary, callback) {
+  for (var i = 0, l = ary.length; i &lt; l; i++) {
+    callback.call(ary[i], i, ary[i])
+  }
+}
+
+each([1, 2, 3], function(i, n) {
+  alert([i, n])
+})
+</code></pre>
+<h2 id="享元模式">享元模式</h2>
+<blockquote>
+<p>享元(ﬂyweight)模式是⼀种用于性能优化的模式，“ﬂy”在这⾥是苍蝇的意思，意为蝇量级。享元模式的核⼼是运⽤共享技术来有效⽀持⼤量细粒度的对象。 如果系统中因为创建了⼤量类似的对象而导致内存占用过高，享元模式就非常有⽤了。在 JavaScript 中，浏览器特别是移动端的浏览器分配的内存并不算多，如何节省内存就成了一件⾮常有意义的事情。</p>
+</blockquote>
+<p>比如只创建少数弹窗对象，动态修改弹窗内容。</p>
+<ul>
+<li>内部状态储存于对象内部 （如弹窗的位置、border 等）</li>
+<li>内部状态可以被一些对象共享</li>
+<li>内部状态独立于具体的场景，通常不会改变</li>
+<li>外部状态取决于具体的场景，并根据场景而变化，外部状态不能被共享 （如弹窗文案）</li>
+</ul>
+<h2 id="责任链模式">责任链模式</h2>
+<ul>
+<li>中间件机制</li>
+</ul>
+<blockquote>
+<p>使多个对象都有机会处理请求，从⽽避免请求的发送者和接收者之间的耦合关系， 将这些对象连成一条链，并沿着这条链传递该请求，直到有⼀个对象处理它为止。 职责链模式的名字⾮常形象，⼀系列可能会处理请求的对象被连接成一条链，请求在这些对象之间依次传递，直到遇到⼀个 可以处理它的对象，我们把这些对象称为链中的节点</p>
+</blockquote>
+<ul>
+<li>假设我们负责⼀个售卖⼿手机的电商网站，经过分别交纳 500 元定金和 200 元定金的两轮预定后(订单已在此时生成)，现在已经到了正式购买的阶段。 公司针对⽀付过定金的用户有一定的优惠政策。在正式购买后，已经支付过 500 元定金的用户会收到 100 元的商城优惠券，200 元定金的用户可以收到 50 元的优惠券，而之前没有支付定金的用户只能进入普通购买模式，也就是没有优惠券，且在库存有限的情况下，不一定保证能买到。</li>
+<li>比起 if 嵌套，我们可以先把 500 元订单、200 元订单以及普通购买分成 3 个函数。接下来把 orderType、pay、stock 这 3 个字段当作参数传递给 500 元订单函数，如果该函数不符合处理条件，则把这个请求传递给后面的 200 元订单函数，如果 200 元订单函数依然不能处理该请求，则继续传递请求给普通购买函数</li>
+<li>这样我们可以自由灵活地增加、移除和修改链中的节点顺序，假如某天网站运营人员 又想出了支持 300 元定金购买，那我们就在该链中增加⼀个节点即可</li>
+</ul>
+<pre><code class="language-js">var order500 = function(orderType, pay, stock) {
+  if (orderType === 1 &amp;&amp; pay === true) {
+    console.log('500 元定金预购，得 100 元优惠')
+  } else {
+    return 'nextSuccessor' // 我不知道下个节点是什么，反正把请求往后传
+  }
+}
+
+var order200 = function(orderType, pay, stock) {
+  if (orderType === 2 &amp;&amp; pay === true) {
+    console.log('200 元定金预购，得 50 元优惠')
+  } else {
+    return 'nextSuccessor' // 我不知道下个节点是什么，反正把请求往后传
+  }
+}
+
+var orderNormal = function(orderType, pay, stock) {
+  if (stock &gt; 0) {
+    console.log('普通购买')
+  } else {
+    console.log('没库存了')
+  }
+}
+
+// Chain.prototype.setNextSuccessor 指定在链中的下一个节点
+// Chain.prototype.passRequest 传递请求给某个节点
+var Chain = function(fn) {
+  this.fn = fn
+  this.successor = null
+}
+Chain.prototype.setNextSuccessor = function(successor) {
+  return (this.successor = successor)
+}
+Chain.prototype.passRequest = function() {
+  var ret = this.fn.apply(this, arguments)
+  if (ret === 'nextSuccessor') {
+    return this.successor &amp;&amp; this.successor.passRequest.apply(this.successor, arguments)
+  }
+  return ret
+}
+
+var chainOrder500 = new Chain(order500)
+var chainOrder200 = new Chain(order200)
+var chainOrderNormal = new Chain(orderNormal)
+
+chainOrder500.setNextSuccessor(chainOrder200)
+chainOrder200.setNextSuccessor(chainOrderNormal)
+
+chainOrder500.passRequest(1, true, 500) // 500 元定金预购，得 100 元优惠
+chainOrder500.passRequest(2, true, 500) // 200 元定金预购，得 50 元优惠
+chainOrder500.passRequest(3, true, 500) // 普通购买
+chainOrder500.passRequest(1, false, 0) // 没库存了
+</code></pre>
+<p>koa 源码还将整个链条合并为一个函数。</p>
+<h2 id="适配器模式">适配器模式</h2>
+<blockquote>
+<p>适配器模式的作用是解决两个软件实体间的接口不兼容的问题。使用适配器模式之后，原本由于接口不兼容而不能工作的两个软件实体可以一起工作。 适配器的别名是包装器(wrapper)，这是一个相对简单的模式。在程序开发中有许多这样的场景：当我们试图调用模块或者对象的某个接口 时，却发现这个接口的格式并不符合目前的需求。 这时候有两种解决办法，第一种是修改原来的接口实现，但如果原来的模块很复杂，或者我们拿到的模块是一段别人编写的经过压缩的代码， 修改原接口就显得不太现实了。第二种办法是创建一个适配器，将原接口转换为客户希望的另一个接口，客户只需要和适配器打交道。</p>
+</blockquote>
+<p>如 JSON，数据交换的格式，多语言间数据交换的解决方案。</p>
+<p>适配器不关心接口是怎么实现的，会怎样演化，也不改变已有接口。</p>
+<p>装饰器模式和代理模式也不会改变原有对象的接口，但装饰器的作用是给对象增加功能，常常形成一条长的装饰链；而适配器模式通常只包装一次；代理模式是为了控制对对象的访问，通常也只包装一次。</p>
+<p>外观模式的作用与适配器较相似，有人把外观模式看成一组对象的适配器，但外观模式最显著的特点是定义了一个新的接口。</p>
+<pre><code class="language-js">var googleMap = {
+  show: function() {},
+}
+var baiduMap = {
+  display: function() {},
+}
+var baiduMapAdapter = {
+  show: function() {
+    return baiduMap.display()
+  },
+}
+
+renderMap(googleMap)
+renderMap(baiduMapAdapter)
+</code></pre>
+<h2 id="模板方法模式">模板方法模式</h2>
+<blockquote>
+<p>模板方法模式在一个方法中定义一个算法的骨架，而将一些步骤的实现延迟到子类中。模板方法 使得子类可以在不改变算法结构的情况下，重新定义算法中某些步骤的具体实现</p>
+</blockquote>
+<p>如插槽（vue 中的 slot、react 中的 children）</p>
+<pre><code class="language-react">class Parent {
+	constructor() {}
+	render() {
+		&lt;div&gt;
+        	&lt;div&gt;{this.props.children}&lt;/div&gt;
+        &lt;/div&gt;
+	}
+}
+class Stage {
+    constructor() {}
+	render() {
+        // 在 Parent 中已经设定了 children 的渲染位置算法
+        &lt;Parent&gt;
+            // children 的具体实现
+        	&lt;div&gt;child&lt;/div&gt;
+        &lt;/Parent&gt;
+    }
+}
+</code></pre>
+<h2 id="备忘录模式">备忘录模式</h2>
+<p>可以恢复对象到之前的某个状态。</p>
+<p>如 react 或 redux 的时间旅行。</p>
+<p>https://zh-hans.reactjs.org/tutorial/tutorial.html#implementing-time-travel</p>
 
               </div>
               <div class="toc-container">
                 <ul class="markdownIt-TOC">
 <li>
 <ul>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
 <li><a href="#pub-sub%E8%AE%A2%E9%98%85-%E5%8F%91%E5%B8%83%E6%A8%A1%E5%BC%8F%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F">pub / sub（订阅 / 发布模式，观察者模式）</a>
 <ul>
 <li><a href="#%E4%BC%98%E7%82%B9">优点</a></li>
@@ -294,16 +587,40 @@ function calculate(level, salary) {
 <li><a href="#%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F">单例模式</a>
 <ul>
 <li><a href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF">适用场景</a></li>
-<li><a href="#%E7%AE%80%E5%8D%95%E5%AE%9E%E4%BE%8B">简单实例</a></li>
+<li><a href="#%E7%AE%80%E5%8D%95%E4%B8%BE%E4%BE%8B">简单举例</a></li>
 </ul>
 </li>
 <li><a href="#%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F">策略模式</a>
 <ul>
 <li><a href="#%E5%88%86%E6%9E%90">分析</a></li>
-<li><a href="#%E5%AE%9E%E4%BE%8B">实例</a></li>
+<li><a href="#%E4%B8%BE%E4%BE%8B">举例</a></li>
 </ul>
 </li>
-<li><a href="#%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F">代理模式</a></li>
+<li><a href="#%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F">代理模式</a>
+<ul>
+<li><a href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-2">适用场景</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F">中介者模式</a></li>
+<li><a href="#%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F">装饰器模式</a>
+<ul>
+<li><a href="#%E5%92%8C%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%BC%82%E5%90%8C">和代理模式的异同</a></li>
+<li><a href="#%E4%B8%BE%E4%BE%8B-2">举例</a></li>
+</ul>
+</li>
+<li><a href="#%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F">外观模式</a></li>
+<li><a href="#%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F">工厂模式</a>
+<ul>
+<li><a href="#%E4%B8%BE%E4%BE%8B-3">举例</a></li>
+</ul>
+</li>
+<li><a href="#%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F-builder">建造者模式 builder</a></li>
+<li><a href="#%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F">迭代器模式</a></li>
+<li><a href="#%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F">享元模式</a></li>
+<li><a href="#%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F">责任链模式</a></li>
+<li><a href="#%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F">适配器模式</a></li>
+<li><a href="#%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F">模板方法模式</a></li>
+<li><a href="#%E5%A4%87%E5%BF%98%E5%BD%95%E6%A8%A1%E5%BC%8F">备忘录模式</a></li>
 </ul>
 </li>
 </ul>
