@@ -1,0 +1,523 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vue 组件化 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583418245091">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Vue 组件化 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="
+组件间通信
+父组件 =&gt; 子组件
+
+属性 props
+
+// child 
+props: { msg: String } 
+// parent 
+&lt;HelloWorld msg=&quot;Welcome to Your Vu..." />
+    <meta name="keywords" content="Vue" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583418245091" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Vue 组件化
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-02-25
+              </span>
+              <span>
+                7 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583341886233.png" alt="" loading="lazy"></figure>
+<h2 id="组件间通信">组件间通信</h2>
+<h3 id="父组件-子组件">父组件 =&gt; 子组件</h3>
+<ul>
+<li>属性 props</li>
+</ul>
+<pre><code class="language-vue">// child 
+props: { msg: String } 
+// parent 
+&lt;HelloWorld msg=&quot;Welcome to Your Vue.js App&quot; /&gt;
+</code></pre>
+<ul>
+<li>$attrs / $listeners</li>
+</ul>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mi>t</mi><mi>t</mi><mi>r</mi><mi>s</mi><mi mathvariant="normal">储</mi><mi mathvariant="normal">存</mi><mi mathvariant="normal">的</mi><mi mathvariant="normal">是</mi><mi mathvariant="normal">父</mi><mi mathvariant="normal">作</mi><mi mathvariant="normal">用</mi><mi mathvariant="normal">域</mi><mi mathvariant="normal">中</mi><mi mathvariant="normal">不</mi><mi mathvariant="normal">被</mi><mi>p</mi><mi>r</mi><mi>o</mi><mi>p</mi><mi mathvariant="normal">所</mi><mi mathvariant="normal">识</mi><mi mathvariant="normal">别</mi><mo>(</mo><mi mathvariant="normal">且</mi><mi mathvariant="normal">获</mi><mi mathvariant="normal">取</mi><mo>)</mo><mi mathvariant="normal">的</mi><mi mathvariant="normal">特</mi><mi mathvariant="normal">性</mi><mi mathvariant="normal">绑</mi><mi mathvariant="normal">定</mi><mo>(</mo><mi>c</mi><mi>l</mi><mi>a</mi><mi>s</mi><mi>s</mi><mi mathvariant="normal">和</mi><mi>s</mi><mi>t</mi><mi>y</mi><mi>l</mi><mi>e</mi><mi mathvariant="normal">除</mi><mi mathvariant="normal">外</mi><mo>)</mo><mi mathvariant="normal">，</mi><mi mathvariant="normal">使</mi><mi mathvariant="normal">用</mi><mi>v</mi><mo>−</mo><mi>b</mi><mi>i</mi><mi>n</mi><mi>d</mi><mo>=</mo><mi mathvariant="normal">&quot;</mi></mrow><annotation encoding="application/x-tex">attrs储存的是父作用域中不被 prop 所识别 (且获取) 的特性绑定 (class 和 style 除外) ，使用v-bind=&quot;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">t</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">s</span><span class="mord cjk_fallback">储</span><span class="mord cjk_fallback">存</span><span class="mord cjk_fallback">的</span><span class="mord cjk_fallback">是</span><span class="mord cjk_fallback">父</span><span class="mord cjk_fallback">作</span><span class="mord cjk_fallback">用</span><span class="mord cjk_fallback">域</span><span class="mord cjk_fallback">中</span><span class="mord cjk_fallback">不</span><span class="mord cjk_fallback">被</span><span class="mord mathdefault">p</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">o</span><span class="mord mathdefault">p</span><span class="mord cjk_fallback">所</span><span class="mord cjk_fallback">识</span><span class="mord cjk_fallback">别</span><span class="mopen">(</span><span class="mord cjk_fallback">且</span><span class="mord cjk_fallback">获</span><span class="mord cjk_fallback">取</span><span class="mclose">)</span><span class="mord cjk_fallback">的</span><span class="mord cjk_fallback">特</span><span class="mord cjk_fallback">性</span><span class="mord cjk_fallback">绑</span><span class="mord cjk_fallback">定</span><span class="mopen">(</span><span class="mord mathdefault">c</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">s</span><span class="mord mathdefault">s</span><span class="mord cjk_fallback">和</span><span class="mord mathdefault">s</span><span class="mord mathdefault">t</span><span class="mord mathdefault" style="margin-right:0.03588em;">y</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">e</span><span class="mord cjk_fallback">除</span><span class="mord cjk_fallback">外</span><span class="mclose">)</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">使</span><span class="mord cjk_fallback">用</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">b</span><span class="mord mathdefault">i</span><span class="mord mathdefault">n</span><span class="mord mathdefault">d</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord">&quot;</span></span></span></span>attrs&quot;可以实现自动挂载。</p>
+<p>默认组件根元素上会自动挂载没有在props声明的属性，配置 inheritAttrs: false 可以关闭。</p>
+<ul>
+<li>引用 $refs</li>
+</ul>
+<pre><code class="language-vue">// parent
+&lt;HelloWorld ref=&quot;hw&quot; /&gt;
+
+this.$refs.hw.xx = 'xxx'
+</code></pre>
+<ul>
+<li>$children</li>
+</ul>
+<pre><code>// parent
+this.$children[0].xx = 'xxx'
+</code></pre>
+<blockquote>
+<p>不保证顺序</p>
+</blockquote>
+<h3 id="子组件-父组件">子组件 =&gt; 父组件</h3>
+<p>自定义事件：</p>
+<pre><code class="language-vue">// child 
+this.$emit('add', good) 
+// parent 
+&lt;Cart @add=&quot;cartAdd($event)&quot;&gt;&lt;/Cart&gt;
+</code></pre>
+<p>观察者模式，因为是作用域是 this 所以<strong>谁派发谁监听</strong>。</p>
+<h3 id="v-model-双向绑定-与-sync-的区别">v-model 双向绑定 / 与 .sync 的区别</h3>
+<ul>
+<li>
+<p>v-model=&quot;bar&quot;是 :value=&quot;bar&quot; @input=&quot;bar=$event&quot; 的语法糖</p>
+<p>但是可以在<strong>组件中</strong>设置model选项修改v-model的默认行为</p>
+</li>
+</ul>
+<pre><code class="language-js">// Checkbox.vue
+{
+  {
+    model: {
+      prop: 'checked'
+      event: 'change'
+    }
+  }
+}
+</code></pre>
+<ul>
+<li>
+<p>value.sync=”bar“ 是 :value=&quot;bar&quot; @update:value=&quot;bar=$event&quot; 的语法糖</p>
+<p>要更改绑定的属性名称，需要在<strong>父组件</strong>中更改，如：</p>
+<pre><code class="language-html">&lt;m-input foo.sync=&quot;bar&quot;&gt;
+等效于
+&lt;m-input :foo=&quot;bar&quot; @update:foo=&quot;bar=$event&quot;&gt; 
+</code></pre>
+</li>
+</ul>
+<h3 id="兄弟组件">兄弟组件</h3>
+<p>通过共同的祖辈组件搭桥，$parent 或 $root：</p>
+<pre><code class="language-js">// brother1
+this.$parent.$on('foo', handle)
+
+// brother2
+this.$parent.$emit('foo')
+</code></pre>
+<h3 id="祖先与后代">祖先与后代</h3>
+<ul>
+<li>provide / inject 可以实现祖先给后代传值，可以传对象：</li>
+</ul>
+<pre><code class="language-js">// ancestor
+provide() {    
+  return {foo: 'foo'}
+}
+
+// descendant
+inject: ['foo']
+</code></pre>
+<blockquote>
+<p>provide 和 inject 主要为高阶插件/组件库提供用例，并不推荐直接用于应用程序代码中，多会在开源组件库中见到。<br>
+后代想给祖先传值这种方案行不通</p>
+</blockquote>
+<ul>
+<li>广播，自上而下</li>
+</ul>
+<p>https://github.com/ElemeFE/element/blob/dev/src/mixins/emitter.js</p>
+<pre><code class="language-js">function broadcast(componentName, eventName, params) {
+  this.$children.forEach(child =&gt; {
+    var name = child.$options.componentName;
+
+    if (name === componentName) {
+      child.$emit.apply(child, [eventName].concat(params));
+    } else {
+      broadcast.apply(child, [componentName, eventName].concat([params]));
+    }
+  });
+}
+</code></pre>
+<ul>
+<li>自下而上</li>
+</ul>
+<pre><code class="language-js">dispatch(componentName, eventName, params) {
+  var parent = this.$parent || this.$root;
+  var name = parent.$options.componentName;
+
+  while (parent &amp;&amp; (!name || name !== componentName)) {
+    parent = parent.$parent;
+
+    if (parent) {
+      name = parent.$options.componentName;
+    }
+  }
+  if (parent) {
+    parent.$emit.apply(parent, [eventName].concat(params));
+  }
+},
+</code></pre>
+<h3 id="任意两个组件之间事件总线-vuex">任意两个组件之间：事件总线 / Vuex</h3>
+<ul>
+<li>事件总线</li>
+</ul>
+<pre><code class="language-js">// 创建一个Bus类负责事件派发、监听和回调管理
+class Bus {
+  constructor() {
+    this.callbacks = {}
+  }
+  $on(name, fn) {
+    ;(this.callbacks[name] || this.callbacks[name] = []).push(fn)
+  }
+  $emit(name, ...args) {
+    const cbs = this.callback[name]
+    if (cbs) {
+      cbs.forEach((cb) =&gt; {
+        cb.call(this, ...args)
+      })
+    }
+  }
+}
+
+// main.js
+Vue.prototype.$bus = new Bus()
+
+// child1
+this.$bus.$on('foo', handle)
+// child2
+this.$bus.$emit('foo')
+</code></pre>
+<pre><code class="language-js">// 或者 main.js 直接
+Vue.prototype.$bus = new Vue()
+</code></pre>
+<ul>
+<li>Vuex</li>
+</ul>
+<p>创建唯一的全局数据管理者 store，通过它管理数据并通知组件状态变更</p>
+<h2 id="组件复合-内容分发插槽">组件复合 / 内容分发：插槽</h2>
+<p>模板方法模式。匿名插槽、具名插槽、作用域插槽。</p>
+<blockquote>
+<p>Vue 2.6.0之后采用全新的v-slot语法取代之前的slot、slot-scope</p>
+</blockquote>
+<pre><code class="language-vue">// comp2 
+&lt;div&gt;
+  &lt;slot&gt;&lt;/slot&gt;
+  &lt;slot name=&quot;content&quot;&gt;&lt;/slot&gt;
+  &lt;slot name=&quot;bar&quot; foo=&quot;foooooooo&quot;&gt;&lt;/slot&gt;
+&lt;/div&gt;
+
+// parent 
+&lt;Comp2&gt;
+  &lt;!-- 匿名插槽用default做参数 --&gt;
+  &lt;template v-slot:default&gt;具名插槽&lt;/template&gt;
+  &lt;!-- 具名插槽用插槽名做参数 --&gt;
+  &lt;template v-slot:content&gt;内容...&lt;/template&gt;
+  &lt;!-- 作用域插槽获取子组件传来的数据 --&gt;
+  &lt;template v-slot:content=&quot;ctx&quot;&gt;来自子组件数据：{{ctx.foo}}&lt;/template&gt;
+&lt;/Comp2&gt;
+</code></pre>
+<h2 id="弹窗组件">弹窗组件</h2>
+<p>弹窗这类组件的特点是它们在当前vue实例例之外独⽴立存在，通常挂载于body；它们是通过JS动态创建 的，不需要在任何组件中声明。</p>
+<p>create.js</p>
+<pre><code class="language-js">import Vue from 'vue'
+export default function create(Component, props) {
+  const vm = new Vue({
+    render(h) {
+      // render 方法提供 h 函数，用来渲染 VNode
+      return h(Component, { props })
+    },
+  }).$mount() // 做好挂载准备(生成DOM)但暂不挂载，为下面 $el 做准备
+
+  // 1. vm 创建组件实例
+  // 2. 通过 $children 获取创建好的传入组件的实例
+  const comp = vm.$children[0]
+
+  // 3. 追加至body
+  document.body.appendChild(vm.$el)
+
+  // 4. 给组件直接挂载上清理函数
+  comp.remove = function(){
+    document.body.removeChild(vm.$el)
+    vm.$destroy()
+  }
+
+  // 5. 返回组件实例
+  return comp
+}
+</code></pre>
+<p>notice.vue</p>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div v-if=&quot;iShow&quot;&gt;
+    &lt;h3&gt;title&lt;/h3&gt;
+    &lt;div&gt;message&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  props: {
+    title: { type: String, default: '' },
+    message: { type: String, default: '' },
+    duration: { type: Number, default: 1000 },
+  },
+  data() {
+    return {
+      isShow: false,
+    }
+  },
+  methods: {
+    show() {
+      this.isShow = true
+      setTimeout(() =&gt; {
+        this.hide()
+      }, this.duration)
+    },
+    hide() {
+      this.isShow = false
+      this.remove() // 来自 create.js
+    },
+  },
+}
+&lt;/script&gt;
+</code></pre>
+<p>Father.vue</p>
+<pre><code class="language-js">import create from '...' // 或者直接挂在 Vue.prototype 上，能在任何地方 Create
+import Notice from '...'
+
+  const notice = create(Notice, {
+    title: 'Title',
+    message: 'Message',
+    duration: 2000
+  })
+  notice.show()
+
+</code></pre>
+<h2 id="递归组件">递归组件</h2>
+<pre><code class="language-vue">// Node.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;{{ data.title }}&lt;/h3&gt;
+    &lt;!-- 必须有结束条件 --&gt;
+    &lt;Node v-for=&quot;d in data.children&quot; :key=&quot;d.id&quot; :data=&quot;d&quot;&gt;&lt;/Node&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+  name: 'Node', // name对递归组件是必要的
+  props: {
+    data: {
+      type: Object,
+      require: true,
+    },
+  },
+}
+&lt;/script&gt;
+
+// 使用 
+&lt;Node :data=&quot;{id:'1',title:'递归组件',children:[{...}]}&quot;&gt;&lt;/Node&gt;
+</code></pre>
+<h3 id="tree-组件">Tree 组件</h3>
+<p>Father.vue</p>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;ul&gt;
+      &lt;item :model=&quot;treeData&quot;&gt;&lt;/item&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<p>item.vue</p>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;li&gt;
+    &lt;div @click=&quot;toggle&quot;&gt;
+        {{model.title}}
+        &lt;span v-if=&quot;haveChild&quot;&gt;{{open ? '-' : '+'}}&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;ul&gt;
+        &lt;item v-for=&quot;model in model.children&quot; :model=&quot;model&quot; :key=&quot;model.title&quot;&gt;&lt;/item&gt;  
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/template&gt;
+
+// 懒加载：传入标识符 =&gt; 判断标识符 true =&gt; show loading、请求数据
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E7%BB%84%E4%BB%B6%E9%97%B4%E9%80%9A%E4%BF%A1">组件间通信</a>
+<ul>
+<li><a href="#%E7%88%B6%E7%BB%84%E4%BB%B6-%E5%AD%90%E7%BB%84%E4%BB%B6">父组件 =&gt; 子组件</a></li>
+<li><a href="#%E5%AD%90%E7%BB%84%E4%BB%B6-%E7%88%B6%E7%BB%84%E4%BB%B6">子组件 =&gt; 父组件</a></li>
+<li><a href="#v-model-%E5%8F%8C%E5%90%91%E7%BB%91%E5%AE%9A-%E4%B8%8E-sync-%E7%9A%84%E5%8C%BA%E5%88%AB">v-model 双向绑定 / 与 .sync 的区别</a></li>
+<li><a href="#%E5%85%84%E5%BC%9F%E7%BB%84%E4%BB%B6">兄弟组件</a></li>
+<li><a href="#%E7%A5%96%E5%85%88%E4%B8%8E%E5%90%8E%E4%BB%A3">祖先与后代</a></li>
+<li><a href="#%E4%BB%BB%E6%84%8F%E4%B8%A4%E4%B8%AA%E7%BB%84%E4%BB%B6%E4%B9%8B%E9%97%B4%E4%BA%8B%E4%BB%B6%E6%80%BB%E7%BA%BF-vuex">任意两个组件之间：事件总线 / Vuex</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BB%84%E4%BB%B6%E5%A4%8D%E5%90%88-%E5%86%85%E5%AE%B9%E5%88%86%E5%8F%91%E6%8F%92%E6%A7%BD">组件复合 / 内容分发：插槽</a></li>
+<li><a href="#%E5%BC%B9%E7%AA%97%E7%BB%84%E4%BB%B6">弹窗组件</a></li>
+<li><a href="#%E9%80%92%E5%BD%92%E7%BB%84%E4%BB%B6">递归组件</a>
+<ul>
+<li><a href="#tree-%E7%BB%84%E4%BB%B6">Tree 组件</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/gxNr15aBN/">
+              <h3 class="post-title">
+                函数柯里化
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

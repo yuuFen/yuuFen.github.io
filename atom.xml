@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-03-03T19:21:30.062Z</updated>
+    <updated>2020-03-05T14:24:54.697Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -45,11 +45,218 @@
 ]]></content>
     </entry>
     <entry>
+        <title type="html"><![CDATA[vue-router 扩展 API 与手写源码]]></title>
+        <id>https://yuufen.com/blog/post/8pW7fVIsz/</id>
+        <link href="https://yuufen.com/blog/post/8pW7fVIsz/">
+        </link>
+        <updated>2020-02-26T08:30:02.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="扩展">扩展</h2>
+<h3 id="路由守卫">路由守卫</h3>
+<p>全局守卫</p>
+<p>路由独享守卫</p>
+<p>组件内守卫</p>
+<h3 id="动态路由">动态路由</h3>
+<p>利用$router.addRoutes()可以实现动态路由添加，常用于用户权限控制。</p>
+<pre><code class="language-js">// router.js
+// 接口返回数据可能是这样的
+// [{
+//   path: &quot;/&quot;,
+//   name: &quot;home&quot;,
+//   component: &quot;Home&quot;, //Home
+// }]
+
+// 异步获取路路由
+api.getRoutes().then((routes) =&gt; {
+  const routeConfig = routes.map((route) =&gt; mapComponent(route))
+  router.addRoutes(routeConfig)
+})
+
+// 映射关系
+const compMap = {
+  Home: () =&gt; import('./view/Home.vue'),
+}
+
+// 递归替换
+function mapComponent(route) {
+  route.component = compMap[route.component]
+  if (route.children) {
+    route.children = route.children.map((child) =&gt; mapComponent(child))
+  }
+  return route
+}
+</code></pre>
+<h3 id="面包屑">面包屑</h3>
+<p>利用$route.matched可得到路由匹配数组，按顺序解析可得路由层次关系。</p>
+<pre><code class="language-js">// Breadcrumb.vue
+watch: {
+  $route() {
+    // [{name:'home',path:'/'},{name:'list',path:'/list'}]
+    console.log(this.$route.matched);
+    // ['home','list']
+    this.crumbData = this.$route.matched.map(m =&gt; m.name)
+  }
+}
+</code></pre>
+<h2 id="手写源码">手写源码</h2>
+<p>https://github.com/yuuFen/vue-router-reimplement</p>
+<h3 id="通常用法与目标分析">通常用法与目标分析</h3>
+<pre><code class="language-js">import Vue from 'vue'
+import VueRouter from 'vue-router'
+
+import Home from &quot;./views/Home&quot;
+import About from &quot;./views/About&quot;
+
+Vue.use(VueRouter)
+
+export default new VueRouter({
+    routes: [
+        { path: '/', component: Home },
+        { path: '/about', component: About },
+    ]
+})
+</code></pre>
+<pre><code class="language-js">import router from './router'
+
+new View({
+    router,
+    // ...
+})
+</code></pre>
+<p>目标：</p>
+<ol>
+<li>解析routes，变成一个key为path，value为component的map</li>
+<li>监听url变化事件，把最新的hash值保存到current路由</li>
+<li>定义两个全局组件：router-view用于显示匹配组件的内容，router-link用于修改hash</li>
+<li>current应该是响应式的，这样可以触发router-view的重新渲染</li>
+</ol>
+<h3 id="实现">实现</h3>
+<blockquote>
+<p>没有考虑嵌套，没有做鲁棒优化。</p>
+</blockquote>
+<pre><code class="language-js">// install 时获取
+let Vue
+
+// hash 改变 =&gt; current (响应式)改变 =&gt; router-view 的 render 改变
+export default class VueRouter {
+  constructor(options) {
+    this.$options = options
+
+    // 用来保存 path 和 route 的映射
+    this.routeMap = {}
+
+    // 利用 Vue 让 current 实现响应式
+    this.app = new Vue({
+      data: {
+        current: '/',
+      },
+    })
+  }
+
+  init() {
+    // 绑定浏览器事件
+    this.bindEvents()
+
+    // 解析路由配置
+    this.createRouteMap(this.$options)
+
+    // 创建 router-link 和 router-view
+    this.initComponent()
+  }
+
+  bindEvents() {
+    window.addEventListener('hashchange', this.onHashChange.bind(this))
+    window.addEventListener('load', this.onHashChange.bind(this))
+  }
+  onHashChange() {
+    this.app.current = window.location.hash.slice(1) || '/'
+  }
+  createRouteMap(options) {
+    options.routes.forEach((item) =&gt; {
+      this.routeMap[item.path] = item
+    })
+  }
+  initComponent() {
+    Vue.component('router-link', {
+      props: {
+        to: String,
+      },
+      render(h) {
+        // 目标：&lt;a :href=&quot;to&quot;&gt;doooo&lt;/a&gt;
+        // 这里 this 指向 router-link 组件实例
+        return h('a', { attrs: { href: '#' + this.to } }, this.$slots.default)
+        // return &lt;a href={this.to}&gt;{this.$slots.default}&lt;/a&gt;
+      },
+    })
+    Vue.component('router-view', {
+      // 箭头函数可以保留 this 指向，所以这里指向 VueRouter 实例
+      render: (h) =&gt; {
+        // console.log(this.app.current)
+        // console.log(this.routeMap)
+        // console.log(this.routeMap[this.app.current])
+        const Comp = this.routeMap[this.app.current].component
+        return h(Comp)
+      },
+    })
+  }
+}
+
+VueRouter.install = function(_Vue) {
+  Vue = _Vue
+
+  Vue.mixin({
+    beforeCreate() {
+      // 每个组件 beforeCreate 的时候都会执行
+      // 但是这里只希望在根组件上执行一次
+      // this 指向 Vue 组件实例
+      // this.$options.router 就是在 router.js 中 new 的 VueRouter 实例
+      if (this.$options.router) {
+        Vue.prototype.$router = this.$options.router
+        this.$options.router.init()
+      }
+    },
+  })
+}
+</code></pre>
+<h3 id="使用同原版">使用同原版</h3>
+<pre><code class="language-js">import Vue from 'vue'
+import VueRouter from '../utils/router'
+
+import Home from '../views/Home.vue'
+import About from '../views/About.vue'
+import Main from '../views/Main.vue'
+
+Vue.use(VueRouter)
+
+export default new VueRouter({
+  routes: [
+    { path: '/', component: Home },
+    { path: '/main', component: Main },
+    { path: '/about', component: About },
+  ],
+})
+</code></pre>
+<pre><code class="language-js">// ...
+
+import router from './router'
+
+new Vue({
+  router,
+  render: (h) =&gt; h(App),
+}).$mount('#app')
+</code></pre>
+<pre><code class="language-html">    &lt;router-link to=&quot;/&quot;&gt;Home&lt;/router-link&gt;
+    &lt;router-link to=&quot;/main&quot;&gt;Main&lt;/router-link&gt;
+    &lt;router-link to=&quot;/about&quot;&gt;About&lt;/router-link&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[常见设计模式总结（都在码里）]]></title>
         <id>https://yuufen.com/blog/post/_lKjmwEdd/</id>
         <link href="https://yuufen.com/blog/post/_lKjmwEdd/">
         </link>
-        <updated>2020-03-01T06:51:31.000Z</updated>
+        <updated>2020-02-26T06:51:31.000Z</updated>
         <content type="html"><![CDATA[<h2 id="总结">总结</h2>
 <p>创建设计模式：单例、工厂、建造者</p>
 <p>结构化设计模式：代理、装饰器、外观、享元、适配器、</p>
@@ -516,38 +723,322 @@ class Stage {
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[制作个人主页的技术总结]]></title>
-        <id>https://yuufen.com/blog/post/gsBr49oPO/</id>
-        <link href="https://yuufen.com/blog/post/gsBr49oPO/">
+        <title type="html"><![CDATA[Vue 组件化]]></title>
+        <id>https://yuufen.com/blog/post/Bpq2VQQen/</id>
+        <link href="https://yuufen.com/blog/post/Bpq2VQQen/">
         </link>
-        <updated>2020-02-28T10:27:58.000Z</updated>
-        <content type="html"><![CDATA[<p>一直都想搭个个人主页，但是因为没有什么特别的 Idea，而自己的设计着实体现出标准的工科直男气息，所以也就一直拖着没开始。直到在知乎看到了 zhangwenli 小姐姐的作品，着实被惊艳到。因为小姐姐是基于旧版本的 vue cli 实现的，并且当时我的技能点基本都点在了 React 上，所以本着顺便学习 Vue 的目的，我使用 vue cli3(4) 重新实现了一遍这个项目。做完之后也学到了很多东西。</p>
-<h2 id="架构">架构</h2>
-<p>这里应该有图，但我画在草稿纸上了(oh shift)。</p>
-<h2 id="目录结构">目录结构</h2>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1582896479729.png" alt="" loading="lazy"></figure>
-<p>这是我的博客最后的目录结构。说实话第一眼看到她的目录结构我是有点懵逼的，最明显的就是 SCSS 和组件分离，并且 SCSS 和组件都统一全局声明，看着有点像 React，和我接触到的其他 vue 项目相差很大，可能是因为在 vue cli3 之后比较少见，但确实非常方便，样式和组件之间的关系更加清晰明了，也可以更方便的统一配置管理。</p>
-<h2 id="提取配置和工具类-工具函数">提取配置和工具类 / 工具函数</h2>
-<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1582896974166.png" alt="" loading="lazy"></figure>
-<p>将可配置的尽量提出来变成可配置的，是降低工程复杂度的最佳方式之一，无论这个配置看起来和程序主题耦合的多么深。博客的可配置项从各个应用的图标标题，到 app 分组，以及相册，需要从一开始就定下来。</p>
-<p>而工具类 / 工具函数的提取是我所欠缺的，因为我平时做些小工程，初期分析架构时很少会细致到这一步，导致会出现重复代码，或者某个组件具体代码可读性比较差，可能中期或者结束了还要花费时间去重构。这也是吸取了一个教训，初期架构的时候就要在意可复用的工具类，编码时发现又可能可复用一些东西就及时提出来，不要觉得可能以后用不到就直接放着了。</p>
-<h2 id="一些细节">一些细节</h2>
-<p>举一些在原版中没有找到解决方法的问题</p>
-<h3 id="resize-的监听">resize 的监听</h3>
-<p>因为背景是通过 canvas 画的，所以当 resize 后需要计算各元素的宽高度，再重新调用绘图函数画出背景。子元素需要等待父元素 resize 后才能获取到正确的宽高度。张姐采用的解决方案是先监听 resize 事件计算出宽高度再 new 根组件，在 vue cli3 中并不适用。于是我在子组件中监听父组件的 resize。</p>
-<h3 id="左右滑动的动画">左右滑动的动画</h3>
-<p>张姐的版本并没有做滑动的动画（我看到她给 scroll 加了一个 transition，但这并不会有效果…），我用定时器完成了这个。</p>
-<h3 id="屏蔽了移动端浏览器左右滑手势的前进后退">屏蔽了移动端浏览器左右滑手势的前进后退</h3>
-<p>原版 Slider 组件左右滑动时会触发浏览器的前进后退，很影响使用。我就直接 prevent 了 touchmove 事件的冒泡。</p>
-<h3 id="实现在-app-界面时按返回键返回首页">实现在 app 界面时按返回键返回首页</h3>
-<p>原版在 app 界面，习惯性的点击返回键的话会直接关闭 web 页面。我通过 history 和 popstate 事件解决了这一点，并模仿 app 实现了双击返回退出。</p>
-<h3 id="代码风格">代码风格</h3>
-<ol>
-<li>之前写 SCSS 都是能套多少层就套多少层，看了她的代码才知道这样不行，可读性不好还影响性能；</li>
-<li>写多了弹性布局都快忘记传统布局咋写的了，以后要多结合使用；</li>
-<li>原来用伪元素可以画出叉叉……</li>
-<li>多多提取工具类工具函数，降低工程复杂度</li>
-</ol>
+        <updated>2020-02-25T09:56:41.000Z</updated>
+        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583341886233.png" alt="" loading="lazy"></figure>
+<h2 id="组件间通信">组件间通信</h2>
+<h3 id="父组件-子组件">父组件 =&gt; 子组件</h3>
+<ul>
+<li>属性 props</li>
+</ul>
+<pre><code class="language-vue">// child 
+props: { msg: String } 
+// parent 
+&lt;HelloWorld msg=&quot;Welcome to Your Vue.js App&quot; /&gt;
+</code></pre>
+<ul>
+<li>$attrs / $listeners</li>
+</ul>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mi>t</mi><mi>t</mi><mi>r</mi><mi>s</mi><mi mathvariant="normal">储</mi><mi mathvariant="normal">存</mi><mi mathvariant="normal">的</mi><mi mathvariant="normal">是</mi><mi mathvariant="normal">父</mi><mi mathvariant="normal">作</mi><mi mathvariant="normal">用</mi><mi mathvariant="normal">域</mi><mi mathvariant="normal">中</mi><mi mathvariant="normal">不</mi><mi mathvariant="normal">被</mi><mi>p</mi><mi>r</mi><mi>o</mi><mi>p</mi><mi mathvariant="normal">所</mi><mi mathvariant="normal">识</mi><mi mathvariant="normal">别</mi><mo>(</mo><mi mathvariant="normal">且</mi><mi mathvariant="normal">获</mi><mi mathvariant="normal">取</mi><mo>)</mo><mi mathvariant="normal">的</mi><mi mathvariant="normal">特</mi><mi mathvariant="normal">性</mi><mi mathvariant="normal">绑</mi><mi mathvariant="normal">定</mi><mo>(</mo><mi>c</mi><mi>l</mi><mi>a</mi><mi>s</mi><mi>s</mi><mi mathvariant="normal">和</mi><mi>s</mi><mi>t</mi><mi>y</mi><mi>l</mi><mi>e</mi><mi mathvariant="normal">除</mi><mi mathvariant="normal">外</mi><mo>)</mo><mi mathvariant="normal">，</mi><mi mathvariant="normal">使</mi><mi mathvariant="normal">用</mi><mi>v</mi><mo>−</mo><mi>b</mi><mi>i</mi><mi>n</mi><mi>d</mi><mo>=</mo><mi mathvariant="normal">&quot;</mi></mrow><annotation encoding="application/x-tex">attrs储存的是父作用域中不被 prop 所识别 (且获取) 的特性绑定 (class 和 style 除外) ，使用v-bind=&quot;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">t</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">s</span><span class="mord cjk_fallback">储</span><span class="mord cjk_fallback">存</span><span class="mord cjk_fallback">的</span><span class="mord cjk_fallback">是</span><span class="mord cjk_fallback">父</span><span class="mord cjk_fallback">作</span><span class="mord cjk_fallback">用</span><span class="mord cjk_fallback">域</span><span class="mord cjk_fallback">中</span><span class="mord cjk_fallback">不</span><span class="mord cjk_fallback">被</span><span class="mord mathdefault">p</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">o</span><span class="mord mathdefault">p</span><span class="mord cjk_fallback">所</span><span class="mord cjk_fallback">识</span><span class="mord cjk_fallback">别</span><span class="mopen">(</span><span class="mord cjk_fallback">且</span><span class="mord cjk_fallback">获</span><span class="mord cjk_fallback">取</span><span class="mclose">)</span><span class="mord cjk_fallback">的</span><span class="mord cjk_fallback">特</span><span class="mord cjk_fallback">性</span><span class="mord cjk_fallback">绑</span><span class="mord cjk_fallback">定</span><span class="mopen">(</span><span class="mord mathdefault">c</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">s</span><span class="mord mathdefault">s</span><span class="mord cjk_fallback">和</span><span class="mord mathdefault">s</span><span class="mord mathdefault">t</span><span class="mord mathdefault" style="margin-right:0.03588em;">y</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">e</span><span class="mord cjk_fallback">除</span><span class="mord cjk_fallback">外</span><span class="mclose">)</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">使</span><span class="mord cjk_fallback">用</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">b</span><span class="mord mathdefault">i</span><span class="mord mathdefault">n</span><span class="mord mathdefault">d</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord">&quot;</span></span></span></span>attrs&quot;可以实现自动挂载。</p>
+<p>默认组件根元素上会自动挂载没有在props声明的属性，配置 inheritAttrs: false 可以关闭。</p>
+<ul>
+<li>引用 $refs</li>
+</ul>
+<pre><code class="language-vue">// parent
+&lt;HelloWorld ref=&quot;hw&quot; /&gt;
+
+this.$refs.hw.xx = 'xxx'
+</code></pre>
+<ul>
+<li>$children</li>
+</ul>
+<pre><code>// parent
+this.$children[0].xx = 'xxx'
+</code></pre>
+<blockquote>
+<p>不保证顺序</p>
+</blockquote>
+<h3 id="子组件-父组件">子组件 =&gt; 父组件</h3>
+<p>自定义事件：</p>
+<pre><code class="language-vue">// child 
+this.$emit('add', good) 
+// parent 
+&lt;Cart @add=&quot;cartAdd($event)&quot;&gt;&lt;/Cart&gt;
+</code></pre>
+<p>观察者模式，因为是作用域是 this 所以<strong>谁派发谁监听</strong>。</p>
+<h3 id="v-model-双向绑定-与-sync-的区别">v-model 双向绑定 / 与 .sync 的区别</h3>
+<ul>
+<li>
+<p>v-model=&quot;bar&quot;是 :value=&quot;bar&quot; @input=&quot;bar=$event&quot; 的语法糖</p>
+<p>但是可以在<strong>组件中</strong>设置model选项修改v-model的默认行为</p>
+</li>
+</ul>
+<pre><code class="language-js">// Checkbox.vue
+{
+  {
+    model: {
+      prop: 'checked'
+      event: 'change'
+    }
+  }
+}
+</code></pre>
+<ul>
+<li>
+<p>value.sync=”bar“ 是 :value=&quot;bar&quot; @update:value=&quot;bar=$event&quot; 的语法糖</p>
+<p>要更改绑定的属性名称，需要在<strong>父组件</strong>中更改，如：</p>
+<pre><code class="language-html">&lt;m-input foo.sync=&quot;bar&quot;&gt;
+等效于
+&lt;m-input :foo=&quot;bar&quot; @update:foo=&quot;bar=$event&quot;&gt; 
+</code></pre>
+</li>
+</ul>
+<h3 id="兄弟组件">兄弟组件</h3>
+<p>通过共同的祖辈组件搭桥，$parent 或 $root：</p>
+<pre><code class="language-js">// brother1
+this.$parent.$on('foo', handle)
+
+// brother2
+this.$parent.$emit('foo')
+</code></pre>
+<h3 id="祖先与后代">祖先与后代</h3>
+<ul>
+<li>provide / inject 可以实现祖先给后代传值，可以传对象：</li>
+</ul>
+<pre><code class="language-js">// ancestor
+provide() {    
+  return {foo: 'foo'}
+}
+
+// descendant
+inject: ['foo']
+</code></pre>
+<blockquote>
+<p>provide 和 inject 主要为高阶插件/组件库提供用例，并不推荐直接用于应用程序代码中，多会在开源组件库中见到。<br>
+后代想给祖先传值这种方案行不通</p>
+</blockquote>
+<ul>
+<li>广播，自上而下</li>
+</ul>
+<p>https://github.com/ElemeFE/element/blob/dev/src/mixins/emitter.js</p>
+<pre><code class="language-js">function broadcast(componentName, eventName, params) {
+  this.$children.forEach(child =&gt; {
+    var name = child.$options.componentName;
+
+    if (name === componentName) {
+      child.$emit.apply(child, [eventName].concat(params));
+    } else {
+      broadcast.apply(child, [componentName, eventName].concat([params]));
+    }
+  });
+}
+</code></pre>
+<ul>
+<li>自下而上</li>
+</ul>
+<pre><code class="language-js">dispatch(componentName, eventName, params) {
+  var parent = this.$parent || this.$root;
+  var name = parent.$options.componentName;
+
+  while (parent &amp;&amp; (!name || name !== componentName)) {
+    parent = parent.$parent;
+
+    if (parent) {
+      name = parent.$options.componentName;
+    }
+  }
+  if (parent) {
+    parent.$emit.apply(parent, [eventName].concat(params));
+  }
+},
+</code></pre>
+<h3 id="任意两个组件之间事件总线-vuex">任意两个组件之间：事件总线 / Vuex</h3>
+<ul>
+<li>事件总线</li>
+</ul>
+<pre><code class="language-js">// 创建一个Bus类负责事件派发、监听和回调管理
+class Bus {
+  constructor() {
+    this.callbacks = {}
+  }
+  $on(name, fn) {
+    ;(this.callbacks[name] || this.callbacks[name] = []).push(fn)
+  }
+  $emit(name, ...args) {
+    const cbs = this.callback[name]
+    if (cbs) {
+      cbs.forEach((cb) =&gt; {
+        cb.call(this, ...args)
+      })
+    }
+  }
+}
+
+// main.js
+Vue.prototype.$bus = new Bus()
+
+// child1
+this.$bus.$on('foo', handle)
+// child2
+this.$bus.$emit('foo')
+</code></pre>
+<pre><code class="language-js">// 或者 main.js 直接
+Vue.prototype.$bus = new Vue()
+</code></pre>
+<ul>
+<li>Vuex</li>
+</ul>
+<p>创建唯一的全局数据管理者 store，通过它管理数据并通知组件状态变更</p>
+<h2 id="组件复合-内容分发插槽">组件复合 / 内容分发：插槽</h2>
+<p>模板方法模式。匿名插槽、具名插槽、作用域插槽。</p>
+<blockquote>
+<p>Vue 2.6.0之后采用全新的v-slot语法取代之前的slot、slot-scope</p>
+</blockquote>
+<pre><code class="language-vue">// comp2 
+&lt;div&gt;
+  &lt;slot&gt;&lt;/slot&gt;
+  &lt;slot name=&quot;content&quot;&gt;&lt;/slot&gt;
+  &lt;slot name=&quot;bar&quot; foo=&quot;foooooooo&quot;&gt;&lt;/slot&gt;
+&lt;/div&gt;
+
+// parent 
+&lt;Comp2&gt;
+  &lt;!-- 匿名插槽用default做参数 --&gt;
+  &lt;template v-slot:default&gt;具名插槽&lt;/template&gt;
+  &lt;!-- 具名插槽用插槽名做参数 --&gt;
+  &lt;template v-slot:content&gt;内容...&lt;/template&gt;
+  &lt;!-- 作用域插槽获取子组件传来的数据 --&gt;
+  &lt;template v-slot:content=&quot;ctx&quot;&gt;来自子组件数据：{{ctx.foo}}&lt;/template&gt;
+&lt;/Comp2&gt;
+</code></pre>
+<h2 id="弹窗组件">弹窗组件</h2>
+<p>弹窗这类组件的特点是它们在当前vue实例例之外独⽴立存在，通常挂载于body；它们是通过JS动态创建 的，不需要在任何组件中声明。</p>
+<p>create.js</p>
+<pre><code class="language-js">import Vue from 'vue'
+export default function create(Component, props) {
+  const vm = new Vue({
+    render(h) {
+      // render 方法提供 h 函数，用来渲染 VNode
+      return h(Component, { props })
+    },
+  }).$mount() // 做好挂载准备(生成DOM)但暂不挂载，为下面 $el 做准备
+
+  // 1. vm 创建组件实例
+  // 2. 通过 $children 获取创建好的传入组件的实例
+  const comp = vm.$children[0]
+
+  // 3. 追加至body
+  document.body.appendChild(vm.$el)
+
+  // 4. 给组件直接挂载上清理函数
+  comp.remove = function(){
+    document.body.removeChild(vm.$el)
+    vm.$destroy()
+  }
+
+  // 5. 返回组件实例
+  return comp
+}
+</code></pre>
+<p>notice.vue</p>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div v-if=&quot;iShow&quot;&gt;
+    &lt;h3&gt;title&lt;/h3&gt;
+    &lt;div&gt;message&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  props: {
+    title: { type: String, default: '' },
+    message: { type: String, default: '' },
+    duration: { type: Number, default: 1000 },
+  },
+  data() {
+    return {
+      isShow: false,
+    }
+  },
+  methods: {
+    show() {
+      this.isShow = true
+      setTimeout(() =&gt; {
+        this.hide()
+      }, this.duration)
+    },
+    hide() {
+      this.isShow = false
+      this.remove() // 来自 create.js
+    },
+  },
+}
+&lt;/script&gt;
+</code></pre>
+<p>Father.vue</p>
+<pre><code class="language-js">import create from '...' // 或者直接挂在 Vue.prototype 上，能在任何地方 Create
+import Notice from '...'
+
+  const notice = create(Notice, {
+    title: 'Title',
+    message: 'Message',
+    duration: 2000
+  })
+  notice.show()
+
+</code></pre>
+<h2 id="递归组件">递归组件</h2>
+<pre><code class="language-vue">// Node.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;{{ data.title }}&lt;/h3&gt;
+    &lt;!-- 必须有结束条件 --&gt;
+    &lt;Node v-for=&quot;d in data.children&quot; :key=&quot;d.id&quot; :data=&quot;d&quot;&gt;&lt;/Node&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+  name: 'Node', // name对递归组件是必要的
+  props: {
+    data: {
+      type: Object,
+      require: true,
+    },
+  },
+}
+&lt;/script&gt;
+
+// 使用 
+&lt;Node :data=&quot;{id:'1',title:'递归组件',children:[{...}]}&quot;&gt;&lt;/Node&gt;
+</code></pre>
+<h3 id="tree-组件">Tree 组件</h3>
+<p>Father.vue</p>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;ul&gt;
+      &lt;item :model=&quot;treeData&quot;&gt;&lt;/item&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+<p>item.vue</p>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;li&gt;
+    &lt;div @click=&quot;toggle&quot;&gt;
+        {{model.title}}
+        &lt;span v-if=&quot;haveChild&quot;&gt;{{open ? '-' : '+'}}&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;ul&gt;
+        &lt;item v-for=&quot;model in model.children&quot; :model=&quot;model&quot; :key=&quot;model.title&quot;&gt;&lt;/item&gt;  
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/template&gt;
+
+// 懒加载：传入标识符 =&gt; 判断标识符 true =&gt; show loading、请求数据
+</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -555,7 +1046,7 @@ class Stage {
         <id>https://yuufen.com/blog/post/gxNr15aBN/</id>
         <link href="https://yuufen.com/blog/post/gxNr15aBN/">
         </link>
-        <updated>2020-02-27T06:16:25.000Z</updated>
+        <updated>2020-02-24T06:16:25.000Z</updated>
         <content type="html"><![CDATA[<h2 id="柯里化从何而来">柯里化从何而来</h2>
 <p>柯里化, 即 Currying 的音译。Currying 是编译原理层面实现多参函数的一个技术。</p>
 <p>在编码过程中，身为码农的我们本质上所进行的工作就是——将复杂问题分解为多个可编程的小问题。</p>

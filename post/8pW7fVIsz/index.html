@@ -1,0 +1,409 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>vue-router 扩展 API 与手写源码 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583418245091">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="vue-router 扩展 API 与手写源码 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="扩展
+路由守卫
+全局守卫
+路由独享守卫
+组件内守卫
+动态路由
+利用$router.addRoutes()可以实现动态路由添加，常用于用户权限控制。
+// router.js
+// 接口返回数据可能是这样的
+// [{
+//   path: ..." />
+    <meta name="keywords" content="Vue" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583418245091" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              vue-router 扩展 API 与手写源码
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-02-26
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="扩展">扩展</h2>
+<h3 id="路由守卫">路由守卫</h3>
+<p>全局守卫</p>
+<p>路由独享守卫</p>
+<p>组件内守卫</p>
+<h3 id="动态路由">动态路由</h3>
+<p>利用$router.addRoutes()可以实现动态路由添加，常用于用户权限控制。</p>
+<pre><code class="language-js">// router.js
+// 接口返回数据可能是这样的
+// [{
+//   path: &quot;/&quot;,
+//   name: &quot;home&quot;,
+//   component: &quot;Home&quot;, //Home
+// }]
+
+// 异步获取路路由
+api.getRoutes().then((routes) =&gt; {
+  const routeConfig = routes.map((route) =&gt; mapComponent(route))
+  router.addRoutes(routeConfig)
+})
+
+// 映射关系
+const compMap = {
+  Home: () =&gt; import('./view/Home.vue'),
+}
+
+// 递归替换
+function mapComponent(route) {
+  route.component = compMap[route.component]
+  if (route.children) {
+    route.children = route.children.map((child) =&gt; mapComponent(child))
+  }
+  return route
+}
+</code></pre>
+<h3 id="面包屑">面包屑</h3>
+<p>利用$route.matched可得到路由匹配数组，按顺序解析可得路由层次关系。</p>
+<pre><code class="language-js">// Breadcrumb.vue
+watch: {
+  $route() {
+    // [{name:'home',path:'/'},{name:'list',path:'/list'}]
+    console.log(this.$route.matched);
+    // ['home','list']
+    this.crumbData = this.$route.matched.map(m =&gt; m.name)
+  }
+}
+</code></pre>
+<h2 id="手写源码">手写源码</h2>
+<p>https://github.com/yuuFen/vue-router-reimplement</p>
+<h3 id="通常用法与目标分析">通常用法与目标分析</h3>
+<pre><code class="language-js">import Vue from 'vue'
+import VueRouter from 'vue-router'
+
+import Home from &quot;./views/Home&quot;
+import About from &quot;./views/About&quot;
+
+Vue.use(VueRouter)
+
+export default new VueRouter({
+    routes: [
+        { path: '/', component: Home },
+        { path: '/about', component: About },
+    ]
+})
+</code></pre>
+<pre><code class="language-js">import router from './router'
+
+new View({
+    router,
+    // ...
+})
+</code></pre>
+<p>目标：</p>
+<ol>
+<li>解析routes，变成一个key为path，value为component的map</li>
+<li>监听url变化事件，把最新的hash值保存到current路由</li>
+<li>定义两个全局组件：router-view用于显示匹配组件的内容，router-link用于修改hash</li>
+<li>current应该是响应式的，这样可以触发router-view的重新渲染</li>
+</ol>
+<h3 id="实现">实现</h3>
+<blockquote>
+<p>没有考虑嵌套，没有做鲁棒优化。</p>
+</blockquote>
+<pre><code class="language-js">// install 时获取
+let Vue
+
+// hash 改变 =&gt; current (响应式)改变 =&gt; router-view 的 render 改变
+export default class VueRouter {
+  constructor(options) {
+    this.$options = options
+
+    // 用来保存 path 和 route 的映射
+    this.routeMap = {}
+
+    // 利用 Vue 让 current 实现响应式
+    this.app = new Vue({
+      data: {
+        current: '/',
+      },
+    })
+  }
+
+  init() {
+    // 绑定浏览器事件
+    this.bindEvents()
+
+    // 解析路由配置
+    this.createRouteMap(this.$options)
+
+    // 创建 router-link 和 router-view
+    this.initComponent()
+  }
+
+  bindEvents() {
+    window.addEventListener('hashchange', this.onHashChange.bind(this))
+    window.addEventListener('load', this.onHashChange.bind(this))
+  }
+  onHashChange() {
+    this.app.current = window.location.hash.slice(1) || '/'
+  }
+  createRouteMap(options) {
+    options.routes.forEach((item) =&gt; {
+      this.routeMap[item.path] = item
+    })
+  }
+  initComponent() {
+    Vue.component('router-link', {
+      props: {
+        to: String,
+      },
+      render(h) {
+        // 目标：&lt;a :href=&quot;to&quot;&gt;doooo&lt;/a&gt;
+        // 这里 this 指向 router-link 组件实例
+        return h('a', { attrs: { href: '#' + this.to } }, this.$slots.default)
+        // return &lt;a href={this.to}&gt;{this.$slots.default}&lt;/a&gt;
+      },
+    })
+    Vue.component('router-view', {
+      // 箭头函数可以保留 this 指向，所以这里指向 VueRouter 实例
+      render: (h) =&gt; {
+        // console.log(this.app.current)
+        // console.log(this.routeMap)
+        // console.log(this.routeMap[this.app.current])
+        const Comp = this.routeMap[this.app.current].component
+        return h(Comp)
+      },
+    })
+  }
+}
+
+VueRouter.install = function(_Vue) {
+  Vue = _Vue
+
+  Vue.mixin({
+    beforeCreate() {
+      // 每个组件 beforeCreate 的时候都会执行
+      // 但是这里只希望在根组件上执行一次
+      // this 指向 Vue 组件实例
+      // this.$options.router 就是在 router.js 中 new 的 VueRouter 实例
+      if (this.$options.router) {
+        Vue.prototype.$router = this.$options.router
+        this.$options.router.init()
+      }
+    },
+  })
+}
+</code></pre>
+<h3 id="使用同原版">使用同原版</h3>
+<pre><code class="language-js">import Vue from 'vue'
+import VueRouter from '../utils/router'
+
+import Home from '../views/Home.vue'
+import About from '../views/About.vue'
+import Main from '../views/Main.vue'
+
+Vue.use(VueRouter)
+
+export default new VueRouter({
+  routes: [
+    { path: '/', component: Home },
+    { path: '/main', component: Main },
+    { path: '/about', component: About },
+  ],
+})
+</code></pre>
+<pre><code class="language-js">// ...
+
+import router from './router'
+
+new Vue({
+  router,
+  render: (h) =&gt; h(App),
+}).$mount('#app')
+</code></pre>
+<pre><code class="language-html">    &lt;router-link to=&quot;/&quot;&gt;Home&lt;/router-link&gt;
+    &lt;router-link to=&quot;/main&quot;&gt;Main&lt;/router-link&gt;
+    &lt;router-link to=&quot;/about&quot;&gt;About&lt;/router-link&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E6%89%A9%E5%B1%95">扩展</a>
+<ul>
+<li><a href="#%E8%B7%AF%E7%94%B1%E5%AE%88%E5%8D%AB">路由守卫</a></li>
+<li><a href="#%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1">动态路由</a></li>
+<li><a href="#%E9%9D%A2%E5%8C%85%E5%B1%91">面包屑</a></li>
+</ul>
+</li>
+<li><a href="#%E6%89%8B%E5%86%99%E6%BA%90%E7%A0%81">手写源码</a>
+<ul>
+<li><a href="#%E9%80%9A%E5%B8%B8%E7%94%A8%E6%B3%95%E4%B8%8E%E7%9B%AE%E6%A0%87%E5%88%86%E6%9E%90">通常用法与目标分析</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0">实现</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E5%90%8C%E5%8E%9F%E7%89%88">使用同原版</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/_lKjmwEdd/">
+              <h3 class="post-title">
+                常见设计模式总结（都在码里）
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
