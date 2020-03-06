@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-03-05T14:24:54.697Z</updated>
+    <updated>2020-03-06T10:25:47.928Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -45,218 +45,11 @@
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[vue-router 扩展 API 与手写源码]]></title>
-        <id>https://yuufen.com/blog/post/8pW7fVIsz/</id>
-        <link href="https://yuufen.com/blog/post/8pW7fVIsz/">
-        </link>
-        <updated>2020-02-26T08:30:02.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="扩展">扩展</h2>
-<h3 id="路由守卫">路由守卫</h3>
-<p>全局守卫</p>
-<p>路由独享守卫</p>
-<p>组件内守卫</p>
-<h3 id="动态路由">动态路由</h3>
-<p>利用$router.addRoutes()可以实现动态路由添加，常用于用户权限控制。</p>
-<pre><code class="language-js">// router.js
-// 接口返回数据可能是这样的
-// [{
-//   path: &quot;/&quot;,
-//   name: &quot;home&quot;,
-//   component: &quot;Home&quot;, //Home
-// }]
-
-// 异步获取路路由
-api.getRoutes().then((routes) =&gt; {
-  const routeConfig = routes.map((route) =&gt; mapComponent(route))
-  router.addRoutes(routeConfig)
-})
-
-// 映射关系
-const compMap = {
-  Home: () =&gt; import('./view/Home.vue'),
-}
-
-// 递归替换
-function mapComponent(route) {
-  route.component = compMap[route.component]
-  if (route.children) {
-    route.children = route.children.map((child) =&gt; mapComponent(child))
-  }
-  return route
-}
-</code></pre>
-<h3 id="面包屑">面包屑</h3>
-<p>利用$route.matched可得到路由匹配数组，按顺序解析可得路由层次关系。</p>
-<pre><code class="language-js">// Breadcrumb.vue
-watch: {
-  $route() {
-    // [{name:'home',path:'/'},{name:'list',path:'/list'}]
-    console.log(this.$route.matched);
-    // ['home','list']
-    this.crumbData = this.$route.matched.map(m =&gt; m.name)
-  }
-}
-</code></pre>
-<h2 id="手写源码">手写源码</h2>
-<p>https://github.com/yuuFen/vue-router-reimplement</p>
-<h3 id="通常用法与目标分析">通常用法与目标分析</h3>
-<pre><code class="language-js">import Vue from 'vue'
-import VueRouter from 'vue-router'
-
-import Home from &quot;./views/Home&quot;
-import About from &quot;./views/About&quot;
-
-Vue.use(VueRouter)
-
-export default new VueRouter({
-    routes: [
-        { path: '/', component: Home },
-        { path: '/about', component: About },
-    ]
-})
-</code></pre>
-<pre><code class="language-js">import router from './router'
-
-new View({
-    router,
-    // ...
-})
-</code></pre>
-<p>目标：</p>
-<ol>
-<li>解析routes，变成一个key为path，value为component的map</li>
-<li>监听url变化事件，把最新的hash值保存到current路由</li>
-<li>定义两个全局组件：router-view用于显示匹配组件的内容，router-link用于修改hash</li>
-<li>current应该是响应式的，这样可以触发router-view的重新渲染</li>
-</ol>
-<h3 id="实现">实现</h3>
-<blockquote>
-<p>没有考虑嵌套，没有做鲁棒优化。</p>
-</blockquote>
-<pre><code class="language-js">// install 时获取
-let Vue
-
-// hash 改变 =&gt; current (响应式)改变 =&gt; router-view 的 render 改变
-export default class VueRouter {
-  constructor(options) {
-    this.$options = options
-
-    // 用来保存 path 和 route 的映射
-    this.routeMap = {}
-
-    // 利用 Vue 让 current 实现响应式
-    this.app = new Vue({
-      data: {
-        current: '/',
-      },
-    })
-  }
-
-  init() {
-    // 绑定浏览器事件
-    this.bindEvents()
-
-    // 解析路由配置
-    this.createRouteMap(this.$options)
-
-    // 创建 router-link 和 router-view
-    this.initComponent()
-  }
-
-  bindEvents() {
-    window.addEventListener('hashchange', this.onHashChange.bind(this))
-    window.addEventListener('load', this.onHashChange.bind(this))
-  }
-  onHashChange() {
-    this.app.current = window.location.hash.slice(1) || '/'
-  }
-  createRouteMap(options) {
-    options.routes.forEach((item) =&gt; {
-      this.routeMap[item.path] = item
-    })
-  }
-  initComponent() {
-    Vue.component('router-link', {
-      props: {
-        to: String,
-      },
-      render(h) {
-        // 目标：&lt;a :href=&quot;to&quot;&gt;doooo&lt;/a&gt;
-        // 这里 this 指向 router-link 组件实例
-        return h('a', { attrs: { href: '#' + this.to } }, this.$slots.default)
-        // return &lt;a href={this.to}&gt;{this.$slots.default}&lt;/a&gt;
-      },
-    })
-    Vue.component('router-view', {
-      // 箭头函数可以保留 this 指向，所以这里指向 VueRouter 实例
-      render: (h) =&gt; {
-        // console.log(this.app.current)
-        // console.log(this.routeMap)
-        // console.log(this.routeMap[this.app.current])
-        const Comp = this.routeMap[this.app.current].component
-        return h(Comp)
-      },
-    })
-  }
-}
-
-VueRouter.install = function(_Vue) {
-  Vue = _Vue
-
-  Vue.mixin({
-    beforeCreate() {
-      // 每个组件 beforeCreate 的时候都会执行
-      // 但是这里只希望在根组件上执行一次
-      // this 指向 Vue 组件实例
-      // this.$options.router 就是在 router.js 中 new 的 VueRouter 实例
-      if (this.$options.router) {
-        Vue.prototype.$router = this.$options.router
-        this.$options.router.init()
-      }
-    },
-  })
-}
-</code></pre>
-<h3 id="使用同原版">使用同原版</h3>
-<pre><code class="language-js">import Vue from 'vue'
-import VueRouter from '../utils/router'
-
-import Home from '../views/Home.vue'
-import About from '../views/About.vue'
-import Main from '../views/Main.vue'
-
-Vue.use(VueRouter)
-
-export default new VueRouter({
-  routes: [
-    { path: '/', component: Home },
-    { path: '/main', component: Main },
-    { path: '/about', component: About },
-  ],
-})
-</code></pre>
-<pre><code class="language-js">// ...
-
-import router from './router'
-
-new Vue({
-  router,
-  render: (h) =&gt; h(App),
-}).$mount('#app')
-</code></pre>
-<pre><code class="language-html">    &lt;router-link to=&quot;/&quot;&gt;Home&lt;/router-link&gt;
-    &lt;router-link to=&quot;/main&quot;&gt;Main&lt;/router-link&gt;
-    &lt;router-link to=&quot;/about&quot;&gt;About&lt;/router-link&gt;
-    &lt;router-view&gt;&lt;/router-view&gt;
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[常见设计模式总结（都在码里）]]></title>
+        <title type="html"><![CDATA[常见设计模式总结]]></title>
         <id>https://yuufen.com/blog/post/_lKjmwEdd/</id>
         <link href="https://yuufen.com/blog/post/_lKjmwEdd/">
         </link>
-        <updated>2020-02-26T06:51:31.000Z</updated>
+        <updated>2020-02-28T06:51:31.000Z</updated>
         <content type="html"><![CDATA[<h2 id="总结">总结</h2>
 <p>创建设计模式：单例、工厂、建造者</p>
 <p>结构化设计模式：代理、装饰器、外观、享元、适配器、</p>
@@ -723,12 +516,429 @@ class Stage {
 ]]></content>
     </entry>
     <entry>
+        <title type="html"><![CDATA[Vuex 总结与浅析源码]]></title>
+        <id>https://yuufen.com/blog/post/pgLxFgJc5/</id>
+        <link href="https://yuufen.com/blog/post/pgLxFgJc5/">
+        </link>
+        <updated>2020-02-27T06:28:50.000Z</updated>
+        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583426923830.png" alt="" loading="lazy"></figure>
+<h2 id="基础总结">基础总结</h2>
+<h3 id="是什么">是什么</h3>
+<p>Vuex 是一个专为 Vue.js 应用开发的<strong>状态管理模式</strong>，集中式存储管理应⽤所有组件的状态。</p>
+<p>Vuex遵循“单向数据流”理念，易于问题追踪以及提高代码可维护性。</p>
+<p>Vue中多个视图依赖于同一状态时，视图间传参和状态同步比较困难，Vuex能够很好解决该问题。</p>
+<h3 id="核心概念">核心概念</h3>
+<ul>
+<li>state 状态、数据</li>
+<li>getters 派生状态 ，从state派生出新状态，类似计算属性</li>
+<li>mutations 更改状态的函数</li>
+<li>actions 异步操作 ，复杂业务逻辑，类似于controller</li>
+<li>store 包含以上概念的容器</li>
+</ul>
+<h3 id="使用">使用</h3>
+<h4 id="普通使用">普通使用</h4>
+<pre><code class="language-js">// store
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  state: {
+    count: 0,
+  },
+  mutations: {
+    add(state, num = 1) {
+      state.count += num
+    },
+  },
+  getters: {
+    // 类似于 computer
+    score(state) {
+      return 'score: ' + state.count * 2
+    },
+  },
+  actions: {
+    // 复杂业务逻辑，类似于 controller
+    // 如 ajax 请求、同时调用多次 commit
+    asyncAdd({ commit }, num) {
+      return new Promise((resolve) =&gt; {
+        setTimeout(() =&gt; {
+          commit('add', num)
+          resolve({ ok: 1 })
+        }, 1000)
+      })
+    },
+  },
+  modules: {},
+})
+</code></pre>
+<pre><code class="language-js">// vue
+  &lt;h3&gt;{{ $store.state.count }}&lt;/h3&gt;
+  &lt;h3&gt;{{ $store.getters.score }}&lt;/h3&gt;
+
+  methods: {
+    add() {
+      this.$store.commit('add')
+    },
+    asyncAdd() {
+      this.$store.dispatch('asyncAdd').then((res) =&gt; {
+        if (res.ok === 1) {
+          alert('ok')
+        }
+      })
+    },
+</code></pre>
+<h4 id="模块化">模块化</h4>
+<p>/store/count.js</p>
+<pre><code class="language-js">export default {
+  namespaced: true, // 单独的命名空间
+  state: {
+    count: 0,
+  },
+  mutations: {
+    add(state, num = 1) {
+      state.count += num
+    },
+  },
+  getters: {
+    score(state) {
+      return 'score: ' + state.count * 2
+    },
+  },
+  actions: {
+    asyncAdd({ commit }, num) {
+      return new Promise((resolve) =&gt; {
+        setTimeout(() =&gt; {
+          commit('add', num)
+          resolve({ ok: 1 })
+        }, 1000)
+      })
+    },
+  },
+}
+</code></pre>
+<p>/store/index.js</p>
+<pre><code class="language-js">import Vue from 'vue'
+import Vuex from 'vuex'
+import count from './count'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  modules: {
+    c: count,
+  },
+})
+</code></pre>
+<p>vue</p>
+<pre><code class="language-js">    &lt;h3&gt;{{ $store.state.c.count }}&lt;/h3&gt;
+    &lt;h3&gt;{{ $store.getters['c/score'] }}&lt;/h3&gt;
+    
+  methods: {
+    add() {
+      this.$store.commit('c/add')
+    },
+    asyncAdd() {
+      this.$store.dispatch('c/asyncAdd').then((res) =&gt; {
+        if (res.ok === 1) {
+          alert('ok')
+        }
+      })
+    },
+  },
+</code></pre>
+<h2 id="浅析源码">浅析源码</h2>
+<pre><code class="language-js">// 1. 维护状态 state （响应式）
+// 2. 修改状态 commit
+// 3. 业务逻辑控制 dispatch
+// 4. 状态派发 getter
+// 5. 混入
+
+let Vue
+
+function install(_Vue) {
+  Vue = _Vue
+
+  Vue.mixin({
+    beforeCreate() {
+      if (this.$options.store) {
+        Vue.prototype.$store = this.$options.store
+      }
+    },
+  })
+}
+
+class Store {
+  constructor(options) {
+    this.state = new Vue({
+      data: options.state,
+    })
+
+    this.mutations = options.mutations || {}
+    this.actions = options.actions || {}
+
+    options.getters &amp;&amp; this.handleGetters(options.getters)
+  }
+
+  commit = (type, arg) =&gt; {
+    // 如果不使用箭头函数，dispatch 中调用时 this 会改变
+    // console.log(this)
+    const fn = this.mutations[type]
+    fn(this.state, arg)
+  }
+
+  dispatch(type, arg) {
+    const fn = this.actions[type]
+    return fn({ commit: this.commit, state: this.state }, arg)
+  }
+
+  // {foo(state){},doo(state){}}
+  handleGetters(getters) {
+    this.getters = {}
+
+    // 定义只读属性和响应式
+    Object.keys(getters).forEach((key) =&gt; {
+      Object.defineProperty(this.getters, key, {
+        get: () =&gt; {
+          return getters[key](this.state)
+        },
+      })
+    })
+  }
+}
+
+export default { Store, install }
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[vue-router 扩展 API 与浅析源码]]></title>
+        <id>https://yuufen.com/blog/post/8pW7fVIsz/</id>
+        <link href="https://yuufen.com/blog/post/8pW7fVIsz/">
+        </link>
+        <updated>2020-02-26T08:30:02.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>原版实现更更更更值得学习</p>
+<p><a href="https://github.com/vuejs/vue-router">vue-router</a></p>
+<p><a href="https://github.com/vuejs/vue-router/blob/dev/src/components/view.js">router-view</a></p>
+</blockquote>
+<h2 id="扩展">扩展</h2>
+<h3 id="懒加载">懒加载</h3>
+<pre><code class="language-js">      // 路由层级代码分割，生成分片(about.[hash].js)      
+      // 当路由访问时会懒加载.      
+      component: () =&gt; import(/* webpackChunkName: &quot;about&quot; */ './views/About.vue')
+</code></pre>
+<h3 id="路由守卫">路由守卫</h3>
+<p>全局守卫</p>
+<p>路由独享守卫</p>
+<p>组件内守卫</p>
+<h3 id="动态路由">动态路由</h3>
+<p>利用$router.addRoutes()可以实现动态路由添加，常用于用户权限控制。</p>
+<pre><code class="language-js">// router.js
+// 接口返回数据可能是这样的
+// [{
+//   path: &quot;/&quot;,
+//   name: &quot;home&quot;,
+//   component: &quot;Home&quot;, //Home
+// }]
+
+// 异步获取路路由
+api.getRoutes().then((routes) =&gt; {
+  const routeConfig = routes.map((route) =&gt; mapComponent(route))
+  router.addRoutes(routeConfig)
+})
+
+// 映射关系
+const compMap = {
+  Home: () =&gt; import('./view/Home.vue'),
+}
+
+// 递归替换
+function mapComponent(route) {
+  route.component = compMap[route.component]
+  if (route.children) {
+    route.children = route.children.map((child) =&gt; mapComponent(child))
+  }
+  return route
+}
+</code></pre>
+<h3 id="面包屑">面包屑</h3>
+<p>利用$route.matched可得到路由匹配数组，按顺序解析可得路由层次关系。</p>
+<pre><code class="language-js">// Breadcrumb.vue
+watch: {
+  $route: {
+    handler(route) {
+      // [{name:'home',path:'/'},{name:'list',path:'/list'}]
+      console.log(this.$route.matched);
+      // ['home','list']
+      this.crumbData = this.$route.matched.map(m =&gt; m.name || m.redirect)
+    },
+    immediate: true // 让它 create 的时候执行一次
+  }
+}
+</code></pre>
+<h2 id="简单重现">简单重现</h2>
+<p>https://github.com/yuuFen/vue-router-reimplement</p>
+<h3 id="通常用法与目标分析">通常用法与目标分析</h3>
+<pre><code class="language-js">import Vue from 'vue'
+import VueRouter from 'vue-router'
+
+import Home from &quot;./views/Home&quot;
+import About from &quot;./views/About&quot;
+
+Vue.use(VueRouter)
+
+export default new VueRouter({
+    routes: [
+        { path: '/', component: Home },
+        { path: '/about', component: About },
+    ]
+})
+</code></pre>
+<pre><code class="language-js">import router from './router'
+
+new View({
+    router,
+    // ...
+})
+</code></pre>
+<p>目标：</p>
+<ol>
+<li>解析routes，变成一个key为path，value为component的map</li>
+<li>监听url变化事件，把最新的hash值保存到current路由</li>
+<li>定义两个全局组件：router-view用于显示匹配组件的内容，router-link用于修改hash</li>
+<li>current应该是响应式的，这样可以触发router-view的重新渲染</li>
+</ol>
+<h3 id="实现">实现</h3>
+<blockquote>
+<p>没有考虑嵌套，没有做鲁棒优化。</p>
+</blockquote>
+<pre><code class="language-js">// install 时获取
+let Vue
+
+// hash 改变 =&gt; current (响应式)改变 =&gt; router-view 的 render 改变
+export default class VueRouter {
+  constructor(options) {
+    this.$options = options
+
+    // 用来保存 path 和 route 的映射
+    this.routeMap = {}
+
+    // 利用 Vue 让 current 实现响应式
+    this.app = new Vue({
+      data: {
+        current: '/',
+      },
+    })
+  }
+
+  init() {
+    // 绑定浏览器事件
+    this.bindEvents()
+
+    // 解析路由配置
+    this.createRouteMap(this.$options)
+
+    // 创建 router-link 和 router-view
+    this.initComponent()
+  }
+
+  bindEvents() {
+    window.addEventListener('hashchange', this.onHashChange.bind(this))
+    window.addEventListener('load', this.onHashChange.bind(this))
+  }
+  onHashChange() {
+    this.app.current = window.location.hash.slice(1) || '/'
+  }
+  createRouteMap(options) {
+    options.routes.forEach((item) =&gt; {
+      this.routeMap[item.path] = item
+    })
+  }
+  initComponent() {
+    Vue.component('router-link', {
+      props: {
+        to: String,
+      },
+      render(h) {
+        // 目标：&lt;a :href=&quot;to&quot;&gt;doooo&lt;/a&gt;
+        // 这里 this 指向 router-link 组件实例
+        return h('a', { attrs: { href: '#' + this.to } }, this.$slots.default)
+        // return &lt;a href={this.to}&gt;{this.$slots.default}&lt;/a&gt;  // 需要 babel-loader
+      },
+    })
+    Vue.component('router-view', {
+      // 箭头函数可以保留 this 指向，所以这里指向 VueRouter 实例
+      render: (h) =&gt; {
+        // console.log(this.app.current)
+        // console.log(this.routeMap)
+        // console.log(this.routeMap[this.app.current])
+        const Comp = this.routeMap[this.app.current].component
+        return h(Comp)
+      },
+    })
+  }
+}
+
+VueRouter.install = function(_Vue) {
+  Vue = _Vue
+
+  Vue.mixin({
+    beforeCreate() {
+      // 每个组件 beforeCreate 的时候都会执行
+      // 但是这里只希望在根组件上执行一次
+      // this 指向 Vue 组件实例
+      // this.$options.router 就是在 router.js 中 new 的 VueRouter 实例
+      if (this.$options.router) {
+        Vue.prototype.$router = this.$options.router
+        this.$options.router.init()
+      }
+    },
+  })
+}
+</code></pre>
+<h3 id="使用同原版">使用同原版</h3>
+<pre><code class="language-js">import Vue from 'vue'
+import VueRouter from '../utils/router'
+
+import Home from '../views/Home.vue'
+import About from '../views/About.vue'
+import Main from '../views/Main.vue'
+
+Vue.use(VueRouter)
+
+export default new VueRouter({
+  routes: [
+    { path: '/', component: Home },
+    { path: '/main', component: Main },
+    { path: '/about', component: About },
+  ],
+})
+</code></pre>
+<pre><code class="language-js">// ...
+
+import router from './router'
+
+new Vue({
+  router,
+  render: (h) =&gt; h(App),
+}).$mount('#app')
+</code></pre>
+<pre><code class="language-html">    &lt;router-link to=&quot;/&quot;&gt;Home&lt;/router-link&gt;
+    &lt;router-link to=&quot;/main&quot;&gt;Main&lt;/router-link&gt;
+    &lt;router-link to=&quot;/about&quot;&gt;About&lt;/router-link&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[Vue 组件化]]></title>
         <id>https://yuufen.com/blog/post/Bpq2VQQen/</id>
         <link href="https://yuufen.com/blog/post/Bpq2VQQen/">
         </link>
         <updated>2020-02-25T09:56:41.000Z</updated>
-        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583341886233.png" alt="" loading="lazy"></figure>
+        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583424020660.png" alt="" loading="lazy"></figure>
 <h2 id="组件间通信">组件间通信</h2>
 <h3 id="父组件-子组件">父组件 =&gt; 子组件</h3>
 <ul>
@@ -915,7 +1125,7 @@ Vue.prototype.$bus = new Vue()
 &lt;/Comp2&gt;
 </code></pre>
 <h2 id="弹窗组件">弹窗组件</h2>
-<p>弹窗这类组件的特点是它们在当前vue实例例之外独⽴立存在，通常挂载于body；它们是通过JS动态创建 的，不需要在任何组件中声明。</p>
+<p>弹窗这类组件的特点是它们在当前vue实例例之外独⽴立存在，通常挂载于body（所以需要 new 一个 Vue 实例）；它们是通过JS动态创建 的，不需要在任何组件中声明。</p>
 <p>create.js</p>
 <pre><code class="language-js">import Vue from 'vue'
 export default function create(Component, props) {
@@ -924,7 +1134,7 @@ export default function create(Component, props) {
       // render 方法提供 h 函数，用来渲染 VNode
       return h(Component, { props })
     },
-  }).$mount() // 做好挂载准备(生成DOM)但暂不挂载，为下面 $el 做准备
+  }).$mount() // 做好挂载准备(生成DOM)但暂不挂载（因为不支持直接挂载到body），为下面 $el 做准备
 
   // 1. vm 创建组件实例
   // 2. 通过 $children 获取创建好的传入组件的实例
@@ -1039,6 +1249,53 @@ export default {
 
 // 懒加载：传入标识符 =&gt; 判断标识符 true =&gt; show loading、请求数据
 </code></pre>
+<h2 id="plugins">plugins</h2>
+<pre><code class="language-js">// 插件定义 
+MyPlugin.install = function (Vue, options) {  
+  // 1. 添加全局方法或属性  
+  Vue.myGlobalMethod = function () {    
+    // 逻辑...  
+  }
+  // 2. 添加全局资源  
+  Vue.directive('my-directive', {    
+    bind (el, binding, vnode, oldVnode) {     
+      // 逻辑...    
+    }  
+    ...  
+  })
+  // 3. 注⼊组件选项
+  Vue.mixin({  
+    created: function () {   
+      // 逻辑...  
+    } 
+    ... 
+  })
+  // 4. 添加实例方法 
+  Vue.prototype.$myMethod = function (methodOptions) {
+    // 逻辑... 
+  }
+}
+
+// 插件使用
+Vue.use(MyPlugin)
+</code></pre>
+<h2 id="mixins">mixins</h2>
+<pre><code class="language-js">// 定义一个混入对象
+var myMixin = {
+  created: function() {
+    this.hello()
+  },
+  methods: {
+    hello: function() {
+      console.log('hello from mixin!')
+    },
+  },
+}
+// 定义一个使用混入对象的组件
+var Component = Vue.extend({
+  mixins: [myMixin],
+})
+</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -1046,7 +1303,7 @@ export default {
         <id>https://yuufen.com/blog/post/gxNr15aBN/</id>
         <link href="https://yuufen.com/blog/post/gxNr15aBN/">
         </link>
-        <updated>2020-02-24T06:16:25.000Z</updated>
+        <updated>2020-02-24T04:16:25.000Z</updated>
         <content type="html"><![CDATA[<h2 id="柯里化从何而来">柯里化从何而来</h2>
 <p>柯里化, 即 Currying 的音译。Currying 是编译原理层面实现多参函数的一个技术。</p>
 <p>在编码过程中，身为码农的我们本质上所进行的工作就是——将复杂问题分解为多个可编程的小问题。</p>

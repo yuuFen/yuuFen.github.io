@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vue 组件化 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583418245091">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583490338782">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Vue 组件化 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
@@ -30,7 +30,7 @@ props: { msg: String }
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583418245091" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583490338782" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -102,7 +102,7 @@ props: { msg: String }
                 2020-02-25
               </span>
               <span>
-                7 min read
+                8 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
@@ -113,7 +113,7 @@ props: { msg: String }
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583341886233.png" alt="" loading="lazy"></figure>
+                <figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583424020660.png" alt="" loading="lazy"></figure>
 <h2 id="组件间通信">组件间通信</h2>
 <h3 id="父组件-子组件">父组件 =&gt; 子组件</h3>
 <ul>
@@ -300,7 +300,7 @@ Vue.prototype.$bus = new Vue()
 &lt;/Comp2&gt;
 </code></pre>
 <h2 id="弹窗组件">弹窗组件</h2>
-<p>弹窗这类组件的特点是它们在当前vue实例例之外独⽴立存在，通常挂载于body；它们是通过JS动态创建 的，不需要在任何组件中声明。</p>
+<p>弹窗这类组件的特点是它们在当前vue实例例之外独⽴立存在，通常挂载于body（所以需要 new 一个 Vue 实例）；它们是通过JS动态创建 的，不需要在任何组件中声明。</p>
 <p>create.js</p>
 <pre><code class="language-js">import Vue from 'vue'
 export default function create(Component, props) {
@@ -309,7 +309,7 @@ export default function create(Component, props) {
       // render 方法提供 h 函数，用来渲染 VNode
       return h(Component, { props })
     },
-  }).$mount() // 做好挂载准备(生成DOM)但暂不挂载，为下面 $el 做准备
+  }).$mount() // 做好挂载准备(生成DOM)但暂不挂载（因为不支持直接挂载到body），为下面 $el 做准备
 
   // 1. vm 创建组件实例
   // 2. 通过 $children 获取创建好的传入组件的实例
@@ -424,6 +424,53 @@ export default {
 
 // 懒加载：传入标识符 =&gt; 判断标识符 true =&gt; show loading、请求数据
 </code></pre>
+<h2 id="plugins">plugins</h2>
+<pre><code class="language-js">// 插件定义 
+MyPlugin.install = function (Vue, options) {  
+  // 1. 添加全局方法或属性  
+  Vue.myGlobalMethod = function () {    
+    // 逻辑...  
+  }
+  // 2. 添加全局资源  
+  Vue.directive('my-directive', {    
+    bind (el, binding, vnode, oldVnode) {     
+      // 逻辑...    
+    }  
+    ...  
+  })
+  // 3. 注⼊组件选项
+  Vue.mixin({  
+    created: function () {   
+      // 逻辑...  
+    } 
+    ... 
+  })
+  // 4. 添加实例方法 
+  Vue.prototype.$myMethod = function (methodOptions) {
+    // 逻辑... 
+  }
+}
+
+// 插件使用
+Vue.use(MyPlugin)
+</code></pre>
+<h2 id="mixins">mixins</h2>
+<pre><code class="language-js">// 定义一个混入对象
+var myMixin = {
+  created: function() {
+    this.hello()
+  },
+  methods: {
+    hello: function() {
+      console.log('hello from mixin!')
+    },
+  },
+}
+// 定义一个使用混入对象的组件
+var Component = Vue.extend({
+  mixins: [myMixin],
+})
+</code></pre>
 
               </div>
               <div class="toc-container">
@@ -447,6 +494,8 @@ export default {
 <li><a href="#tree-%E7%BB%84%E4%BB%B6">Tree 组件</a></li>
 </ul>
 </li>
+<li><a href="#plugins">plugins</a></li>
+<li><a href="#mixins">mixins</a></li>
 </ul>
 </li>
 </ul>

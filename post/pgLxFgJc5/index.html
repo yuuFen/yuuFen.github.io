@@ -1,0 +1,393 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vuex 总结与浅析源码 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583490338782">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Vuex 总结与浅析源码 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="
+基础总结
+是什么
+Vuex 是一个专为 Vue.js 应用开发的状态管理模式，集中式存储管理应⽤所有组件的状态。
+Vuex遵循“单向数据流”理念，易于问题追踪以及提高代码可维护性。
+Vue中多个视图依赖于同一状态时，视图间传参和状态同步比..." />
+    <meta name="keywords" content="Vue" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583490338782" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Vuex 总结与浅析源码
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-02-27
+              </span>
+              <span>
+                3 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583426923830.png" alt="" loading="lazy"></figure>
+<h2 id="基础总结">基础总结</h2>
+<h3 id="是什么">是什么</h3>
+<p>Vuex 是一个专为 Vue.js 应用开发的<strong>状态管理模式</strong>，集中式存储管理应⽤所有组件的状态。</p>
+<p>Vuex遵循“单向数据流”理念，易于问题追踪以及提高代码可维护性。</p>
+<p>Vue中多个视图依赖于同一状态时，视图间传参和状态同步比较困难，Vuex能够很好解决该问题。</p>
+<h3 id="核心概念">核心概念</h3>
+<ul>
+<li>state 状态、数据</li>
+<li>getters 派生状态 ，从state派生出新状态，类似计算属性</li>
+<li>mutations 更改状态的函数</li>
+<li>actions 异步操作 ，复杂业务逻辑，类似于controller</li>
+<li>store 包含以上概念的容器</li>
+</ul>
+<h3 id="使用">使用</h3>
+<h4 id="普通使用">普通使用</h4>
+<pre><code class="language-js">// store
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  state: {
+    count: 0,
+  },
+  mutations: {
+    add(state, num = 1) {
+      state.count += num
+    },
+  },
+  getters: {
+    // 类似于 computer
+    score(state) {
+      return 'score: ' + state.count * 2
+    },
+  },
+  actions: {
+    // 复杂业务逻辑，类似于 controller
+    // 如 ajax 请求、同时调用多次 commit
+    asyncAdd({ commit }, num) {
+      return new Promise((resolve) =&gt; {
+        setTimeout(() =&gt; {
+          commit('add', num)
+          resolve({ ok: 1 })
+        }, 1000)
+      })
+    },
+  },
+  modules: {},
+})
+</code></pre>
+<pre><code class="language-js">// vue
+  &lt;h3&gt;{{ $store.state.count }}&lt;/h3&gt;
+  &lt;h3&gt;{{ $store.getters.score }}&lt;/h3&gt;
+
+  methods: {
+    add() {
+      this.$store.commit('add')
+    },
+    asyncAdd() {
+      this.$store.dispatch('asyncAdd').then((res) =&gt; {
+        if (res.ok === 1) {
+          alert('ok')
+        }
+      })
+    },
+</code></pre>
+<h4 id="模块化">模块化</h4>
+<p>/store/count.js</p>
+<pre><code class="language-js">export default {
+  namespaced: true, // 单独的命名空间
+  state: {
+    count: 0,
+  },
+  mutations: {
+    add(state, num = 1) {
+      state.count += num
+    },
+  },
+  getters: {
+    score(state) {
+      return 'score: ' + state.count * 2
+    },
+  },
+  actions: {
+    asyncAdd({ commit }, num) {
+      return new Promise((resolve) =&gt; {
+        setTimeout(() =&gt; {
+          commit('add', num)
+          resolve({ ok: 1 })
+        }, 1000)
+      })
+    },
+  },
+}
+</code></pre>
+<p>/store/index.js</p>
+<pre><code class="language-js">import Vue from 'vue'
+import Vuex from 'vuex'
+import count from './count'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  modules: {
+    c: count,
+  },
+})
+</code></pre>
+<p>vue</p>
+<pre><code class="language-js">    &lt;h3&gt;{{ $store.state.c.count }}&lt;/h3&gt;
+    &lt;h3&gt;{{ $store.getters['c/score'] }}&lt;/h3&gt;
+    
+  methods: {
+    add() {
+      this.$store.commit('c/add')
+    },
+    asyncAdd() {
+      this.$store.dispatch('c/asyncAdd').then((res) =&gt; {
+        if (res.ok === 1) {
+          alert('ok')
+        }
+      })
+    },
+  },
+</code></pre>
+<h2 id="浅析源码">浅析源码</h2>
+<pre><code class="language-js">// 1. 维护状态 state （响应式）
+// 2. 修改状态 commit
+// 3. 业务逻辑控制 dispatch
+// 4. 状态派发 getter
+// 5. 混入
+
+let Vue
+
+function install(_Vue) {
+  Vue = _Vue
+
+  Vue.mixin({
+    beforeCreate() {
+      if (this.$options.store) {
+        Vue.prototype.$store = this.$options.store
+      }
+    },
+  })
+}
+
+class Store {
+  constructor(options) {
+    this.state = new Vue({
+      data: options.state,
+    })
+
+    this.mutations = options.mutations || {}
+    this.actions = options.actions || {}
+
+    options.getters &amp;&amp; this.handleGetters(options.getters)
+  }
+
+  commit = (type, arg) =&gt; {
+    // 如果不使用箭头函数，dispatch 中调用时 this 会改变
+    // console.log(this)
+    const fn = this.mutations[type]
+    fn(this.state, arg)
+  }
+
+  dispatch(type, arg) {
+    const fn = this.actions[type]
+    return fn({ commit: this.commit, state: this.state }, arg)
+  }
+
+  // {foo(state){},doo(state){}}
+  handleGetters(getters) {
+    this.getters = {}
+
+    // 定义只读属性和响应式
+    Object.keys(getters).forEach((key) =&gt; {
+      Object.defineProperty(this.getters, key, {
+        get: () =&gt; {
+          return getters[key](this.state)
+        },
+      })
+    })
+  }
+}
+
+export default { Store, install }
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%9F%BA%E7%A1%80%E6%80%BB%E7%BB%93">基础总结</a>
+<ul>
+<li><a href="#%E6%98%AF%E4%BB%80%E4%B9%88">是什么</a></li>
+<li><a href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5">核心概念</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8">使用</a>
+<ul>
+<li><a href="#%E6%99%AE%E9%80%9A%E4%BD%BF%E7%94%A8">普通使用</a></li>
+<li><a href="#%E6%A8%A1%E5%9D%97%E5%8C%96">模块化</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E6%B5%85%E6%9E%90%E6%BA%90%E7%A0%81">浅析源码</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/8pW7fVIsz/">
+              <h3 class="post-title">
+                vue-router 扩展 API 与浅析源码
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

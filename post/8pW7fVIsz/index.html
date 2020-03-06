@@ -2,26 +2,25 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>vue-router 扩展 API 与手写源码 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583418245091">
+<title>vue-router 扩展 API 与浅析源码 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583490338782">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="vue-router 扩展 API 与手写源码 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="vue-router 扩展 API 与浅析源码 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <meta name="description" content="扩展
-路由守卫
-全局守卫
-路由独享守卫
-组件内守卫
-动态路由
-利用$router.addRoutes()可以实现动态路由添加，常用于用户权限控制。
-// router.js
-// 接口返回数据可能是这样的
-// [{
-//   path: ..." />
+    <meta name="description" content="
+原版实现更更更更值得学习
+vue-router
+router-view
+
+扩展
+懒加载
+      // 路由层级代码分割，生成分片(about.[hash].js)      
+      // 当路由访问时会懒加载.      
+  ..." />
     <meta name="keywords" content="Vue" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
@@ -31,7 +30,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583418245091" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583490338782" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -96,14 +95,14 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              vue-router 扩展 API 与手写源码
+              vue-router 扩展 API 与浅析源码
             </h2>
             <div class="post-info">
               <span>
                 2020-02-26
               </span>
               <span>
-                4 min read
+                5 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
@@ -114,7 +113,17 @@
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <h2 id="扩展">扩展</h2>
+                <blockquote>
+<p>原版实现更更更更值得学习</p>
+<p><a href="https://github.com/vuejs/vue-router">vue-router</a></p>
+<p><a href="https://github.com/vuejs/vue-router/blob/dev/src/components/view.js">router-view</a></p>
+</blockquote>
+<h2 id="扩展">扩展</h2>
+<h3 id="懒加载">懒加载</h3>
+<pre><code class="language-js">      // 路由层级代码分割，生成分片(about.[hash].js)      
+      // 当路由访问时会懒加载.      
+      component: () =&gt; import(/* webpackChunkName: &quot;about&quot; */ './views/About.vue')
+</code></pre>
 <h3 id="路由守卫">路由守卫</h3>
 <p>全局守卫</p>
 <p>路由独享守卫</p>
@@ -153,15 +162,18 @@ function mapComponent(route) {
 <p>利用$route.matched可得到路由匹配数组，按顺序解析可得路由层次关系。</p>
 <pre><code class="language-js">// Breadcrumb.vue
 watch: {
-  $route() {
-    // [{name:'home',path:'/'},{name:'list',path:'/list'}]
-    console.log(this.$route.matched);
-    // ['home','list']
-    this.crumbData = this.$route.matched.map(m =&gt; m.name)
+  $route: {
+    handler(route) {
+      // [{name:'home',path:'/'},{name:'list',path:'/list'}]
+      console.log(this.$route.matched);
+      // ['home','list']
+      this.crumbData = this.$route.matched.map(m =&gt; m.name || m.redirect)
+    },
+    immediate: true // 让它 create 的时候执行一次
   }
 }
 </code></pre>
-<h2 id="手写源码">手写源码</h2>
+<h2 id="简单重现">简单重现</h2>
 <p>https://github.com/yuuFen/vue-router-reimplement</p>
 <h3 id="通常用法与目标分析">通常用法与目标分析</h3>
 <pre><code class="language-js">import Vue from 'vue'
@@ -248,7 +260,7 @@ export default class VueRouter {
         // 目标：&lt;a :href=&quot;to&quot;&gt;doooo&lt;/a&gt;
         // 这里 this 指向 router-link 组件实例
         return h('a', { attrs: { href: '#' + this.to } }, this.$slots.default)
-        // return &lt;a href={this.to}&gt;{this.$slots.default}&lt;/a&gt;
+        // return &lt;a href={this.to}&gt;{this.$slots.default}&lt;/a&gt;  // 需要 babel-loader
       },
     })
     Vue.component('router-view', {
@@ -321,12 +333,13 @@ new Vue({
 <ul>
 <li><a href="#%E6%89%A9%E5%B1%95">扩展</a>
 <ul>
+<li><a href="#%E6%87%92%E5%8A%A0%E8%BD%BD">懒加载</a></li>
 <li><a href="#%E8%B7%AF%E7%94%B1%E5%AE%88%E5%8D%AB">路由守卫</a></li>
 <li><a href="#%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1">动态路由</a></li>
 <li><a href="#%E9%9D%A2%E5%8C%85%E5%B1%91">面包屑</a></li>
 </ul>
 </li>
-<li><a href="#%E6%89%8B%E5%86%99%E6%BA%90%E7%A0%81">手写源码</a>
+<li><a href="#%E7%AE%80%E5%8D%95%E9%87%8D%E7%8E%B0">简单重现</a>
 <ul>
 <li><a href="#%E9%80%9A%E5%B8%B8%E7%94%A8%E6%B3%95%E4%B8%8E%E7%9B%AE%E6%A0%87%E5%88%86%E6%9E%90">通常用法与目标分析</a></li>
 <li><a href="#%E5%AE%9E%E7%8E%B0">实现</a></li>
@@ -345,9 +358,9 @@ new Vue({
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://yuufen.com/blog/post/_lKjmwEdd/">
+            <a href="https://yuufen.com/blog/post/Bpq2VQQen/">
               <h3 class="post-title">
-                常见设计模式总结（都在码里）
+                Vue 组件化
               </h3>
             </a>
           </div>
