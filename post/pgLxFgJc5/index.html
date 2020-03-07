@@ -3,20 +3,29 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vuex 总结与浅析源码 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583490338782">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583603652009">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Vuex 总结与浅析源码 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
 
     <meta name="description" content="
+https://github.com/yuuFen/vuex-reimplement
 基础总结
 是什么
 Vuex 是一个专为 Vue.js 应用开发的状态管理模式，集中式存储管理应⽤所有组件的状态。
-Vuex遵循“单向数据流”理念，易于问题追踪以及提高代码可维护性。
-Vue中多个视图依赖于同一状态时，视图间传参和状态同步比..." />
+Vuex遵循“单向数据流”理念，易于问..." />
     <meta name="keywords" content="Vue" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
@@ -26,7 +35,7 @@ Vue中多个视图依赖于同一状态时，视图间传参和状态同步比..
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583490338782" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583603652009" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -98,7 +107,7 @@ Vue中多个视图依赖于同一状态时，视图间传参和状态同步比..
                 2020-02-27
               </span>
               <span>
-                3 min read
+                4 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
@@ -110,6 +119,7 @@ Vue中多个视图依赖于同一状态时，视图间传参和状态同步比..
             <div class="post-content-wrapper">
               <div class="post-content">
                 <figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583426923830.png" alt="" loading="lazy"></figure>
+<p><a href="https://github.com/yuuFen/vuex-reimplement">https://github.com/yuuFen/vuex-reimplement</a></p>
 <h2 id="基础总结">基础总结</h2>
 <h3 id="是什么">是什么</h3>
 <p>Vuex 是一个专为 Vue.js 应用开发的<strong>状态管理模式</strong>，集中式存储管理应⽤所有组件的状态。</p>
@@ -237,13 +247,16 @@ export default new Vuex.Store({
   },
 </code></pre>
 <h2 id="浅析源码">浅析源码</h2>
-<pre><code class="language-js">// 1. 维护状态 state （响应式）
-// 2. 修改状态 commit
-// 3. 业务逻辑控制 dispatch
-// 4. 状态派发 getter
-// 5. 混入
-
-let Vue
+<h3 id="目标">目标</h3>
+<ol>
+<li>维护状态 state （响应式）</li>
+<li>修改状态 commit</li>
+<li>业务逻辑控制 dispatch</li>
+<li>状态派发 getter（响应式）</li>
+<li>混入</li>
+</ol>
+<h3 id="实现">实现</h3>
+<pre><code class="language-js">let Vue
 
 function install(_Vue) {
   Vue = _Vue
@@ -316,7 +329,12 @@ export default { Store, install }
 </li>
 </ul>
 </li>
-<li><a href="#%E6%B5%85%E6%9E%90%E6%BA%90%E7%A0%81">浅析源码</a></li>
+<li><a href="#%E6%B5%85%E6%9E%90%E6%BA%90%E7%A0%81">浅析源码</a>
+<ul>
+<li><a href="#%E7%9B%AE%E6%A0%87">目标</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0">实现</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

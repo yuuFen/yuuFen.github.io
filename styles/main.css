@@ -999,7 +999,7 @@ td {
     text-shadow: none;
     text-indent: 0;
     font-size: 16px;
-    margin: 0 6px;
+    margin:  3px 6px;
     display: inline-block;
     border: 1px solid #000 !important;
   }

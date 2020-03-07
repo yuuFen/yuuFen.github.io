@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-03-06T10:25:47.928Z</updated>
+    <updated>2020-03-07T17:54:13.701Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -26,7 +26,7 @@
 <p><s>看了看一年前的博文发现自己真的变化了蛮多的（加油💪）</s></p>
 <p>总之现在又开始了</p>
 <h2 id="关于我">🐟 关于我</h2>
-<p>我目前大二在读，我的职业规划是前端工程师，拥有一年以上的前端项目开发经验，当然基础也没有落下！我的专业是电子信息，所以我还了解一些嵌入式开发（当然只是一些些），对Python和TensorFlow也有一定的涉猎。我正在努力寻找暑期实习！</p>
+<p>我目前大二在读，我的职业规划是前端工程师，我的专业是电子信息，所以我还了解一些嵌入式开发（当然只是一些些），对Python和TensorFlow也有一定的涉猎。我正在努力寻找暑期实习！</p>
 <p>在以下位置找到有关我的更多信息：</p>
 <p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://yuufen.com/" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
 <h2 id="兴趣爱好">🎨 兴趣爱好</h2>
@@ -34,14 +34,390 @@
 ]]></content>
     </entry>
     <entry>
+        <title type="html"><![CDATA[深入虚拟 DOM ]]></title>
+        <id>https://yuufen.com/blog/post/JH8DkltoG/</id>
+        <link href="https://yuufen.com/blog/post/JH8DkltoG/">
+        </link>
+        <updated>2020-03-05T12:10:34.000Z</updated>
+        <content type="html"><![CDATA[<ul>
+<li></li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[浏览器渲染架构]]></title>
         <id>https://yuufen.com/blog/post/tWNxkYDGN/</id>
         <link href="https://yuufen.com/blog/post/tWNxkYDGN/">
         </link>
-        <updated>2020-03-02T13:34:56.000Z</updated>
+        <updated>2020-03-03T13:34:56.000Z</updated>
         <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583166954595.png" alt="" loading="lazy"></figure>
 <p>js 动画 / CSS 动画</p>
 <p>查表：https://csstriggers.com/</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[简单实现 Vue]]></title>
+        <id>https://yuufen.com/blog/post/_IR3q9jGE/</id>
+        <link href="https://yuufen.com/blog/post/_IR3q9jGE/">
+        </link>
+        <updated>2020-02-29T17:13:55.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://github.com/yuuFen/vue-reimplement">https://github.com/yuuFen/vue-reimplement</a></p>
+<h2 id="vue-工作机制">Vue 工作机制</h2>
+<p>在 <code>new Vue()</code>  时会调用 _init() 进行初始化，会初始化生命周期、事件、props、methods、data、computed 和 watch 等。其中最重要的是 <code>Object.defineProperty</code> 设置 <code>setter</code> 与 <code>getter</code> ，用来实现<strong>响应式</strong>以及<strong>依赖收集</strong>。</p>
+<p>初始化后调用 <code>$mount</code> 挂载组件：</p>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583512098725.png" alt="" loading="lazy"></figure>
+<p>化简版：</p>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1583502362745.png" alt="" loading="lazy"></figure>
+<h2 id="响应式">响应式</h2>
+<h3 id="实现">实现</h3>
+<pre><code class="language-js">class Vue {
+  constructor(options) {
+    this.$options = options
+
+    this.$data = options.data
+
+    // 响应化处理
+    this.observe(this.$data)
+
+    Object.keys(this.$data).forEach((key) =&gt; {
+      // 只需要给 data 的第一层设置代理
+      // 不然 set 多余的键时会给 data 添加属性
+      this.proxyData(key)
+    })
+  }
+
+  observe(value) {
+    if (!value || typeof value !== 'object') {
+      return
+    }
+
+    Object.keys(value).forEach((key) =&gt; {
+      // setter 和 getter 使用中介 val，防止无限循环
+      // 需要新建一个作用域（闭包）来保存 val,
+      // Object.defineProperty(obj, key, { // val })
+      this.defineReactive(value, key, value[key])
+    })
+  }
+
+  defineReactive(obj, key, val) {
+    // 递归，处理对象
+    this.observe(val)
+
+    // 会在 obj 上添加新属性，或者修改现有属性
+    // 所以是个引用变量
+    Object.defineProperty(obj, key, {
+      get() {
+        return val
+      },
+      set(newVal) {
+        if (newVal !== val) {
+          val = newVal
+        }
+      },
+    })
+  }
+
+  // 在 Vue 实例根上定义属性转发至 data 中的数据
+  proxyData(key) {
+    // this 指 Vue 实例
+    Object.defineProperty(this, key, {
+      get() {
+        return this.$data[key]
+      },
+      set(newVal) {
+        this.$data[key] = newVal
+      },
+    })
+  }
+}
+</code></pre>
+<h3 id="测试">测试</h3>
+<pre><code class="language-html">    &lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+    &lt;script&gt;
+      const app = new Vue({
+        data: {
+          foo: 'foooooo',
+          bar: {
+            doo: 'dooooooo',
+          },
+        },
+      })
+
+      console.log(app.bar);
+      app.bar = 'baaaar'
+      console.log(app.bar);
+    &lt;/script&gt;
+</code></pre>
+<h2 id="依赖收集与追踪">依赖收集与追踪</h2>
+<p>流程：</p>
+<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1583577271564.png" alt="" loading="lazy"></figure>
+<p>关系：</p>
+<figure data-type="image" tabindex="4"><img src="https://yuufen.com/blog/post-images/1583579033936.png" alt="" loading="lazy"></figure>
+<h3 id="案例">案例</h3>
+<pre><code class="language-js">new Vue({
+  template: `
+    &lt;div&gt;
+      &lt;span&gt;{{name1}}&lt;/span&gt;  
+      &lt;span&gt;{{name2}}&lt;/span&gt;  
+      &lt;span&gt;{{name1}}&lt;/span&gt;  
+    &lt;/div&gt;
+  `,
+  data: {
+    name1: 'name1',
+    name2: 'name2',
+    name3: 'name3',
+  },
+})
+</code></pre>
+<blockquote>
+<p>修改name1，视图更新，且要更新两处；</p>
+<p>修改name2，视图更新；</p>
+<p>修改name3，没有使用，视图不更新。</p>
+<p>需要扫描视图收集依赖，知道视图中到底那些地方对数据有依赖。</p>
+</blockquote>
+<h3 id="实现-2">实现</h3>
+<pre><code class="language-js">class Vue {
+  constructor(options) {
+    this.$options = options
+
+    this.$data = options.data
+
+    // 响应化处理
+    this.observe(this.$data)
+
+    Object.keys(this.$data).forEach((key) =&gt; {
+      // 只需要给 data 的第一层设置代理
+      // 不然 set 多余的键时会给 data 添加属性
+      this.proxyData(key)
+    })
+
+    // 测试
+    new Watcher(this, 'foo')
+    new Watcher(this, 'bar.doo')
+  }
+
+  observe(value) {
+    if (!value || typeof value !== 'object') {
+      return
+    }
+
+    Object.keys(value).forEach((key) =&gt; {
+      // setter 和 getter 使用中介 val，防止无限循环
+      // 需要新建一个作用域（闭包）来保存 val,
+      // Object.defineProperty(obj, key, { // val })
+      this.defineReactive(value, key, value[key])
+    })
+  }
+
+  defineReactive(obj, key, val) {
+    // 递归，处理对象
+    this.observe(val)
+
+    //
+    const dep = new Dep()
+
+    // 会在 obj 上添加新属性，或者修改现有属性
+    // 所以是个引用变量
+    Object.defineProperty(obj, key, {
+      get() {
+        // 若存在 targetWatcher（watcher的构造阶段），则添加
+        Dep.targetWatcher &amp;&amp; dep.addWatcher(Dep.targetWatcher)
+        return val
+      },
+      set(newVal) {
+        if (newVal !== val) {
+          val = newVal
+          // 通知更新
+          dep.notify()
+        }
+      },
+    })
+  }
+
+  // 在 Vue 实例根上定义属性转发至 data 中的数据
+  proxyData(key) {
+    // this 指 Vue 实例
+    Object.defineProperty(this, key, {
+      get() {
+        return this.$data[key]
+      },
+      set(newVal) {
+        this.$data[key] = newVal
+      },
+    })
+  }
+}
+
+// 创建 Dep: 管理所有的 Watcher
+class Dep {
+  constructor() {
+    this.watchers = []
+  }
+  addWatcher(watcher) {
+    this.watchers.push(watcher)
+  }
+  notify() {
+    this.watchers.forEach((watcher) =&gt; {
+      watcher.update()
+    })
+  }
+}
+
+// 创建 Watcher：与视图中的变量对应(出现一次就创建一个 Watcher 实例)
+class Watcher {
+  constructor(vm, key) {
+    this.vm = vm
+    this.key = key
+
+    Dep.targetWatcher = this
+    this.vm[this.key] // key解析出来之后为字符串， 但是若如 'bar.doo'，需要额外操作
+    Dep.targetWatcher = null
+  }
+  update() {
+    console.log(this.key, '更新——来自 watcher')
+    // do something
+  }
+}
+</code></pre>
+<h2 id="编译-compile">编译 compile</h2>
+<figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1583580639945.png" alt="" loading="lazy"></figure>
+<ol>
+<li>获取并遍历 DOM 树</li>
+<li>文本节点：获取 <code>{{}}</code> 格式的内容并解析</li>
+<li>元素节点：访问节点特性，截获 <code>v-</code> 开头和 <code>@</code> 开头内容并解析</li>
+</ol>
+<h3 id="使用场景">使用场景</h3>
+<pre><code>new Vue {
+  el: '#app',
+}
+</code></pre>
+<pre><code class="language-js">class Vue {
+  constructor(options) {
+    // ...
+    new Compile(this, options.el)
+  }
+  // ...
+}
+</code></pre>
+<h3 id="遍历节点">遍历节点</h3>
+<pre><code class="language-js">class Compile {
+  constructor(vm, el) {
+    // new Watcher 需要 vm
+    this.$vm = vm
+    this.$el = document.querySelector(el)
+
+    if (this.$el) {
+      // 提取宿主中模板内容到 fragment 标签（结束后 $el 中没有子元素）
+      // 不会引起页面回流（对元素位置和几何上的计算），性能更好
+      this.$fragment = this.node2Fragment(this.$el)
+      // 编译，并进行依赖收集
+      this.compile(this.$fragment)
+      // 编译结束后把 fragment 再添加到 el 中
+      this.$el.appendChild(this.$fragment)
+    }
+  }
+
+  node2Fragment(el) {
+    const fragment = document.createDocumentFragment()
+    let child
+    while ((child = el.firstChild)) {
+      fragment.appendChild(child)
+    }
+    return fragment
+  }
+
+  compile(el) {
+    const childNodes = el.childNodes
+
+    Array.from(childNodes).forEach((node) =&gt; {
+      // 判断节点类型
+      if (node.nodeType === 1) {
+        // Element 节点
+        console.log('遍历到节点', node.nodeName)
+      } else if (this.isInterpolation(node)) {
+        // 插值表达式
+        console.log('遍历到插值表达式', node.textContent)
+      }
+      // 如果有子节点
+      if (node.children &amp;&amp; node.childNodes.length &gt; 0) {
+        this.compile(node)
+      }
+    })
+  }
+
+  isInterpolation(node) {
+    // 是文本且符合{{...}}
+    return node.nodeType === 3 &amp;&amp; /\{\{(.*)\}\}/.test(node.textContent)
+  }
+}
+</code></pre>
+<h3 id="插值表达式的响应式更新">插值表达式的响应式更新</h3>
+<p>Compile：</p>
+<pre><code class="language-js">  // ...
+  // 遍历到插值表达式时
+  compileText(node) {
+    // console.log(RegExp.$1)
+    const keys = RegExp.$1
+    this.update(node, keys, 'text')
+  }
+
+  update(node, keys, dir) {
+    const updater = this[dir + 'Updater']
+    updater &amp;&amp; updater(node, keys)
+    // 注意 this
+    const get = this.getContent
+    // 形成闭包，和一个 Watcher 实例对应
+    new Watcher(
+      this.$vm,
+      keys,
+      function() {
+        get(keys)
+      },
+      function() {
+        updater &amp;&amp; updater(node, keys)
+      },
+    )
+  }
+  
+  // 注意 this
+  textUpdater = (node, keys) =&gt; {
+    node.textContent = this.getContent(keys)
+  }
+  
+  // 注意 this
+  getContent = (keys) =&gt; {
+    // 解决嵌套，get 嵌套属性的值
+    const p = keys.split('.')
+    let content = this.$vm[p[0]]
+    for (let i = 1; i &lt; p.length; i++) {
+      content = content[p[i]]
+    }
+    return content
+  }
+}
+</code></pre>
+<p>Watcher：</p>
+<pre><code class="language-js">// 初始化时再接受 get 和 updater
+// 对应的 update(node, keys, dir) {...} 形成闭包
+</code></pre>
+<h3 id="元素属性的响应式">元素属性的响应式</h3>
+<h4 id="v-text">v-text</h4>
+<pre><code class="language-js">  compileElement(node) {
+    const nodeAttrs = node.attributes
+    Array.from(nodeAttrs).forEach((attr) =&gt; {
+      const attrName = attr.name
+      const exp = attr.value
+      if (attrName.indexOf('v-') === 0) {
+        const dir = attrName.substring(2)
+        this[dir] &amp;&amp; this[dir](node, exp)
+      }
+    })
+  }
+
+  text(node, exp) {
+    this.update(node, exp, 'text')
+  }
+</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -522,6 +898,7 @@ class Stage {
         </link>
         <updated>2020-02-27T06:28:50.000Z</updated>
         <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583426923830.png" alt="" loading="lazy"></figure>
+<p><a href="https://github.com/yuuFen/vuex-reimplement">https://github.com/yuuFen/vuex-reimplement</a></p>
 <h2 id="基础总结">基础总结</h2>
 <h3 id="是什么">是什么</h3>
 <p>Vuex 是一个专为 Vue.js 应用开发的<strong>状态管理模式</strong>，集中式存储管理应⽤所有组件的状态。</p>
@@ -649,13 +1026,16 @@ export default new Vuex.Store({
   },
 </code></pre>
 <h2 id="浅析源码">浅析源码</h2>
-<pre><code class="language-js">// 1. 维护状态 state （响应式）
-// 2. 修改状态 commit
-// 3. 业务逻辑控制 dispatch
-// 4. 状态派发 getter
-// 5. 混入
-
-let Vue
+<h3 id="目标">目标</h3>
+<ol>
+<li>维护状态 state （响应式）</li>
+<li>修改状态 commit</li>
+<li>业务逻辑控制 dispatch</li>
+<li>状态派发 getter（响应式）</li>
+<li>混入</li>
+</ol>
+<h3 id="实现">实现</h3>
+<pre><code class="language-js">let Vue
 
 function install(_Vue) {
   Vue = _Vue
@@ -812,7 +1192,7 @@ new View({
 </ol>
 <h3 id="实现">实现</h3>
 <blockquote>
-<p>没有考虑嵌套，没有做鲁棒优化。</p>
+<p>没有考虑嵌套</p>
 </blockquote>
 <pre><code class="language-js">// install 时获取
 let Vue
