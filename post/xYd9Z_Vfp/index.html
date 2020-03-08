@@ -1,0 +1,400 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>前端性能优化 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583670085459">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="前端性能优化 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="从输入 url 到显示页面，发生了什么？
+从输入 url 到显示页面，发生了什么？
+
+用户输入 yuufen.com
+浏览器通过 DNS，把 url 解析为 IP
+和 IP 地址建立 TCP 连接，发送 HTTP 请求
+服务器接收请求，查库..." />
+    <meta name="keywords" content="优化" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583670085459" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              前端性能优化
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-03-06
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/nnjcgRgZ6/" class="post-tag">
+                  # 优化
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="从输入-url-到显示页面发生了什么">从输入 url 到显示页面，发生了什么？</h2>
+<p><strong>从输入 url 到显示页面，发生了什么？</strong></p>
+<ol>
+<li>用户输入 yuufen.com</li>
+<li>浏览器通过 DNS，把 url 解析为 IP</li>
+<li>和 IP 地址建立 TCP 连接，发送 HTTP 请求</li>
+<li>服务器接收请求，查库，读文件等，拼接好返回的 HTTP 响应</li>
+<li>浏览器收到首屏 html，开始渲染</li>
+<li>解析 html 为 dom（同时加载额外的 css 和 js）</li>
+<li>解析 css 为 css-tree</li>
+<li>dom + css 生成 render-tree，绘图</li>
+</ol>
+<p>这是一个万能的面试题，这个题的答案包含着整个互联网运行的过程，我们性能优化的策略就是基于它的答案，针对每一步依次解析，让整体的时间变短。所以有两个大方向：</p>
+<ol>
+<li>少加载文件</li>
+<li>少执行代码</li>
+</ol>
+<h2 id="雅虎军规">雅虎军规</h2>
+<blockquote>
+<p>虽然随着 Vue、React、Angular 这些框架的流行，雅虎军规当中一些优化的方法已不在适用，但是，更多的时候，我们是学习这些方法背后的思想，而不是去死记硬背某个方法，技术总是在更迭，只有握方法背后的思想，才能够立于不败之地。</p>
+</blockquote>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583615829278.jpg" alt="" loading="lazy"></figure>
+<p>https://developer.yahoo.com/performance/rules.html</p>
+<p>https://juejin.im/post/5b73ef38f265da281e048e51</p>
+<h2 id="性能指标">性能指标</h2>
+<blockquote>
+<p>抛开场景谈性能优化，都是耍流氓</p>
+</blockquote>
+<h3 id="performance-api">Performance API</h3>
+<h3 id="lighthouse">Lighthouse</h3>
+<pre><code>lighthouse https://yuufen.com/
+</code></pre>
+<h2 id="dns">DNS</h2>
+<p>prefetch</p>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1583617452917.png" alt="" loading="lazy"></figure>
+<h2 id="tcp">TCP</h2>
+<h3 id="ip-tcp-http-的关系">IP、TCP、HTTP 的关系</h3>
+<ol>
+<li>
+<p>IP-门牌号，通过IP协议找到对应机器</p>
+</li>
+<li>
+<p>TCP负责数据完整性和有序性，通过三次握手、粘包、滑动窗口等非常庞大的网络协议机制</p>
+</li>
+<li>
+<p>HTTP负责应用层数据，文件编码、cookie、缓存、数据终止时机等</p>
+</li>
+</ol>
+<h3 id="优化tcp策略">优化（TCP）策略</h3>
+<ol>
+<li>长连接</li>
+<li>减少文件体积
+<ol>
+<li>js打包压缩</li>
+<li>图片压缩</li>
+<li>gzip</li>
+</ol>
+</li>
+<li>减少文件请求次数
+<ol>
+<li>雪碧图</li>
+<li>js、css打包</li>
+<li>缓存控制</li>
+<li>懒加载</li>
+</ol>
+</li>
+<li>减少用户和服务器的举例
+<ol>
+<li>cdn</li>
+</ol>
+</li>
+<li>本地储存</li>
+</ol>
+<h2 id="图片">图片</h2>
+<h3 id="格式">格式</h3>
+<ol>
+<li>PNG</li>
+</ol>
+<p>png-8 png-24 png-32</p>
+<p>logo，颜色简单但对图片质量要求高、精灵图</p>
+<ol start="2">
+<li>
+<p>JPG/JPEG</p>
+</li>
+<li>
+<p>GIF</p>
+</li>
+<li>
+<p>SVG</p>
+</li>
+</ol>
+<p>SVG图像中的文本时可选取可搜索的。</p>
+<p>常用来绘制地图、股票k线图</p>
+<p>会损耗性能</p>
+<ol start="5">
+<li>WebP</li>
+</ol>
+<p>全能的解决方案，但是兼容性不好，需要根据浏览器判断加载格式</p>
+<ol start="6">
+<li>Base64</li>
+</ol>
+<p>图片base64之后会变大，适合小的矢量图标</p>
+<h3 id="其他">其他</h3>
+<ol>
+<li>图片渐进显示</li>
+<li>懒加载</li>
+<li>骨架图</li>
+</ol>
+<h2 id="缓存">缓存</h2>
+<p>可以少加载文件</p>
+<ol>
+<li>cdn 缓存</li>
+<li>本地缓存
+<ol>
+<li>localstorage</li>
+<li>indexdb</li>
+<li>cookie</li>
+</ol>
+</li>
+<li>浏览器缓存</li>
+</ol>
+<h3 id="cdn">CDN</h3>
+<p>缓存+回源</p>
+<p>地理位置更近，新的域名规避cookie</p>
+<h3 id="浏览器缓存">浏览器缓存</h3>
+<ol>
+<li>获取文件</li>
+<li>文件返回express或者cache-control设置过期时间，并且带上etag或者lastModfied字段</li>
+<li>再次请求，浏览器先查询expres或者cache-control是否过期，若没过期，强缓存生效，不发出网络请求，直接使用缓存</li>
+<li>若强缓存失效，浏览器会带上etag或者lastModfied数据，使用if-none-match或者if-Modified-Since字段，咨询后端是否过期</li>
+<li>若没过期，返回304状态码，直接用缓存</li>
+<li>若过期，状态码200，返回新资源</li>
+</ol>
+<h4 id="强缓存">强缓存</h4>
+<h4 id="协商缓存">协商缓存</h4>
+<h3 id="webpack打包和缓存的关系">webpack打包和缓存的关系</h3>
+<ol>
+<li>hash：整个项目相关的hash</li>
+<li>chunkhash：入口文件依赖的chunkhash</li>
+<li>contenthash：文件内容的hash</li>
+</ol>
+<h3 id="其他-2">其他</h3>
+<ol>
+<li>
+<p>memory cache 内存缓存，比如储存在变量里，关闭tab就没了</p>
+</li>
+<li>
+<p>Disk cache 硬盘上的缓存</p>
+</li>
+<li>
+<p>Push cache推送缓存 http2</p>
+</li>
+<li>
+<p>service worker 浏览器背后的独立进程</p>
+</li>
+</ol>
+<h2 id="渲染">渲染</h2>
+<h3 id="浏览器渲染原理">浏览器渲染原理</h3>
+<p>经典文章 how browser works</p>
+<p>https://www.html5rocks.com/zh/tutorials/internals/howbrowserswork/</p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E4%BB%8E%E8%BE%93%E5%85%A5-url-%E5%88%B0%E6%98%BE%E7%A4%BA%E9%A1%B5%E9%9D%A2%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88">从输入 url 到显示页面，发生了什么？</a></li>
+<li><a href="#%E9%9B%85%E8%99%8E%E5%86%9B%E8%A7%84">雅虎军规</a></li>
+<li><a href="#%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87">性能指标</a>
+<ul>
+<li><a href="#performance-api">Performance API</a></li>
+<li><a href="#lighthouse">Lighthouse</a></li>
+</ul>
+</li>
+<li><a href="#dns">DNS</a></li>
+<li><a href="#tcp">TCP</a>
+<ul>
+<li><a href="#ip-tcp-http-%E7%9A%84%E5%85%B3%E7%B3%BB">IP、TCP、HTTP 的关系</a></li>
+<li><a href="#%E4%BC%98%E5%8C%96tcp%E7%AD%96%E7%95%A5">优化（TCP）策略</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9B%BE%E7%89%87">图片</a>
+<ul>
+<li><a href="#%E6%A0%BC%E5%BC%8F">格式</a></li>
+<li><a href="#%E5%85%B6%E4%BB%96">其他</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BC%93%E5%AD%98">缓存</a>
+<ul>
+<li><a href="#cdn">CDN</a></li>
+<li><a href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E7%BC%93%E5%AD%98">浏览器缓存</a>
+<ul>
+<li><a href="#%E5%BC%BA%E7%BC%93%E5%AD%98">强缓存</a></li>
+<li><a href="#%E5%8D%8F%E5%95%86%E7%BC%93%E5%AD%98">协商缓存</a></li>
+</ul>
+</li>
+<li><a href="#webpack%E6%89%93%E5%8C%85%E5%92%8C%E7%BC%93%E5%AD%98%E7%9A%84%E5%85%B3%E7%B3%BB">webpack打包和缓存的关系</a></li>
+<li><a href="#%E5%85%B6%E4%BB%96-2">其他</a></li>
+</ul>
+</li>
+<li><a href="#%E6%B8%B2%E6%9F%93">渲染</a>
+<ul>
+<li><a href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B8%B2%E6%9F%93%E5%8E%9F%E7%90%86">浏览器渲染原理</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/M0Xa7RsWm/">
+              <h3 class="post-title">
+                虚拟 DOM 深入与简单实现
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

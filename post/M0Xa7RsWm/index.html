@@ -2,11 +2,11 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>浏览器渲染架构 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583603652009">
+<title>虚拟 DOM 深入与简单实现 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583670085459">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="浏览器渲染架构 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="虚拟 DOM 深入与简单实现 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -21,10 +21,10 @@
 
 
     <meta name="description" content="
-js 动画 / CSS 动画
-查表：https://csstriggers.com/
-..." />
-    <meta name="keywords" content="JS" />
+
+
+" />
+    <meta name="keywords" content="React,Vue,JS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -33,7 +33,7 @@ js 动画 / CSS 动画
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583603652009" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583670085459" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -98,15 +98,23 @@ js 动画 / CSS 动画
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              浏览器渲染架构
+              虚拟 DOM 深入与简单实现
             </h2>
             <div class="post-info">
               <span>
-                2020-03-03
+                2020-03-05
               </span>
               <span>
-                1 min read
+                0 min read
               </span>
+              
+                <a href="https://yuufen.com/blog/tag/Ukk75LqlC/" class="post-tag">
+                  # React
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
               
                 <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
                   # JS
@@ -116,9 +124,9 @@ js 动画 / CSS 动画
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583166954595.png" alt="" loading="lazy"></figure>
-<p>js 动画 / CSS 动画</p>
-<p>查表：https://csstriggers.com/</p>
+                <ul>
+<li></li>
+</ul>
 
               </div>
               <div class="toc-container">
@@ -133,7 +141,7 @@ js 动画 / CSS 动画
             <div class="next">下一篇</div>
             <a href="https://yuufen.com/blog/post/_IR3q9jGE/">
               <h3 class="post-title">
-                简单实现 Vue
+                简单实现 Vue（MVVM模式）
               </h3>
             </a>
           </div>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-03-07T17:54:13.701Z</updated>
+    <updated>2020-03-08T12:21:27.699Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -28,42 +28,199 @@
 <h2 id="关于我">🐟 关于我</h2>
 <p>我目前大二在读，我的职业规划是前端工程师，我的专业是电子信息，所以我还了解一些嵌入式开发（当然只是一些些），对Python和TensorFlow也有一定的涉猎。我正在努力寻找暑期实习！</p>
 <p>在以下位置找到有关我的更多信息：</p>
-<p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://yuufen.com/" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
+<p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://github.com/yuuFen" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
 <h2 id="兴趣爱好">🎨 兴趣爱好</h2>
 <p><strong>摄影</strong>、羽毛球、轮滑，and playing!</p>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[深入虚拟 DOM ]]></title>
-        <id>https://yuufen.com/blog/post/JH8DkltoG/</id>
-        <link href="https://yuufen.com/blog/post/JH8DkltoG/">
+        <title type="html"><![CDATA[前端性能优化]]></title>
+        <id>https://yuufen.com/blog/post/xYd9Z_Vfp/</id>
+        <link href="https://yuufen.com/blog/post/xYd9Z_Vfp/">
         </link>
-        <updated>2020-03-05T12:10:34.000Z</updated>
+        <updated>2020-03-06T06:21:58.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="从输入-url-到显示页面发生了什么">从输入 url 到显示页面，发生了什么？</h2>
+<p><strong>从输入 url 到显示页面，发生了什么？</strong></p>
+<ol>
+<li>用户输入 yuufen.com</li>
+<li>浏览器通过 DNS，把 url 解析为 IP</li>
+<li>和 IP 地址建立 TCP 连接，发送 HTTP 请求</li>
+<li>服务器接收请求，查库，读文件等，拼接好返回的 HTTP 响应</li>
+<li>浏览器收到首屏 html，开始渲染</li>
+<li>解析 html 为 dom（同时加载额外的 css 和 js）</li>
+<li>解析 css 为 css-tree</li>
+<li>dom + css 生成 render-tree，绘图</li>
+</ol>
+<p>这是一个万能的面试题，这个题的答案包含着整个互联网运行的过程，我们性能优化的策略就是基于它的答案，针对每一步依次解析，让整体的时间变短。所以有两个大方向：</p>
+<ol>
+<li>少加载文件</li>
+<li>少执行代码</li>
+</ol>
+<h2 id="雅虎军规">雅虎军规</h2>
+<blockquote>
+<p>虽然随着 Vue、React、Angular 这些框架的流行，雅虎军规当中一些优化的方法已不在适用，但是，更多的时候，我们是学习这些方法背后的思想，而不是去死记硬背某个方法，技术总是在更迭，只有握方法背后的思想，才能够立于不败之地。</p>
+</blockquote>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583615829278.jpg" alt="" loading="lazy"></figure>
+<p>https://developer.yahoo.com/performance/rules.html</p>
+<p>https://juejin.im/post/5b73ef38f265da281e048e51</p>
+<h2 id="性能指标">性能指标</h2>
+<blockquote>
+<p>抛开场景谈性能优化，都是耍流氓</p>
+</blockquote>
+<h3 id="performance-api">Performance API</h3>
+<h3 id="lighthouse">Lighthouse</h3>
+<pre><code>lighthouse https://yuufen.com/
+</code></pre>
+<h2 id="dns">DNS</h2>
+<p>prefetch</p>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1583617452917.png" alt="" loading="lazy"></figure>
+<h2 id="tcp">TCP</h2>
+<h3 id="ip-tcp-http-的关系">IP、TCP、HTTP 的关系</h3>
+<ol>
+<li>
+<p>IP-门牌号，通过IP协议找到对应机器</p>
+</li>
+<li>
+<p>TCP负责数据完整性和有序性，通过三次握手、粘包、滑动窗口等非常庞大的网络协议机制</p>
+</li>
+<li>
+<p>HTTP负责应用层数据，文件编码、cookie、缓存、数据终止时机等</p>
+</li>
+</ol>
+<h3 id="优化tcp策略">优化（TCP）策略</h3>
+<ol>
+<li>长连接</li>
+<li>减少文件体积
+<ol>
+<li>js打包压缩</li>
+<li>图片压缩</li>
+<li>gzip</li>
+</ol>
+</li>
+<li>减少文件请求次数
+<ol>
+<li>雪碧图</li>
+<li>js、css打包</li>
+<li>缓存控制</li>
+<li>懒加载</li>
+</ol>
+</li>
+<li>减少用户和服务器的举例
+<ol>
+<li>cdn</li>
+</ol>
+</li>
+<li>本地储存</li>
+</ol>
+<h2 id="图片">图片</h2>
+<h3 id="格式">格式</h3>
+<ol>
+<li>PNG</li>
+</ol>
+<p>png-8 png-24 png-32</p>
+<p>logo，颜色简单但对图片质量要求高、精灵图</p>
+<ol start="2">
+<li>
+<p>JPG/JPEG</p>
+</li>
+<li>
+<p>GIF</p>
+</li>
+<li>
+<p>SVG</p>
+</li>
+</ol>
+<p>SVG图像中的文本时可选取可搜索的。</p>
+<p>常用来绘制地图、股票k线图</p>
+<p>会损耗性能</p>
+<ol start="5">
+<li>WebP</li>
+</ol>
+<p>全能的解决方案，但是兼容性不好，需要根据浏览器判断加载格式</p>
+<ol start="6">
+<li>Base64</li>
+</ol>
+<p>图片base64之后会变大，适合小的矢量图标</p>
+<h3 id="其他">其他</h3>
+<ol>
+<li>图片渐进显示</li>
+<li>懒加载</li>
+<li>骨架图</li>
+</ol>
+<h2 id="缓存">缓存</h2>
+<p>可以少加载文件</p>
+<ol>
+<li>cdn 缓存</li>
+<li>本地缓存
+<ol>
+<li>localstorage</li>
+<li>indexdb</li>
+<li>cookie</li>
+</ol>
+</li>
+<li>浏览器缓存</li>
+</ol>
+<h3 id="cdn">CDN</h3>
+<p>缓存+回源</p>
+<p>地理位置更近，新的域名规避cookie</p>
+<h3 id="浏览器缓存">浏览器缓存</h3>
+<ol>
+<li>获取文件</li>
+<li>文件返回express或者cache-control设置过期时间，并且带上etag或者lastModfied字段</li>
+<li>再次请求，浏览器先查询expres或者cache-control是否过期，若没过期，强缓存生效，不发出网络请求，直接使用缓存</li>
+<li>若强缓存失效，浏览器会带上etag或者lastModfied数据，使用if-none-match或者if-Modified-Since字段，咨询后端是否过期</li>
+<li>若没过期，返回304状态码，直接用缓存</li>
+<li>若过期，状态码200，返回新资源</li>
+</ol>
+<h4 id="强缓存">强缓存</h4>
+<h4 id="协商缓存">协商缓存</h4>
+<h3 id="webpack打包和缓存的关系">webpack打包和缓存的关系</h3>
+<ol>
+<li>hash：整个项目相关的hash</li>
+<li>chunkhash：入口文件依赖的chunkhash</li>
+<li>contenthash：文件内容的hash</li>
+</ol>
+<h3 id="其他-2">其他</h3>
+<ol>
+<li>
+<p>memory cache 内存缓存，比如储存在变量里，关闭tab就没了</p>
+</li>
+<li>
+<p>Disk cache 硬盘上的缓存</p>
+</li>
+<li>
+<p>Push cache推送缓存 http2</p>
+</li>
+<li>
+<p>service worker 浏览器背后的独立进程</p>
+</li>
+</ol>
+<h2 id="渲染">渲染</h2>
+<h3 id="浏览器渲染原理">浏览器渲染原理</h3>
+<p>经典文章 how browser works</p>
+<p>https://www.html5rocks.com/zh/tutorials/internals/howbrowserswork/</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[虚拟 DOM 深入与简单实现]]></title>
+        <id>https://yuufen.com/blog/post/M0Xa7RsWm/</id>
+        <link href="https://yuufen.com/blog/post/M0Xa7RsWm/">
+        </link>
+        <updated>2020-03-04T20:24:31.000Z</updated>
         <content type="html"><![CDATA[<ul>
 <li></li>
 </ul>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[浏览器渲染架构]]></title>
-        <id>https://yuufen.com/blog/post/tWNxkYDGN/</id>
-        <link href="https://yuufen.com/blog/post/tWNxkYDGN/">
-        </link>
-        <updated>2020-03-03T13:34:56.000Z</updated>
-        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583166954595.png" alt="" loading="lazy"></figure>
-<p>js 动画 / CSS 动画</p>
-<p>查表：https://csstriggers.com/</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[简单实现 Vue]]></title>
+        <title type="html"><![CDATA[简单实现 Vue（MVVM模式）]]></title>
         <id>https://yuufen.com/blog/post/_IR3q9jGE/</id>
         <link href="https://yuufen.com/blog/post/_IR3q9jGE/">
         </link>
         <updated>2020-02-29T17:13:55.000Z</updated>
         <content type="html"><![CDATA[<p><a href="https://github.com/yuuFen/vue-reimplement">https://github.com/yuuFen/vue-reimplement</a></p>
 <h2 id="vue-工作机制">Vue 工作机制</h2>
-<p>在 <code>new Vue()</code>  时会调用 _init() 进行初始化，会初始化生命周期、事件、props、methods、data、computed 和 watch 等。其中最重要的是 <code>Object.defineProperty</code> 设置 <code>setter</code> 与 <code>getter</code> ，用来实现<strong>响应式</strong>以及<strong>依赖收集</strong>。</p>
+<p>在 <code>new Vue()</code> 时会调用 _init() 进行初始化，会初始化生命周期、事件、props、methods、data、computed 和 watch 等。其中最重要的是 <code>Object.defineProperty</code> 设置 <code>setter</code> 与 <code>getter</code> ，用来实现<strong>响应式</strong>以及<strong>依赖收集</strong>。</p>
 <p>初始化后调用 <code>$mount</code> 挂载组件：</p>
 <figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583512098725.png" alt="" loading="lazy"></figure>
 <p>化简版：</p>
@@ -132,21 +289,21 @@
 }
 </code></pre>
 <h3 id="测试">测试</h3>
-<pre><code class="language-html">    &lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-    &lt;script&gt;
-      const app = new Vue({
-        data: {
-          foo: 'foooooo',
-          bar: {
-            doo: 'dooooooo',
-          },
-        },
-      })
+<pre><code class="language-html">&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+  const app = new Vue({
+    data: {
+      foo: 'foooooo',
+      bar: {
+        doo: 'dooooooo',
+      },
+    },
+  })
 
-      console.log(app.bar);
-      app.bar = 'baaaar'
-      console.log(app.bar);
-    &lt;/script&gt;
+  console.log(app.bar)
+  app.bar = 'baaaar'
+  console.log(app.bar)
+&lt;/script&gt;
 </code></pre>
 <h2 id="依赖收集与追踪">依赖收集与追踪</h2>
 <p>流程：</p>
@@ -170,9 +327,9 @@
 })
 </code></pre>
 <blockquote>
-<p>修改name1，视图更新，且要更新两处；</p>
-<p>修改name2，视图更新；</p>
-<p>修改name3，没有使用，视图不更新。</p>
+<p>修改 name1，视图更新，且要更新两处；</p>
+<p>修改 name2，视图更新；</p>
+<p>修改 name3，没有使用，视图不更新。</p>
 <p>需要扫描视图收集依赖，知道视图中到底那些地方对数据有依赖。</p>
 </blockquote>
 <h3 id="实现-2">实现</h3>
@@ -213,11 +370,10 @@
     // 递归，处理对象
     this.observe(val)
 
-    //
     const dep = new Dep()
 
-    // 会在 obj 上添加新属性，或者修改现有属性
-    // 所以是个引用变量
+    // 会在 obj 上添加新属性，或者修改现有属性，是个引用变量
+    // 这里导致形成闭包
     Object.defineProperty(obj, key, {
       get() {
         // 若存在 targetWatcher（watcher的构造阶段），则添加
@@ -357,37 +513,37 @@ class Watcher {
   // 遍历到插值表达式时
   compileText(node) {
     // console.log(RegExp.$1)
-    const keys = RegExp.$1
-    this.update(node, keys, 'text')
+    const exp = RegExp.$1
+    this.update(node, exp, 'text')
   }
 
-  update(node, keys, dir) {
+  update(node, exp, dir) {
     const updater = this[dir + 'Updater']
-    updater &amp;&amp; updater(node, keys)
+    updater &amp;&amp; updater(node, exp)
     // 注意 this
     const get = this.getContent
     // 形成闭包，和一个 Watcher 实例对应
     new Watcher(
       this.$vm,
-      keys,
+      // exp, // 在闭包中处理
       function() {
-        get(keys)
+        get(exp)
       },
       function() {
-        updater &amp;&amp; updater(node, keys)
+        updater &amp;&amp; updater(node, exp)
       },
     )
   }
-  
+
   // 注意 this
-  textUpdater = (node, keys) =&gt; {
-    node.textContent = this.getContent(keys)
+  textUpdater = (node, exp) =&gt; {
+    node.textContent = this.getContent(exp)
   }
-  
+
   // 注意 this
-  getContent = (keys) =&gt; {
+  getContent = (exp) =&gt; {
     // 解决嵌套，get 嵌套属性的值
-    const p = keys.split('.')
+    const p = exp.split('.')
     let content = this.$vm[p[0]]
     for (let i = 1; i &lt; p.length; i++) {
       content = content[p[i]]
@@ -397,8 +553,69 @@ class Watcher {
 }
 </code></pre>
 <p>Watcher：</p>
-<pre><code class="language-js">// 初始化时再接受 get 和 updater
+<pre><code class="language-js">// 初始化时再接受 get 和 updater，不再需要 key 和 vm
 // 对应的 update(node, keys, dir) {...} 形成闭包
+
+class Watcher {
+  constructor(get, cb) {
+    // this.vm = vm
+    // this.key = key
+    this.cb = cb
+
+    this.get = get // 获取嵌套属性的方法
+
+    Dep.targetWatcher = this
+    // key解析出来之后为字符串， 但是若如 'bar.doo'，需要额外操作
+    // 访问 bar.doo，会将它同时挂载到 bar 和 doo 的 Dep 实例（也是有必要的）
+    // 这里直接在闭包中处理
+    this.get()
+    Dep.targetWatcher = null
+  }
+  update() {
+    // 更新视图
+    this.cb()
+  }
+}
+</code></pre>
+<blockquote>
+<p>Watcher 实例对应的 update 形成闭包，存有 get、updater、node、exp。</p>
+<p>也可以把 update 的相关内容直接放在 watcher 里面，更直观一点，但是 Watcher 太臃肿。</p>
+</blockquote>
+<pre><code class="language-js">class Watcher {
+  constructor(vm, node, exp, dir) {
+    this.vm = vm
+    this.node = node
+    this.exp = exp
+    this.dir = dir
+
+    this.updater = this[dir + 'Updater']
+
+    Dep.targetWatcher = this
+    this.getContent()
+    Dep.targetWatcher = null
+
+    this.updater()
+  }
+  update() {
+    this.updater()
+  }
+
+  textUpdater() {
+    this.node.textContent = this.getContent(this.exp)
+  }
+
+  // ...
+
+  getContent() {
+    // 解决嵌套，get 嵌套属性的值
+    const p = this.exp.split('.')
+    let content = this.vm[p[0]]
+    for (let i = 1; i &lt; p.length; i++) {
+      content = content[p[i]]
+    }
+    return content
+  }
+}
 </code></pre>
 <h3 id="元素属性的响应式">元素属性的响应式</h3>
 <h4 id="v-text">v-text</h4>
@@ -417,6 +634,357 @@ class Watcher {
   text(node, exp) {
     this.update(node, exp, 'text')
   }
+</code></pre>
+<h4 id="v-html">v-html</h4>
+<p>和 text 一样，把 node.textContent 改为 node.innerHTML</p>
+<h4 id="v-model">v-model</h4>
+<p>修改 node.value，监听 node 的 input 事件</p>
+<p>新建 set 方法，解决嵌套属性的 set 问题</p>
+<pre><code class="language-js">setContent = (exp, value) =&gt; {
+  const p = exp.split('.')
+  if (p.length === 1) {
+    this.$vm[p] = value
+  } else if (p.length &gt; 1) {
+    let content = this.$vm[p[0]]
+    for (let i = 1; i &lt; p.length - 1; i++) {
+      content = content[p[i]]
+    }
+    content[p[p.length - 1]] = value
+  }
+}
+</code></pre>
+<h4 id="事件绑定">@ 事件绑定</h4>
+<pre><code>@click=&quot;handleClick&quot;
+</code></pre>
+<p>获取到 click、handleClick，绑定到 node 上，注意 this。</p>
+<h2 id="汇总">汇总</h2>
+<h3 id="compilejs">compile.js</h3>
+<pre><code class="language-js">class Compile {
+  constructor(vm) {
+    // new Watcher 需要 vm
+    this.$vm = vm
+    this.$el = document.querySelector(this.$vm.$options.el)
+
+    if (this.$el) {
+      // 提取宿主中模板内容到 fragment 标签（结束后 $el 中没有子元素）
+      // 不会引起页面回流（对元素位置和几何上的计算），性能更好
+      this.$fragment = this.node2Fragment(this.$el)
+      // 编译，并进行依赖收集
+      this.compile(this.$fragment)
+      // 编译结束后把 fragment 再添加到 el 中
+      this.$el.appendChild(this.$fragment)
+    }
+  }
+
+  node2Fragment(el) {
+    const fragment = document.createDocumentFragment()
+    let child
+    while ((child = el.firstChild)) {
+      fragment.appendChild(child)
+    }
+    return fragment
+  }
+
+  compile(el) {
+    const childNodes = el.childNodes
+
+    Array.from(childNodes).forEach((node) =&gt; {
+      // 判断节点类型
+      if (node.nodeType === 1) {
+        // Element 节点
+        console.log('遍历到节点', node.nodeName)
+        this.compileElement(node)
+      } else if (this.isInterpolation(node)) {
+        // 插值表达式
+        console.log('遍历到插值表达式', node.textContent)
+        this.compileText(node)
+      }
+      // 如果有子节点
+      if (node.children &amp;&amp; node.childNodes.length &gt; 0) {
+        this.compile(node)
+      }
+    })
+  }
+
+  isInterpolation(node) {
+    // 是文本且符合{{...}}
+    return node.nodeType === 3 &amp;&amp; /\{\{(.*)\}\}/.test(node.textContent)
+  }
+
+  compileText(node) {
+    // console.log(RegExp.$1)
+    const exp = RegExp.$1
+    this.update(this.$vm, node, exp, 'text')
+  }
+
+  update(vm, node, exp, dir) {
+    const updater = this[dir + 'Updater']
+    // 也可以把 updater 的实现直接放在 watcher 里面
+    // 就不用形成闭包，但是这样 watcher 就太臃肿了。
+    updater &amp;&amp; updater(node, exp)
+    // 注意 this
+    const get = this.getContent
+    // 形成闭包，和一个 Watcher 实例对应
+    new Watcher(
+      // vm, // 在这里处理
+      // exp, // 在这里处理
+      function() {
+        get(exp)
+      },
+      function() {
+        updater &amp;&amp; updater(node, exp)
+      },
+    )
+  }
+
+  // 注意 this
+  textUpdater = (node, exp) =&gt; {
+    node.textContent = this.getContent(exp)
+  }
+  htmlUpdater = (node, exp) =&gt; {
+    node.innerHTML = this.getContent(exp)
+  }
+  modelUpdater = (node, exp) =&gt; {
+    node.value = this.getContent(exp)
+  }
+
+  // 注意 this
+  getContent = (exp) =&gt; {
+    // 解决嵌套，get 嵌套属性的值
+    const p = exp.split('.')
+    let content = this.$vm[p[0]]
+    for (let i = 1; i &lt; p.length; i++) {
+      content = content[p[i]]
+    }
+    return content
+  }
+  setContent = (exp, value) =&gt; {
+    const p = exp.split('.')
+    if (p.length === 1) {
+      this.$vm[p] = value
+    } else if (p.length &gt; 1) {
+      let content = this.$vm[p[0]]
+      for (let i = 1; i &lt; p.length - 1; i++) {
+        content = content[p[i]]
+      }
+      content[p[p.length - 1]] = value
+    }
+  }
+
+  compileElement(node) {
+    const nodeAttrs = node.attributes
+    Array.from(nodeAttrs).forEach((attr) =&gt; {
+      const attrName = attr.name
+      const exp = attr.value
+      if (attrName.indexOf('v-') === 0) {
+        const dir = attrName.substring(2)
+        this[dir] &amp;&amp; this[dir](this.$vm, node, exp)
+      } else if (attrName.indexOf('@') === 0) {
+        // @click=&quot;handleClick&quot;
+        const dir = attrName.substring(1)
+        this.eventHandler(this.$vm, node, exp, dir)
+      }
+    })
+  }
+
+  text(vm, node, exp) {
+    this.update(vm, node, exp, 'text')
+  }
+
+  html(vm, node, exp) {
+    this.update(vm, node, exp, 'html')
+  }
+
+  model(vm, node, exp) {
+    this.update(vm, node, exp, 'model')
+    node.addEventListener('input', (e) =&gt; {
+      this.setContent(exp, e.target.value)
+    })
+  }
+
+  eventHandler(vm, node, exp, dir) {
+    const fn = vm.$options.methods &amp;&amp; vm.$options.methods[exp]
+    // console.log(node, exp, dir, fn)
+    if (dir &amp;&amp; fn) {
+      // 注意 this
+      node.addEventListener(dir, fn.bind(vm))
+    }
+  }
+}
+</code></pre>
+<h3 id="vuejs">vue.js</h3>
+<pre><code class="language-js">class Vue {
+  constructor(options) {
+    this.$options = options
+
+    this.$data = options.data
+
+    // 响应化处理
+    this.observe(this.$data)
+
+    Object.keys(this.$data).forEach((key) =&gt; {
+      // 只需要给 data 的第一层设置代理
+      // 不然 set 多余的键时会给 data 添加属性
+      this.proxyData(key)
+    })
+
+    // new Watcher(this, 'foo')
+    // new Watcher(this, 'bar.doo')
+
+    new Compile(this)
+  }
+
+  observe(value) {
+    if (!value || typeof value !== 'object') {
+      return
+    }
+
+    Object.keys(value).forEach((key) =&gt; {
+      // setter 和 getter 使用中介 val，防止无限循环
+      // 需要新建一个作用域（闭包）来保存 val,
+      // Object.defineProperty(obj, key, { // val })
+      this.defineReactive(value, key, value[key])
+    })
+  }
+
+  defineReactive(obj, key, val) {
+    // 递归，处理对象
+    this.observe(val)
+
+    const dep = new Dep()
+
+    // 会在 obj 上添加新属性，或者修改现有属性，是个引用变量
+    // 这里导致形成闭包
+    Object.defineProperty(obj, key, {
+      get() {
+        // 若存在 targetWatcher（watcher的构造阶段），则添加
+        Dep.targetWatcher &amp;&amp; dep.addWatcher(Dep.targetWatcher)
+        // console.log('get');
+        return val
+      },
+      set(newVal) {
+        if (newVal !== val) {
+          // console.log('set');
+          val = newVal
+          // 通知更新
+          dep.notify()
+        }
+      },
+    })
+  }
+
+  // 在 Vue 实例根上定义属性转发至 data 中的数据
+  proxyData(key) {
+    // this 指 Vue 实例
+    Object.defineProperty(this, key, {
+      get() {
+        return this.$data[key]
+      },
+      set(newVal) {
+        this.$data[key] = newVal
+      },
+    })
+  }
+}
+
+// 创建 Dep: 管理所有的 Watcher
+class Dep {
+  constructor() {
+    this.watchers = []
+  }
+  addWatcher(watcher) {
+    this.watchers.push(watcher)
+  }
+  notify() {
+    this.watchers.forEach((watcher) =&gt; {
+      watcher.update()
+    })
+  }
+}
+
+// 创建 Watcher：与视图中的变量对应(出现一次就创建一个 Watcher 实例)
+class Watcher {
+  constructor(get, cb) {
+    // this.vm = vm
+    // this.key = key
+    this.cb = cb
+
+    this.get = get // 获取嵌套属性的方法
+
+    Dep.targetWatcher = this
+    // key解析出来之后为字符串， 但是若如 'bar.doo'，需要额外操作
+    // 访问 bar.doo，会将它同时挂载到 bar 和 doo 的 Dep 实例（也是有必要的）
+    // 这里直接在闭包中处理
+    this.get()
+    Dep.targetWatcher = null
+  }
+  update() {
+    // 更新视图
+    this.cb()
+  }
+}
+</code></pre>
+<h3 id="indexhtml">index.html</h3>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;Document&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;
+      &lt;p&gt;{{name}}&lt;/p&gt;
+      &lt;p v-text=&quot;name&quot;&gt;&lt;/p&gt;
+      &lt;p&gt;{{age}}&lt;/p&gt;
+      &lt;p&gt;{{doubleAge}}&lt;/p&gt;
+      &lt;p&gt;{{bar}}&lt;/p&gt;
+      &lt;p&gt;{{bar.doo}}&lt;/p&gt;
+      &lt;div&gt;{{}}&lt;/div&gt;
+      &lt;input type=&quot;text&quot; v-model=&quot;name&quot; /&gt; &lt;button @click=&quot;changeName&quot;&gt;修改name&lt;/button&gt;
+      &lt;input type=&quot;text&quot; v-model=&quot;bar.doo&quot; /&gt; &lt;button @click=&quot;changeDoo&quot;&gt;修改doo&lt;/button&gt;
+      &lt;div v-html=&quot;html&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script src=&quot;compile.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+    &lt;script&gt;
+      const app = new Vue({
+        el: '#app',
+        data: {
+          name: 'I am test.',
+          age: 12,
+          html: '&lt;button&gt;html测试&lt;/button&gt;',
+          foo: 'foooooo',
+          bar: {
+            doo: '嵌套属性',
+          },
+        },
+        methods: {
+          changeName() {
+            // console.log('执行了吗')
+            // 注意 this
+            this.name = '调用了methods'
+          },
+          changeDoo() {
+            this.bar.doo = '调用了methods'
+          },
+        },
+      })
+
+      setTimeout(() =&gt; {
+        app.name = '666666666666'
+        app.bar.doo = 'oooo'
+        // console.log(app.bar.doo)
+        // app.bar = 'oooo'
+      }, 1000)
+
+      // console.log(app['bar.doo'])
+      // app.foo = 'ffff'
+      // console.log(app.bar)
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
 </code></pre>
 ]]></content>
     </entry>
