@@ -1,0 +1,362 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vue 源码解析：启动项目与入口文件分析 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583778482790">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：启动项目与入口文件分析 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="启动项目
+获取 Vue 项目
+项目地址：https://github.com/vuejs/vue
+当前版本：2.6.11
+调试方式
+
+浏览器调试（我们选择这一项）
+使用拦截器或其他工具
+
+调试环境搭建
+
+
+安装依赖：npm i
+
+
+安装 r..." />
+    <meta name="keywords" content="Vue,JS" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583778482790" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Vue 源码解析：启动项目与入口文件分析
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-03-04
+              </span>
+              <span>
+                5 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
+                  # JS
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="启动项目">启动项目</h2>
+<h3 id="获取-vue-项目">获取 Vue 项目</h3>
+<p>项目地址：https://github.com/vuejs/vue</p>
+<p>当前版本：2.6.11</p>
+<h3 id="调试方式">调试方式</h3>
+<ol>
+<li>浏览器调试（我们选择这一项）</li>
+<li>使用拦截器或其他工具</li>
+</ol>
+<h3 id="调试环境搭建">调试环境搭建</h3>
+<ul>
+<li>
+<p>安装依赖：<code>npm i</code></p>
+</li>
+<li>
+<p>安装 rollup：<code>npm i -g rollup</code></p>
+</li>
+</ul>
+<blockquote>
+<p>rollup 是打包工具，用于打包纯代码项目，vue 使用了 rollup 打包</p>
+</blockquote>
+<ul>
+<li>package.json 中修改 dev 脚本，添加 sourcemap，方便调试</li>
+</ul>
+<pre><code>&quot;dev&quot;: &quot;rollup -w -c scripts/config.js --sourcemap --environment TARGET:web-full-dev&quot;,
+</code></pre>
+<ul>
+<li>运行开发版本打包命令：<code>npm run dev</code></li>
+<li>在测试用例中引入打包生成的新的 vue.js</li>
+</ul>
+<blockquote>
+<p>然后就可以愉快的打断点调试了</p>
+</blockquote>
+<h2 id="入口文件分析">入口文件分析</h2>
+<h3 id="目录结构">目录结构</h3>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583685102033.png" alt="" loading="lazy"></figure>
+<blockquote>
+<p>Vue 源码使用 flow 编写，所以还要额外维护 TypeScript 类型定义，加上 flow 目前已停止维护，所以 vue 3 使用 TypeScript 重写。</p>
+</blockquote>
+<h3 id="找到入口">找到入口</h3>
+<p>package.json 中，main 是 require 的入口，module 是 import 的入口</p>
+<pre><code>&quot;main&quot;: &quot;dist/vue.runtime.common.js&quot;,
+&quot;module&quot;: &quot;dist/vue.runtime.esm.js&quot;,
+</code></pre>
+<p>dist 是执行构建脚本<code>&quot;build&quot;: &quot;node scripts/build.js&quot;</code>创建的，所以<code>npm run build</code>执行的是 scripts/build.js。</p>
+<pre><code class="language-js">// 获取所有打包配置
+let builds = require('./config').getAllBuilds()
+
+// 根据参数过滤掉不需要的
+if (process.argv[2]) {
+  const filters = process.argv[2].split(',')
+  builds = builds.filter(b =&gt; {
+    return filters.some(f =&gt; b.output.file.indexOf(f) &gt; -1 || b._name.indexOf(f) &gt; -1)
+  })
+} else {
+  // 过滤掉包含 weex 的配置
+  builds = builds.filter(b =&gt; {
+    return b.output.file.indexOf('weex') === -1
+  })
+}
+
+build(builds)
+</code></pre>
+<p>build.js 中引入了 script/config.js，在里面可以找到各个版本的打包配置。</p>
+<blockquote>
+<h3 id="术语解释">术语解释</h3>
+<p>runtime：仅包含运行时的版本，包含 vue 运行的核心代码，但没有模板编译器，如 vue.runtime.js</p>
+<p>umd：Universal Module Definition 规范，用于浏览器的 script 标签，默认包含运行时和编译器，如 vue.js</p>
+<p>commonjs：cjs 规范，用于旧版打包器，如 browserify、webpack 1，如 vue.runtime.common.js</p>
+<p>esm：ES module 规范，用于现代打包器，如 webpack 2 及以上版本，如 vue.runtime.esm.js</p>
+<h3 id="compile-vs-runtime">Compile vs Runtime</h3>
+<p>带 compiler 版本支持 template 选项，可以实时编译模板</p>
+<p>仅 runtime 版不支持 template，体积小，需要借助 webpack 把 template 解析成 render 函数</p>
+</blockquote>
+<p>因为我们希望在浏览器中调试，所以查看umd格式的版本。</p>
+<pre><code class="language-js">  // Runtime+compiler development build (Browser)
+  'web-full-dev': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.js'),
+    format: 'umd',
+    env: 'development',
+    alias: { he: './entity-decoder' },
+    banner
+  },
+</code></pre>
+<p>结合script/alias.js中的别名可以找到入口文件 src/platforms/web/entry-runtime-with-compiler.js</p>
+<pre><code class="language-js">// 核心代码在这里
+// 扩展默认的 $mount 方法，能够编译 template 或 el 指定的模板
+const mount = Vue.prototype.$mount
+Vue.prototype.$mount = function (
+  el?: string | Element,
+  hydrating?: boolean
+): Component {
+  el = el &amp;&amp; query(el)
+
+  // 不能挂载到 body 或者 html 上
+  if (el === document.body || el === document.documentElement) {
+    process.env.NODE_ENV !== 'production' &amp;&amp; warn(
+      `Do not mount Vue to &lt;html&gt; or &lt;body&gt; - mount to normal elements instead.`
+    )
+    return this
+  }
+  
+  // 获取选项
+  const options = this.$options
+  // 如果 options 上不存在 render 选项，则将 template/el 转化为 render 函数，挂载到 options 上
+  // 如果 options 上存在 render，直接渲染
+  if (!options.render) {
+    let template = options.template
+    if (template) {
+      // 如果有 template，解析 template 选项
+      if (typeof template === 'string') {
+        // 如果是字符串 / 模板字符串
+        if (template.charAt(0) === '#') {
+          // 如果是 '#app' 等 id 选择器，转化为模板字符串
+          template = idToTemplate(template)
+        }
+      } else if (template.nodeType) {
+        // 如果是 DOM 元素
+        template = template.innerHTML
+      }
+    } else if (el) {
+      //否则解析 el
+      template = getOuterHTML(el)
+    }
+    if (template) {
+      // 如果有模板字符串，需要用编译器编译，得到 render 函数
+      const { render, staticRenderFns } = compileToFunctions(template, {
+        outputSourceRange: process.env.NODE_ENV !== 'production',
+        shouldDecodeNewlines,
+        shouldDecodeNewlinesForHref,
+        delimiters: options.delimiters,
+        comments: options.comments
+      }, this)
+      options.render = render
+      options.staticRenderFns = staticRenderFns
+    }
+  }
+  // 渲染
+  return mount.call(this, el, hydrating)
+}
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%90%AF%E5%8A%A8%E9%A1%B9%E7%9B%AE">启动项目</a>
+<ul>
+<li><a href="#%E8%8E%B7%E5%8F%96-vue-%E9%A1%B9%E7%9B%AE">获取 Vue 项目</a></li>
+<li><a href="#%E8%B0%83%E8%AF%95%E6%96%B9%E5%BC%8F">调试方式</a></li>
+<li><a href="#%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA">调试环境搭建</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%A5%E5%8F%A3%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90">入口文件分析</a>
+<ul>
+<li><a href="#%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84">目录结构</a></li>
+<li><a href="#%E6%89%BE%E5%88%B0%E5%85%A5%E5%8F%A3">找到入口</a></li>
+<li><a href="#%E6%9C%AF%E8%AF%AD%E8%A7%A3%E9%87%8A">术语解释</a></li>
+<li><a href="#compile-vs-runtime">Compile vs Runtime</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

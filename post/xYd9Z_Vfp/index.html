@@ -2,11 +2,11 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>前端性能优化 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583670085459">
+<title>前端性能优化总结 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583778482790">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="前端性能优化 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="前端性能优化总结 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -20,14 +20,18 @@
 </script>
 
 
-    <meta name="description" content="从输入 url 到显示页面，发生了什么？
+    <meta name="description" content="
+新玩意：Prepack
+在编译阶段做预计算
+prepack.io
+
+从输入 url 到显示页面，发生了什么？
 从输入 url 到显示页面，发生了什么？
 
 用户输入 yuufen.com
 浏览器通过 DNS，把 url 解析为 IP
-和 IP 地址建立 TCP 连接，发送 HTTP 请求
-服务器接收请求，查库..." />
-    <meta name="keywords" content="优化" />
+和 I..." />
+    <meta name="keywords" content="未完成,优化" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -36,7 +40,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583670085459" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583778482790" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -101,15 +105,19 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              前端性能优化
+              前端性能优化总结
             </h2>
             <div class="post-info">
               <span>
-                2020-03-06
+                2020-03-02
               </span>
               <span>
-                4 min read
+                11 min read
               </span>
+              
+                <a href="https://yuufen.com/blog/tag/gx0HNoXwR/" class="post-tag">
+                  # 未完成
+                </a>
               
                 <a href="https://yuufen.com/blog/tag/nnjcgRgZ6/" class="post-tag">
                   # 优化
@@ -119,7 +127,12 @@
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <h2 id="从输入-url-到显示页面发生了什么">从输入 url 到显示页面，发生了什么？</h2>
+                <blockquote>
+<h2 id="新玩意prepack">新玩意：Prepack</h2>
+<p>在编译阶段做预计算<br>
+<a href="prepack.io">prepack.io</a></p>
+</blockquote>
+<h2 id="从输入-url-到显示页面发生了什么">从输入 url 到显示页面，发生了什么？</h2>
 <p><strong>从输入 url 到显示页面，发生了什么？</strong></p>
 <ol>
 <li>用户输入 yuufen.com</li>
@@ -128,7 +141,7 @@
 <li>服务器接收请求，查库，读文件等，拼接好返回的 HTTP 响应</li>
 <li>浏览器收到首屏 html，开始渲染</li>
 <li>解析 html 为 dom（同时加载额外的 css 和 js）</li>
-<li>解析 css 为 css-tree</li>
+<li>解析 css 为 css-tree（CSS 选择器从<strong>右</strong>向左过滤查找）</li>
 <li>dom + css 生成 render-tree，绘图</li>
 </ol>
 <p>这是一个万能的面试题，这个题的答案包含着整个互联网运行的过程，我们性能优化的策略就是基于它的答案，针对每一步依次解析，让整体的时间变短。所以有两个大方向：</p>
@@ -148,31 +161,54 @@
 <p>抛开场景谈性能优化，都是耍流氓</p>
 </blockquote>
 <h3 id="performance-api">Performance API</h3>
+<p>提到性能优化指标就不得不说 Performance API，首先来看 MDN 上关于这个 API 的 介绍：Performance 接口可以获取到当前页面中与性能相关的信息。它是 High Resolution Time API 的一部分，同时也融合了 Performance Timeline API、Navigation Timing API、 User Timing API 和 Resource Timing API。该类型的对象可以通过调⽤用只读属性 Window.performance 来获得。</p>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1583740522448.png" alt="" loading="lazy"></figure>
+<pre><code class="language-js">const timingInfo = window.performance.timing
+console.log({
+  TCP连接耗时: timingInfo.connectEnd - timingInfo.connectStart,
+  DNS查询耗时: timingInfo.domainLookupEnd - timingInfo.domainLookupStart,
+  '获得首字节耗费时间，也叫TTFB': timingInfo.responseStart - timingInfo.navigationStart,
+  domReady时间: timingInfo.domContentLoadedEventStart - timingInfo.navigationStart,
+  DOM资源下载: timingInfo.responseEnd - timingInfo.responseStart,
+})
+</code></pre>
+<ol>
+<li>First Paint(简称 FP)：表示文档中任一元素首次渲染时间。</li>
+<li>First Contentful Paint(简称 FCP)：当浏览器首次渲染任何文本，图像（包括背景图像），非白色画布或 SVG 时。这个指标就是我们日常说的白屏时间。</li>
+<li>First Meaningful Paint(简称 FMP)：首次有意义的绘制，这个指标反映的是主要内容出现在页面上所需要的时间，如果 FMP 时间过长的话，这里就要考虑是不是静态文件阻塞了主线程。</li>
+<li>Time To Interactive(TTI)：可交互时间，等到服务器通过 HTTP 协议将响应全部返回之后，便开始 DOM Tree 的构建，完成之后，网页变成可交互状态，到此为止便是网页的可交互时间。用户可以进行正常的事件输入交互操作，这个指标是最重要的用户体验指标，用户最关心的就是什么时候可以进行交互，所以通常这个指标是我们优化的重点。</li>
+</ol>
+<h3 id="浏览器-performance-工具">浏览器 Performance 工具</h3>
 <h3 id="lighthouse">Lighthouse</h3>
+<ul>
+<li>安装 chrome 插件 （或者）</li>
+<li><code>npm install -g lighthouse</code></li>
+</ul>
 <pre><code>lighthouse https://yuufen.com/
 </code></pre>
-<h2 id="dns">DNS</h2>
+<h2 id="网络">网络</h2>
+<h3 id="dns">DNS</h3>
 <p>prefetch</p>
-<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1583617452917.png" alt="" loading="lazy"></figure>
-<h2 id="tcp">TCP</h2>
-<h3 id="ip-tcp-http-的关系">IP、TCP、HTTP 的关系</h3>
+<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1583617452917.png" alt="" loading="lazy"></figure>
+<h3 id="tcp">TCP</h3>
+<h4 id="ip-tcp-http-的关系">IP、TCP、HTTP 的关系</h4>
 <ol>
 <li>
-<p>IP-门牌号，通过IP协议找到对应机器</p>
+<p>IP-门牌号，通过 IP 协议找到对应机器</p>
 </li>
 <li>
-<p>TCP负责数据完整性和有序性，通过三次握手、粘包、滑动窗口等非常庞大的网络协议机制</p>
+<p>TCP 负责数据完整性和有序性，通过三次握手、粘包、滑动窗口等非常庞大的网络协议机制</p>
 </li>
 <li>
-<p>HTTP负责应用层数据，文件编码、cookie、缓存、数据终止时机等</p>
+<p>HTTP 负责应用层数据，文件编码、cookie、缓存、数据终止时机等</p>
 </li>
 </ol>
-<h3 id="优化tcp策略">优化（TCP）策略</h3>
+<h4 id="优化tcp策略">优化（TCP）策略</h4>
 <ol>
 <li>长连接</li>
 <li>减少文件体积
 <ol>
-<li>js打包压缩</li>
+<li>js 打包压缩</li>
 <li>图片压缩</li>
 <li>gzip</li>
 </ol>
@@ -180,7 +216,7 @@
 <li>减少文件请求次数
 <ol>
 <li>雪碧图</li>
-<li>js、css打包</li>
+<li>js、css 打包</li>
 <li>缓存控制</li>
 <li>懒加载</li>
 </ol>
@@ -193,7 +229,7 @@
 <li>本地储存</li>
 </ol>
 <h2 id="图片">图片</h2>
-<h3 id="格式">格式</h3>
+<h3 id="选择合适格式">选择合适格式</h3>
 <ol>
 <li>PNG</li>
 </ol>
@@ -210,8 +246,8 @@
 <p>SVG</p>
 </li>
 </ol>
-<p>SVG图像中的文本时可选取可搜索的。</p>
-<p>常用来绘制地图、股票k线图</p>
+<p>SVG 图像中的文本时可选取可搜索的。</p>
+<p>常用来绘制地图、股票 k 线图</p>
 <p>会损耗性能</p>
 <ol start="5">
 <li>WebP</li>
@@ -220,7 +256,7 @@
 <ol start="6">
 <li>Base64</li>
 </ol>
-<p>图片base64之后会变大，适合小的矢量图标</p>
+<p>图片 base64 之后会变大，适合小的矢量图标</p>
 <h3 id="其他">其他</h3>
 <ol>
 <li>图片渐进显示</li>
@@ -242,57 +278,226 @@
 </ol>
 <h3 id="cdn">CDN</h3>
 <p>缓存+回源</p>
-<p>地理位置更近，新的域名规避cookie</p>
+<p>地理位置更近，新的域名规避 cookie</p>
 <h3 id="浏览器缓存">浏览器缓存</h3>
+<figure data-type="image" tabindex="4"><img src="https://yuufen.com/blog/post-images/1583741167549.png" alt="" loading="lazy"></figure>
+<h4 id="流程">流程</h4>
 <ol>
 <li>获取文件</li>
-<li>文件返回express或者cache-control设置过期时间，并且带上etag或者lastModfied字段</li>
-<li>再次请求，浏览器先查询expres或者cache-control是否过期，若没过期，强缓存生效，不发出网络请求，直接使用缓存</li>
-<li>若强缓存失效，浏览器会带上etag或者lastModfied数据，使用if-none-match或者if-Modified-Since字段，咨询后端是否过期</li>
-<li>若没过期，返回304状态码，直接用缓存</li>
-<li>若过期，状态码200，返回新资源</li>
+<li>文件返回 express 或者 cache-control 设置过期时间，并且带上 etag 或者 lastModfied 字段</li>
+<li>再次请求，浏览器先查询 expres 或者 cache-control 是否过期，若没过期，强缓存生效，不发出网络请求，直接使用缓存</li>
+<li>若强缓存失效，浏览器会带上 etag 或者 lastModfied 数据，使用 if-none-match 或者 if-Modified-Since 字段，咨询后端是否过期</li>
+<li>若没过期，返回 304 状态码，直接用缓存</li>
+<li>若过期，状态码 200，返回新资源</li>
 </ol>
 <h4 id="强缓存">强缓存</h4>
+<h5 id="expires">expires</h5>
+<p>http 1.0 中</p>
+<h5 id="cache-control">Cache-Control</h5>
+<p>http 1.1 中</p>
 <h4 id="协商缓存">协商缓存</h4>
-<h3 id="webpack打包和缓存的关系">webpack打包和缓存的关系</h3>
+<h5 id="last-modified-if-modified-since">Last-Modified / If-Modified-Since</h5>
+<p>标注时间（只能精确到秒）</p>
+<h5 id="etag-if-none-match">Etag / If-None-Match</h5>
+<p>根据文件内容计算 hash</p>
+<h3 id="webpack-打包和缓存的关系">webpack 打包和缓存的关系</h3>
+<p>通过 hash 来判断是否有更新：</p>
 <ol>
-<li>hash：整个项目相关的hash</li>
-<li>chunkhash：入口文件依赖的chunkhash</li>
-<li>contenthash：文件内容的hash</li>
+<li>hash：整个项目相关的 hash</li>
+<li>chunkhash：入口文件依赖的 chunkhash</li>
+<li>contenthash：文件内容的 hash</li>
 </ol>
 <h3 id="其他-2">其他</h3>
 <ol>
-<li>
-<p>memory cache 内存缓存，比如储存在变量里，关闭tab就没了</p>
-</li>
-<li>
-<p>Disk cache 硬盘上的缓存</p>
-</li>
-<li>
-<p>Push cache推送缓存 http2</p>
-</li>
-<li>
-<p>service worker 浏览器背后的独立进程</p>
-</li>
+<li>memory cache 内存缓存，比如储存在变量里，关闭 tab 就没了</li>
+<li>Disk cache 硬盘上的缓存</li>
+<li>Push cache 推送缓存 http2</li>
+<li>service worker 浏览器背后的独立进程</li>
 </ol>
 <h2 id="渲染">渲染</h2>
 <h3 id="浏览器渲染原理">浏览器渲染原理</h3>
 <p>经典文章 how browser works</p>
 <p>https://www.html5rocks.com/zh/tutorials/internals/howbrowserswork/</p>
+<figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1583741367851.png" alt="" loading="lazy"></figure>
+<p>首先是解析 HTML。这个过程主要是把 HTML 文档解析为 DOM 树的过程，如果遇到&lt;script&gt;标签，则会停止解析，先执行标签当中的 JavaScript；如果是外联方式，也需要等待下载并执行完对应的 JavaScript 代码，然后才能继续执行解析 HTML 的工作。HTML 解析完成后触发 DOMContentLoaded 事件，这里我们就可以操作 DOM 了。</p>
+<p>生成对应的 DOM 树结构：</p>
+<figure data-type="image" tabindex="6"><img src="https://yuufen.com/blog/post-images/1583741376936.png" alt="" loading="lazy"></figure>
+<p>同时会解析 CSS。解析 HTML 和解析 CSS 是并行处理的，不然会造成渲染的内容没有对应的样式。解析 CSS 遇到&lt;script&gt;标签和上面解析 HTML 的处理方式是一样的。CSS 解析器将 CSS 解析成 CSSStyleSheet（也被叫做 CSSOM 树），和 DOM 树结构类似。</p>
+<p>CSSOM 树：</p>
+<figure data-type="image" tabindex="7"><img src="https://yuufen.com/blog/post-images/1583741498395.png" alt="" loading="lazy"></figure>
+<p>DOM 树和 CSSOM 树一起附着合成渲染树（Render Tree）：</p>
+<figure data-type="image" tabindex="8"><img src="https://yuufen.com/blog/post-images/1583741581016.png" alt="" loading="lazy"></figure>
+<p>图中左侧为 DOM 树，右侧是 Render 树，可以看到 Render 树结构与 DOM 树是非常相似的，但不是一一对应的。每一个节点是一个 Render Object，包含了我们在样式表中设置的样式，样式的宽高和具体位置是通过 Layout (重排)计算得出。</p>
+<blockquote>
+<h4 id="tips">Tips</h4>
+<p>元素如果被设置为 <code>display:none</code>，在 DOM 树中依然会显示，但是在 Render 树中不会显示；元素如果被设置为 <code>visibility:none</code>，那么 DOM 树和 Render 树中都会显示；我们经常说的脱离⽂文档流，其实就是脱离 Render Tree。</p>
+</blockquote>
+<h3 id="白屏应对">白屏应对</h3>
+<h4 id="骨架屏">骨架屏</h4>
+<h5 id="自动化方案">自动化方案</h5>
+<ul>
+<li>page-skeleton-webpack-plugin</li>
+<li>antd 的 skeleton 组件</li>
+</ul>
+<h3 id="dom-性能优化">DOM 性能优化</h3>
+<p>少操作 dom，使用 fragment, 虚拟 dom</p>
+<h3 id="回流重绘">回流重绘</h3>
+<figure data-type="image" tabindex="9"><img src="https://yuufen.com/blog/post-images/1583741388259.png" alt="" loading="lazy"></figure>
+<h3 id="event-loop">event-loop</h3>
+<h4 id="流程-2">流程</h4>
+<figure data-type="image" tabindex="10"><img src="https://yuufen.com/blog/post-images/1583742431195.png" alt="" loading="lazy"></figure>
+<h4 id="macrotask宏任务-microtask微任务">Macrotask（宏任务） / Microtask（微任务）</h4>
+<p>上面我们提到了任务队列，那么任务队列有两种，一种是 Macrotask，另外一种是 Microtask。从最开始我给出的 Event Loop 总的流程图，大家可以看出 Microtask 优先级是高于 Macrotask 的。Microtask 当中的任务也是在执行栈当中的任务执行完成后再进行执行，执行的时候和 Macrotask 有一些区别，Microtask 当中任务不会一个⼀一个压入执⾏行行栈，而是所有任务直接压入栈中， 当 Microtask 当中的任务执行完毕后，然后我们再从 Macrotask 中取栈顶的第一个任务进行执行。</p>
+<p>那么哪些任务属于 Microtask，哪些任务属于 Macrotask 呢，这里有一个大概的总结：</p>
+<ul>
+<li><strong>Macrotask</strong>：</li>
+</ul>
+<p>setTimeout、setInterval、I/O、UI Rendering、script 当中的所有代码、 setImmediate(Node)</p>
+<ul>
+<li><strong>Microtask</strong>：</li>
+</ul>
+<p>process.nextTick(node) 、Promise 、MutationObserver</p>
+<blockquote>
+<p>Microtask 当中各种任务的优先级如下： process.nextTick &gt; Promise &gt; MutationOberse</p>
+</blockquote>
+<blockquote>
+<p>批量更新，可以利用 event-loop，在当前数据修改之后，汇总数据，统一修改，如 React 的<code>setState</code></p>
+</blockquote>
+<h2 id="防抖节流">防抖节流</h2>
+<h3 id="节流">节流</h3>
+<pre><code class="language-js">function throttle(fn, wait = 500) {
+  let lastTime = 0
+  return function(...args) {
+    let now = new Date()
+    if (now - lastTime &gt; wait) {
+      lastTime = now
+      fn(...args)
+    }
+  }
+}
+window.onscroll = throttle(function() {
+  console.log('懒加载判定、显示回到顶部判定……')
+})
+</code></pre>
+<h3 id="防抖">防抖</h3>
+<pre><code class="language-js">function debounce(fn, wait = 500) {
+  let timer = 0
+  return function(...arg) {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() =&gt; {
+      fn(...arg)
+    }, wait)
+  }
+}
+
+window.onscroll = debounce(function() {
+  console.log('懒加载判定、显示回到顶部判定……')
+})
+</code></pre>
+<h2 id="懒加载">懒加载</h2>
+<h3 id="图片懒加载">图片懒加载</h3>
+<pre><code class="language-html">&lt;body&gt;
+  &lt;div id=&quot;container&quot;&gt;
+    &lt;div class=&quot;img-container&quot;&gt;
+      &lt;img
+        data-src=&quot;https://i0.hdslb.com/bfs/album/8e10328d8a35d3acb957bb521170711d02fdece8.jpg@518w_1e_1c.jpg&quot;
+        alt=&quot;&quot;
+      /&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;img-container&quot;&gt;
+      &lt;img data-src=&quot;https://i0.hdslb.com/bfs/album/3f9b4b9f8a91806c1daf2ab187f2faec8174d7ae.jpg&quot; alt=&quot;&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;img-container&quot;&gt;
+      &lt;img
+        data-src=&quot;https://i0.hdslb.com/bfs/album/f14aec7ef14f0c95d359914e0927f9e1f1c3625b.png@518w_1e_1c.png&quot;
+        alt=&quot;&quot;
+      /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;script&gt;
+    const imgs = document.querySelectorAll('img')
+    // 获取可视区域高度
+    const viewHeight = window.innerHeight || window.documentElement.clientHeight
+    console.log(viewHeight, imgs)
+    num = 0
+    function loadImg() {
+      for (let i = 0; i &lt; imgs.length; i++) {
+        console.log(imgs[i].getBoundingClientRect().top)
+        let dis = viewHeight - imgs[i].getBoundingClientRect().top
+        if (dis &gt; 0) {
+          imgs[i].src = imgs[i].getAttribute('data-src')
+          num = i + 1
+        }
+      }
+    }
+    loadImg()
+    // 节流
+    window.addEventListener(
+      'scroll',
+      (function(fn, wait = 500) {
+        let lastTime = 0
+        return function(...args) {
+          let now = new Date()
+          if (now - lastTime &gt; wait) {
+            lastTime = now
+            fn(...args)
+          }
+        }
+      })(loadImg),
+    )
+  &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="组件路由懒加载">组件（路由）懒加载</h3>
+<p>webpack</p>
+<h2 id="服务端渲染-同构">服务端渲染 &amp;&amp; 同构</h2>
+<ol>
+<li>服务端渲染，就是在服务端解析首屏的组件，产出 HTML，直接返回</li>
+<li>如果用户跳转页面，同构。整个应用有两个入口：
+<ol>
+<li>server-entry 首次进入的入口，使用 ssr</li>
+<li>用户点击跳转，如果是单页应用，点击不刷新，走 js 单页入口，或者客户端渲染入口</li>
+</ol>
+</li>
+</ol>
+<h2 id="移动端优化">移动端优化</h2>
+<p>svg、虚拟列表、300ms 延迟（禁用缩放解决）</p>
+<p>https://bvaughn.github.io/react-virtualized/#/components/List</p>
+<h3 id="vue">Vue</h3>
+<p>async-component、v-if / v-show</p>
+<h3 id="react">React</h3>
+<p>purecomponent、suspense</p>
+<h2 id="webpack">webpack</h2>
+<ul>
+<li>可视化优化</li>
+</ul>
+<pre><code class="language-js">const BundleAnalyzerPlugin = require('webpack-bundleanalyzer').BundleAnalyzerPlugin
+
+module.exports = {
+  plugins: [new BundleAnalyzerPlugin()],
+}
+</code></pre>
+<ul>
+<li>tree-shaking 删除冗余代码</li>
+</ul>
 
               </div>
               <div class="toc-container">
                 <ul class="markdownIt-TOC">
 <li>
 <ul>
+<li><a href="#%E6%96%B0%E7%8E%A9%E6%84%8Fprepack">新玩意：Prepack</a></li>
 <li><a href="#%E4%BB%8E%E8%BE%93%E5%85%A5-url-%E5%88%B0%E6%98%BE%E7%A4%BA%E9%A1%B5%E9%9D%A2%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88">从输入 url 到显示页面，发生了什么？</a></li>
 <li><a href="#%E9%9B%85%E8%99%8E%E5%86%9B%E8%A7%84">雅虎军规</a></li>
 <li><a href="#%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87">性能指标</a>
 <ul>
 <li><a href="#performance-api">Performance API</a></li>
+<li><a href="#%E6%B5%8F%E8%A7%88%E5%99%A8-performance-%E5%B7%A5%E5%85%B7">浏览器 Performance 工具</a></li>
 <li><a href="#lighthouse">Lighthouse</a></li>
 </ul>
 </li>
+<li><a href="#%E7%BD%91%E7%BB%9C">网络</a>
+<ul>
 <li><a href="#dns">DNS</a></li>
 <li><a href="#tcp">TCP</a>
 <ul>
@@ -300,9 +505,11 @@
 <li><a href="#%E4%BC%98%E5%8C%96tcp%E7%AD%96%E7%95%A5">优化（TCP）策略</a></li>
 </ul>
 </li>
+</ul>
+</li>
 <li><a href="#%E5%9B%BE%E7%89%87">图片</a>
 <ul>
-<li><a href="#%E6%A0%BC%E5%BC%8F">格式</a></li>
+<li><a href="#%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E6%A0%BC%E5%BC%8F">选择合适格式</a></li>
 <li><a href="#%E5%85%B6%E4%BB%96">其他</a></li>
 </ul>
 </li>
@@ -311,19 +518,71 @@
 <li><a href="#cdn">CDN</a></li>
 <li><a href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E7%BC%93%E5%AD%98">浏览器缓存</a>
 <ul>
-<li><a href="#%E5%BC%BA%E7%BC%93%E5%AD%98">强缓存</a></li>
-<li><a href="#%E5%8D%8F%E5%95%86%E7%BC%93%E5%AD%98">协商缓存</a></li>
+<li><a href="#%E6%B5%81%E7%A8%8B">流程</a></li>
+<li><a href="#%E5%BC%BA%E7%BC%93%E5%AD%98">强缓存</a>
+<ul>
+<li><a href="#expires">expires</a></li>
+<li><a href="#cache-control">Cache-Control</a></li>
 </ul>
 </li>
-<li><a href="#webpack%E6%89%93%E5%8C%85%E5%92%8C%E7%BC%93%E5%AD%98%E7%9A%84%E5%85%B3%E7%B3%BB">webpack打包和缓存的关系</a></li>
+<li><a href="#%E5%8D%8F%E5%95%86%E7%BC%93%E5%AD%98">协商缓存</a>
+<ul>
+<li><a href="#last-modified-if-modified-since">Last-Modified / If-Modified-Since</a></li>
+<li><a href="#etag-if-none-match">Etag / If-None-Match</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#webpack-%E6%89%93%E5%8C%85%E5%92%8C%E7%BC%93%E5%AD%98%E7%9A%84%E5%85%B3%E7%B3%BB">webpack 打包和缓存的关系</a></li>
 <li><a href="#%E5%85%B6%E4%BB%96-2">其他</a></li>
 </ul>
 </li>
 <li><a href="#%E6%B8%B2%E6%9F%93">渲染</a>
 <ul>
-<li><a href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B8%B2%E6%9F%93%E5%8E%9F%E7%90%86">浏览器渲染原理</a></li>
+<li><a href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B8%B2%E6%9F%93%E5%8E%9F%E7%90%86">浏览器渲染原理</a>
+<ul>
+<li><a href="#tips">Tips</a></li>
 </ul>
 </li>
+<li><a href="#%E7%99%BD%E5%B1%8F%E5%BA%94%E5%AF%B9">白屏应对</a>
+<ul>
+<li><a href="#%E9%AA%A8%E6%9E%B6%E5%B1%8F">骨架屏</a>
+<ul>
+<li><a href="#%E8%87%AA%E5%8A%A8%E5%8C%96%E6%96%B9%E6%A1%88">自动化方案</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#dom-%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96">DOM 性能优化</a></li>
+<li><a href="#%E5%9B%9E%E6%B5%81%E9%87%8D%E7%BB%98">回流重绘</a></li>
+<li><a href="#event-loop">event-loop</a>
+<ul>
+<li><a href="#%E6%B5%81%E7%A8%8B-2">流程</a></li>
+<li><a href="#macrotask%E5%AE%8F%E4%BB%BB%E5%8A%A1-microtask%E5%BE%AE%E4%BB%BB%E5%8A%A1">Macrotask（宏任务） / Microtask（微任务）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E9%98%B2%E6%8A%96%E8%8A%82%E6%B5%81">防抖节流</a>
+<ul>
+<li><a href="#%E8%8A%82%E6%B5%81">节流</a></li>
+<li><a href="#%E9%98%B2%E6%8A%96">防抖</a></li>
+</ul>
+</li>
+<li><a href="#%E6%87%92%E5%8A%A0%E8%BD%BD">懒加载</a>
+<ul>
+<li><a href="#%E5%9B%BE%E7%89%87%E6%87%92%E5%8A%A0%E8%BD%BD">图片懒加载</a></li>
+<li><a href="#%E7%BB%84%E4%BB%B6%E8%B7%AF%E7%94%B1%E6%87%92%E5%8A%A0%E8%BD%BD">组件（路由）懒加载</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B8%B2%E6%9F%93-%E5%90%8C%E6%9E%84">服务端渲染 &amp;&amp; 同构</a></li>
+<li><a href="#%E7%A7%BB%E5%8A%A8%E7%AB%AF%E4%BC%98%E5%8C%96">移动端优化</a>
+<ul>
+<li><a href="#vue">Vue</a></li>
+<li><a href="#react">React</a></li>
+</ul>
+</li>
+<li><a href="#webpack">webpack</a></li>
 </ul>
 </li>
 </ul>
@@ -336,9 +595,9 @@
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://yuufen.com/blog/post/M0Xa7RsWm/">
+            <a href="https://yuufen.com/blog/post/_IR3q9jGE/">
               <h3 class="post-title">
-                虚拟 DOM 深入与简单实现
+                仿照 Vue 实现简单的 MVVM 模式
               </h3>
             </a>
           </div>

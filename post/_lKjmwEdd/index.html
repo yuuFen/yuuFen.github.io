@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>常见设计模式总结 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583670085459">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583778482790">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="常见设计模式总结 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
@@ -20,11 +20,13 @@
 </script>
 
 
-    <meta name="description" content="总结
-创建设计模式：单例、工厂、建造者
-结构化设计模式：代理、装饰器、外观、享元、适配器、
-行为型：观察者、策略、中介者、迭代器、责任链、模板方法、备忘录
-vue &amp; element / react &amp; redux 的源码值..." />
+    <meta name="description" content="从输入 url 到显示页面，发生了什么？
+从输入 url 到显示页面，发生了什么？
+
+用户输入 yuufen.com
+浏览器通过 DNS，把 url 解析为 IP
+和 IP 地址建立 TCP 连接，发送 HTTP 请求
+服务器接收请求，查库..." />
     <meta name="keywords" content="JS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
@@ -34,7 +36,7 @@ vue &amp; element / react &amp; redux 的源码值..." />
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583670085459" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583778482790" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -103,10 +105,10 @@ vue &amp; element / react &amp; redux 的源码值..." />
             </h2>
             <div class="post-info">
               <span>
-                2020-02-28
+                2020-02-27
               </span>
               <span>
-                15 min read
+                11 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
@@ -117,519 +119,460 @@ vue &amp; element / react &amp; redux 的源码值..." />
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <h2 id="总结">总结</h2>
-<p>创建设计模式：单例、工厂、建造者</p>
-<p>结构化设计模式：代理、装饰器、外观、享元、适配器、</p>
-<p>行为型：观察者、策略、中介者、迭代器、责任链、模板方法、备忘录</p>
-<p>vue &amp; element / react &amp; redux 的源码值得学习</p>
-<h2 id="pub-sub订阅-发布模式观察者模式">pub / sub（订阅 / 发布模式，观察者模式）</h2>
-<h3 id="优点">优点</h3>
-<p>解耦，降低代码入侵性</p>
-<pre><code class="language-js">原始：
-ModuleA
-  import B
-  B.action()
-ModuleB
-  action() {
-    import C
-    C.action()
-  }
-ModuleC
-  action() {
-    doSomething()
-  }
-
-观察者：
-Event
-ModuleA
-  event.$emit()
-ModuleB
-  event.$on()
-  event.$emit()
-ModuleC
-  event.$on()
-</code></pre>
-<h3 id="目标-实现">目标 &amp; 实现</h3>
-<p>参考 vue</p>
-<pre><code class="language-js">// 实现：
-class Event {
-  constructor() {
-    this.callback = {}
-  }
-
-  $on(name, fn) {
-    ;(this.callback[name] || (this.callback[name] = [])).push(fn)
-  }
-
-  $emit(name, ...args) {
-    const cbs = this.callback[name]
-    if (cbs) {
-      cbs.forEach((cb) =&gt; {
-        cb.call(this, ...args)
-      })
-    }
-  }
-
-  $off(name) {
-    this.callback[name] = null
-  }
-}
-
-// 目标：
-let event = new Event()
-// 监听
-event.$on('event1', (...args) =&gt; {
-  console.log('event1', ...args)
-})
-event.$on('event1', (...args) =&gt; {
-  console.log('event1 again', ...args)
-})
-// 触发
-event.$emit('event1', 1, 2, 3)
-// 解绑
-console.log('-'.repeat(20))
-event.$off('event1')
-event.$emit('event1', 1, 2, 3) // 测试
-</code></pre>
-<h2 id="单例模式">单例模式</h2>
-<p>保证一个类仅有一个实例，并提供一个访问它的全局访问点。</p>
-<h3 id="适用场景">适用场景</h3>
-<p>如：</p>
+                <h2 id="从输入-url-到显示页面发生了什么">从输入 url 到显示页面，发生了什么？</h2>
+<p><strong>从输入 url 到显示页面，发生了什么？</strong></p>
 <ol>
-<li>弹窗，无论点击多少次都只被创建一次。</li>
-<li>redux 的 store，全局唯一</li>
+<li>用户输入 yuufen.com</li>
+<li>浏览器通过 DNS，把 url 解析为 IP</li>
+<li>和 IP 地址建立 TCP 连接，发送 HTTP 请求</li>
+<li>服务器接收请求，查库，读文件等，拼接好返回的 HTTP 响应</li>
+<li>浏览器收到首屏 html，开始渲染</li>
+<li>解析 html 为 dom（同时加载额外的 css 和 js）</li>
+<li>解析 css 为 css-tree（CSS 选择器从<strong>右</strong>向左过滤查找）</li>
+<li>dom + css 生成 render-tree，绘图</li>
 </ol>
-<h3 id="简单举例">简单举例</h3>
-<pre><code class="language-js">// 新建弹窗，期望弹窗全局唯一
-// 伪代码:
-// function createModalLayer() {
-//   // 闭包储存单例实例
-//   let result
-//   return function() {
-//     return result || (result = 新建弹窗)
-//   }
-// }
-// 提取：
-// 高阶函数：
-function getSingle(fn) {
-  let result
-  return function() {
-    return result || (result = fn.apply(this, arguments))
-  }
-}
-function createModalLayer() {
-  console.log('新建弹窗')
-  const div = document.createElement('div')
-  div.innerHTML = new Date()
-  div.className = 'modal'
-  div.style.display = 'none'
-  document.body.appendChild(div)
-  div.addEventListener(
-    'click',
-    function() {
-      div.style.display = 'none'
-    },
-    false,
-  )
-  return div
-}
-
-createModalLayer = getSingle(createModalLayer)
-
-document.getElementById('modal-btn').addEventListener('click', function() {
-  // 新建弹窗
-  const modalLayer = createModalLayer()
-  modalLayer.style.display = 'block'
+<p>这是一个万能的面试题，这个题的答案包含着整个互联网运行的过程，我们性能优化的策略就是基于它的答案，针对每一步依次解析，让整体的时间变短。所以有两个大方向：</p>
+<ol>
+<li>少加载文件</li>
+<li>少执行代码</li>
+</ol>
+<h2 id="雅虎军规">雅虎军规</h2>
+<blockquote>
+<p>虽然随着 Vue、React、Angular 这些框架的流行，雅虎军规当中一些优化的方法已不在适用，但是，更多的时候，我们是学习这些方法背后的思想，而不是去死记硬背某个方法，技术总是在更迭，只有握方法背后的思想，才能够立于不败之地。</p>
+</blockquote>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583615829278.jpg" alt="" loading="lazy"></figure>
+<p>https://developer.yahoo.com/performance/rules.html</p>
+<p>https://juejin.im/post/5b73ef38f265da281e048e51</p>
+<h2 id="性能指标">性能指标</h2>
+<blockquote>
+<p>抛开场景谈性能优化，都是耍流氓</p>
+</blockquote>
+<h3 id="performance-api">Performance API</h3>
+<p>提到性能优化指标就不得不说 Performance API，首先来看 MDN 上关于这个 API 的 介绍：Performance 接口可以获取到当前页面中与性能相关的信息。它是 High Resolution Time API 的一部分，同时也融合了 Performance Timeline API、Navigation Timing API、 User Timing API 和 Resource Timing API。该类型的对象可以通过调⽤用只读属性 Window.performance 来获得。</p>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1583740522448.png" alt="" loading="lazy"></figure>
+<pre><code class="language-js">const timingInfo = window.performance.timing
+console.log({
+  TCP连接耗时: timingInfo.connectEnd - timingInfo.connectStart,
+  DNS查询耗时: timingInfo.domainLookupEnd - timingInfo.domainLookupStart,
+  '获得首字节耗费时间，也叫TTFB': timingInfo.responseStart - timingInfo.navigationStart,
+  domReady时间: timingInfo.domContentLoadedEventStart - timingInfo.navigationStart,
+  DOM资源下载: timingInfo.responseEnd - timingInfo.responseStart,
 })
 </code></pre>
-<h2 id="策略模式">策略模式</h2>
-<h3 id="分析">分析</h3>
-<p>KISS 原则 keep it simple and stupid</p>
-<p>策略模式指定义一系列算法，把他们一个个封装起来，并使他们可以相互替换。</p>
-<p>目的是将算法的使用和实现分离。</p>
-<p>一个基于策略模式的程序至少由两部分组成。第一部分是一组策略类（可变），封装了具体的算法，负责具体的计算过程；第二部分是环境类 Context（不变），Context 接收客户的请求，随后将请求委托给某一个策略类。要做到这一点，说明 Context 中要维持对某个策略对象的引用。</p>
-<h3 id="举例">举例</h3>
-<p>原始（面条式代码）：</p>
-<pre><code class="language-js">let form = 获取表单
-form.onSubmit = function() {
-  if (form.name.value === '') {
-    弹出错误消息
-  }
-  if (form.password.value === '') {
-    弹出错误消息
-  }
-  if (form.password.value.length &lt; 5) {
-    弹出错误消息
-  }
-  正则等等
-}
-</code></pre>
-<p>策略模式（具体看 element 的表单验证 https://github.com/ElemeFE/element/blob/dev/packages/form/src/form.vue ），其他例子：</p>
-<pre><code class="language-js">// 1. 策略
-// 可以使用配置
-const policy = {
-  S: function(salary) {
-    return salary * 4
-  },
-  A: function(salary) {
-    return salary * 3
-  },
-  B: function(salary) {
-    return salary * 2
-  },
-  C: function(salary) {
-    return salary
-  },
-}
-// 2. 使用
-function calculate(level, salary) {
-  return policy[level] ? policy[level](salary) : 0
-}
-</code></pre>
-<h2 id="代理模式">代理模式</h2>
-<p>定义：为一个对象提供一个占用品或占位符，以便控制对它的访问。</p>
-<p>常用的虚拟代理形式：某花销很大的操作，可通过虚拟代理的方式延迟到需要它的时候再创建（如使用虚拟代理实现图片懒加载）。</p>
-<h3 id="适用场景-2">适用场景</h3>
 <ol>
-<li>图片懒加载的方式：先通过一张 loading 图占位，然后同通过异步的方式加载图片，等图片加载好了再把完成的图片加载到 img 标签里面。</li>
+<li>First Paint(简称 FP)：表示文档中任一元素首次渲染时间。</li>
+<li>First Contentful Paint(简称 FCP)：当浏览器首次渲染任何文本，图像（包括背景图像），非白色画布或 SVG 时。这个指标就是我们日常说的白屏时间。</li>
+<li>First Meaningful Paint(简称 FMP)：首次有意义的绘制，这个指标反映的是主要内容出现在页面上所需要的时间，如果 FMP 时间过长的话，这里就要考虑是不是静态文件阻塞了主线程。</li>
+<li>Time To Interactive(TTI)：可交互时间，等到服务器通过 HTTP 协议将响应全部返回之后，便开始 DOM Tree 的构建，完成之后，网页变成可交互状态，到此为止便是网页的可交互时间。用户可以进行正常的事件输入交互操作，这个指标是最重要的用户体验指标，用户最关心的就是什么时候可以进行交互，所以通常这个指标是我们优化的重点。</li>
 </ol>
-<pre><code class="language-js">// 给图片实例一个setSrc方法，先设置loading，再显示图片
-const imgFunc = (function() {
-  let imgNode = document.createElement('img')
-  document.body.appendChild(imgNode)
-  return {
-    setSrc: function(src) {
-      // 耗时
-      imgNode.src = src
-    },
-  }
-})()
-// 使用代理模式，增加 loading
-const proxyImage = (function() {
-  let img = new Image()
-  // 加载完毕，再设置
-  img.onload = function() {
-    setTimeout(() =&gt; {
-      imgFunc.setSrc(this.src)
-    }, 500)
-  }
-  return {
-    setSrc(src) {
-      // 先设置 loading
-      imgFunc.setSrc('loading.gif')
-      img.src = src
-    },
-  }
-})()
-proxyImage.setSrc('https://yuufen.com/album/photography/2.jpg')
+<h3 id="浏览器-performance-工具">浏览器 Performance 工具</h3>
+<h3 id="lighthouse">Lighthouse</h3>
+<ul>
+<li>安装 chrome 插件 （或者）</li>
+<li><code>npm install -g lighthouse</code></li>
+</ul>
+<pre><code>lighthouse https://yuufen.com/
 </code></pre>
+<h2 id="网络">网络</h2>
+<h3 id="dns">DNS</h3>
+<p>prefetch</p>
+<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1583617452917.png" alt="" loading="lazy"></figure>
+<h3 id="tcp">TCP</h3>
+<h4 id="ip-tcp-http-的关系">IP、TCP、HTTP 的关系</h4>
+<ol>
+<li>
+<p>IP-门牌号，通过 IP 协议找到对应机器</p>
+</li>
+<li>
+<p>TCP 负责数据完整性和有序性，通过三次握手、粘包、滑动窗口等非常庞大的网络协议机制</p>
+</li>
+<li>
+<p>HTTP 负责应用层数据，文件编码、cookie、缓存、数据终止时机等</p>
+</li>
+</ol>
+<h4 id="优化tcp策略">优化（TCP）策略</h4>
+<ol>
+<li>长连接</li>
+<li>减少文件体积
+<ol>
+<li>js 打包压缩</li>
+<li>图片压缩</li>
+<li>gzip</li>
+</ol>
+</li>
+<li>减少文件请求次数
+<ol>
+<li>雪碧图</li>
+<li>js、css 打包</li>
+<li>缓存控制</li>
+<li>懒加载</li>
+</ol>
+</li>
+<li>减少用户和服务器的举例
+<ol>
+<li>cdn</li>
+</ol>
+</li>
+<li>本地储存</li>
+</ol>
+<h2 id="图片">图片</h2>
+<h3 id="选择合适格式">选择合适格式</h3>
+<ol>
+<li>PNG</li>
+</ol>
+<p>png-8 png-24 png-32</p>
+<p>logo，颜色简单但对图片质量要求高、精灵图</p>
 <ol start="2">
-<li>通过一个代理函数收集一段时间之内的请求，最后一次性发送给服务器。</li>
-</ol>
-<pre><code class="language-js">var synchronousFile = function(id) {
-  console.log('开始同步⽂文件，id 为: ' + id)
-}
-var proxySynchronousFile = (function() {
-  var cache = [], // 保存⼀一段时间内需要同步的 ID
-    timer // 定时器
-  return function(id) {
-    cache.push(id)
-    if (timer) {
-      // 保证不不会覆盖已经启动的定时器器
-      return
-    }
-    timer = setTimeout(function() {
-      synchronousFile(cache.join(','))
-      clearTimeout(timer) // 清空定时器器
-      timer = null
-      cache.length = 0 // 清空 ID 集合
-    }, 2000)
-  } // 2 秒后向本体发送需要同步的 ID 集合
-})()
-var checkbox = document.getElementsByTagName('input')
-for (var i = 0, c; (c = checkbox[i++]); ) {
-  c.onclick = function() {
-    if (this.checked === true) {
-      proxySynchronousFile(this.id)
-    }
-  }
-}
-</code></pre>
-<ol start="3">
 <li>
-<p>函数的防抖节流。</p>
+<p>JPG/JPEG</p>
 </li>
 <li>
-<p>React 的 CSS 代理。</p>
+<p>GIF</p>
+</li>
+<li>
+<p>SVG</p>
 </li>
 </ol>
-<h2 id="中介者模式">中介者模式</h2>
-<p>如 redux / vuex，把共享的数据抽离成一个单独的 store，每个都通过 store 这个中介来操作对象。</p>
-<p>适用场景：如购物车需求，存在商品选择表单、颜色选择表单、购买数量表单等，都会触发 change 事件。</p>
-<p>通过中介者来转发处理这些事件，实现各个事件之间的解耦，仅仅维护中介者对象即可。</p>
-<h2 id="装饰器模式">装饰器模式</h2>
-<h3 id="和代理模式的异同">和代理模式的异同</h3>
-<p>两种模式都描述了怎样为对象提供一定程度上的间接引用，他们的实现部分都保留了对另外一个对象的引用，并且向那个对象发送请求。</p>
-<p>代理模式和装饰器模式最重要的区别在于它们的意图和设计目的。</p>
-<p>代理模式的目的是，当直接访问本体不方便或者不符合需要时，为这个本体提供一个替代者。本体定义了关键功能，而代理提供或拒绝对它的访问，或者在访问本体之前做一些额外的事情。</p>
-<p>装饰器模式的作用则是为对象动态的加入行为。</p>
-<h3 id="举例-2">举例</h3>
-<p>如 React 的高阶组件</p>
-<pre><code class="language-js">import React from 'react'
-
-// 统计渲染日志
-const withLog = (Component) =&gt; {
-  class NewComponent extends React.Component {
-    componentWillMount() {
-      console.time('componentRender')
-    }
-	  render() {
-      return &lt;Component {...this.props}&gt;&lt;/Component&gt;
-    }
-    componentDidMount() {
-      console.timeEnd('componentRender')
-    }
-  }
-  return NewComponent
-}
-export {withLog}
-
-// 装饰
-@withLog
-class XXX
-
-// 或者
-// class XXX
-// XXX = withLog(XXX)
-</code></pre>
-<pre><code class="language-js">// 依此可以在配置文件中实现统一配置
-Function.prototype.before = function(beforefn) {
-  var __self = this // 保存对原函数的引用
-  return function() {
-    //返回包含原函数和新函数的“代理”函数
-    beforefn.apply(this, arguments) // 新函数在原函数之前执行，并保证 this 不被劫持
-    return __self.apply(this, arguments) // 返回原函数的执行结构，并保证 this 不被劫持
-  }
-}
-Function.prototype.after = function(afterfn) {
-  var __self = this
-  return function() {
-    var ret = __self.apply(this, arguments)
-    afterfn.apply(this, arguments)
-    return ret
-  }
-}
-</code></pre>
-<h2 id="外观模式">外观模式</h2>
-<p>涉及到兼容性、参数支持多格式等，对外暴露统一的 API，内部判断实现。让 API 更精简。</p>
-<h2 id="工厂模式">工厂模式</h2>
-<p>提供创建对象的接口，把成员对象的创建工作转交给一个外部对象。好处在于消除对象之间的耦合（也就是相互影响）。常见的例子：弹窗、Message，对外提供 api，调用 api 新建一个弹窗或者 Message 的实例。</p>
-<h3 id="举例-3">举例</h3>
-<p>https://github.com/ElemeFE/element/blob/dev/packages/notification/src/main.js</p>
-<h2 id="建造者模式-builder">建造者模式 builder</h2>
-<p>和工厂模式相比，参与了更多或更复杂的创建的过程。</p>
-<pre><code class="language-js">var Person = function(name, work) {
-  var _person = new Human()
-  _person.name = new Named(name)
-  _person.work = new Work(work)
-  return _person
-}
-var person = new Person('Ming', 'code')
-console.log(person)
-</code></pre>
-<h2 id="迭代器模式">迭代器模式</h2>
+<p>SVG 图像中的文本时可选取可搜索的。</p>
+<p>常用来绘制地图、股票 k 线图</p>
+<p>会损耗性能</p>
+<ol start="5">
+<li>WebP</li>
+</ol>
+<p>全能的解决方案，但是兼容性不好，需要根据浏览器判断加载格式</p>
+<ol start="6">
+<li>Base64</li>
+</ol>
+<p>图片 base64 之后会变大，适合小的矢量图标</p>
+<h3 id="其他">其他</h3>
+<ol>
+<li>图片渐进显示</li>
+<li>懒加载</li>
+<li>骨架图</li>
+</ol>
+<h2 id="缓存">缓存</h2>
+<p>可以少加载文件</p>
+<ol>
+<li>cdn 缓存</li>
+<li>本地缓存
+<ol>
+<li>localstorage</li>
+<li>indexdb</li>
+<li>cookie</li>
+</ol>
+</li>
+<li>浏览器缓存</li>
+</ol>
+<h3 id="cdn">CDN</h3>
+<p>缓存+回源</p>
+<p>地理位置更近，新的域名规避 cookie</p>
+<h3 id="浏览器缓存">浏览器缓存</h3>
+<figure data-type="image" tabindex="4"><img src="https://yuufen.com/blog/post-images/1583741167549.png" alt="" loading="lazy"></figure>
+<h4 id="流程">流程</h4>
+<ol>
+<li>获取文件</li>
+<li>文件返回 express 或者 cache-control 设置过期时间，并且带上 etag 或者 lastModfied 字段</li>
+<li>再次请求，浏览器先查询 expres 或者 cache-control 是否过期，若没过期，强缓存生效，不发出网络请求，直接使用缓存</li>
+<li>若强缓存失效，浏览器会带上 etag 或者 lastModfied 数据，使用 if-none-match 或者 if-Modified-Since 字段，咨询后端是否过期</li>
+<li>若没过期，返回 304 状态码，直接用缓存</li>
+<li>若过期，状态码 200，返回新资源</li>
+</ol>
+<h4 id="强缓存">强缓存</h4>
+<h5 id="expires">expires</h5>
+<p>http 1.0 中</p>
+<h5 id="cache-control">Cache-Control</h5>
+<p>http 1.1 中</p>
+<h4 id="协商缓存">协商缓存</h4>
+<h5 id="last-modified-if-modified-since">Last-Modified / If-Modified-Since</h5>
+<p>标注时间（只能精确到秒）</p>
+<h5 id="etag-if-none-match">Etag / If-None-Match</h5>
+<p>根据文件内容计算 hash</p>
+<h3 id="webpack-打包和缓存的关系">webpack 打包和缓存的关系</h3>
+<p>通过 hash 来判断是否有更新：</p>
+<ol>
+<li>hash：整个项目相关的 hash</li>
+<li>chunkhash：入口文件依赖的 chunkhash</li>
+<li>contenthash：文件内容的 hash</li>
+</ol>
+<h3 id="其他-2">其他</h3>
+<ol>
+<li>memory cache 内存缓存，比如储存在变量里，关闭 tab 就没了</li>
+<li>Disk cache 硬盘上的缓存</li>
+<li>Push cache 推送缓存 http2</li>
+<li>service worker 浏览器背后的独立进程</li>
+</ol>
+<h2 id="渲染">渲染</h2>
+<h3 id="浏览器渲染原理">浏览器渲染原理</h3>
+<p>经典文章 how browser works</p>
+<p>https://www.html5rocks.com/zh/tutorials/internals/howbrowserswork/</p>
+<figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1583741367851.png" alt="" loading="lazy"></figure>
+<p>首先是解析 HTML。这个过程主要是把 HTML 文档解析为 DOM 树的过程，如果遇到&lt;script&gt;标签，则会停止解析，先执行标签当中的 JavaScript；如果是外联方式，也需要等待下载并执行完对应的 JavaScript 代码，然后才能继续执行解析 HTML 的工作。HTML 解析完成后触发 DOMContentLoaded 事件，这里我们就可以操作 DOM 了。</p>
+<p>生成对应的 DOM 树结构：</p>
+<figure data-type="image" tabindex="6"><img src="https://yuufen.com/blog/post-images/1583741376936.png" alt="" loading="lazy"></figure>
+<p>同时会解析 CSS。解析 HTML 和解析 CSS 是并行处理的，不然会造成渲染的内容没有对应的样式。解析 CSS 遇到&lt;script&gt;标签和上面解析 HTML 的处理方式是一样的。CSS 解析器将 CSS 解析成 CSSStyleSheet（也被叫做 CSSOM 树），和 DOM 树结构类似。</p>
+<p>CSSOM 树：</p>
+<figure data-type="image" tabindex="7"><img src="https://yuufen.com/blog/post-images/1583741498395.png" alt="" loading="lazy"></figure>
+<p>DOM 树和 CSSOM 树一起附着合成渲染树（Render Tree）：</p>
+<figure data-type="image" tabindex="8"><img src="https://yuufen.com/blog/post-images/1583741581016.png" alt="" loading="lazy"></figure>
+<p>图中左侧为 DOM 树，右侧是 Render 树，可以看到 Render 树结构与 DOM 树是非常相似的，但不是一一对应的。每一个节点是一个 Render Object，包含了我们在样式表中设置的样式，样式的宽高和具体位置是通过 Layout (重排)计算得出。</p>
 <blockquote>
-<p>迭代器器模式是指提供⼀种⽅法顺序访问⼀个聚合对象中的各个元素，⽽又不要暴露该对象的内部表示。迭代器模式可以把迭代的过程从业务逻辑中分离出来,在使用迭代器模式之后，即使不关心对象的内部构造，也可以按顺序访问其中的每个元素</p>
+<h4 id="tips">Tips</h4>
+<p>元素如果被设置为 <code>display:none</code>，在 DOM 树中依然会显示，但是在 Render 树中不会显示；元素如果被设置为 <code>visibility:none</code>，那么 DOM 树和 Render 树中都会显示；我们经常说的脱离⽂文档流，其实就是脱离 Render Tree。</p>
 </blockquote>
-<p>each、map 等等等等太多了</p>
-<pre><code class="language-js">var each = function(ary, callback) {
-  for (var i = 0, l = ary.length; i &lt; l; i++) {
-    callback.call(ary[i], i, ary[i])
+<h3 id="白屏应对">白屏应对</h3>
+<h4 id="骨架屏">骨架屏</h4>
+<h5 id="自动化方案">自动化方案</h5>
+<ul>
+<li>page-skeleton-webpack-plugin</li>
+<li>antd 的 skeleton 组件</li>
+</ul>
+<h3 id="dom-性能优化">DOM 性能优化</h3>
+<p>少操作 dom，使用 fragment, 虚拟 dom</p>
+<h3 id="回流重绘">回流重绘</h3>
+<figure data-type="image" tabindex="9"><img src="https://yuufen.com/blog/post-images/1583741388259.png" alt="" loading="lazy"></figure>
+<h3 id="event-loop">event-loop</h3>
+<h4 id="流程-2">流程</h4>
+<figure data-type="image" tabindex="10"><img src="https://yuufen.com/blog/post-images/1583742431195.png" alt="" loading="lazy"></figure>
+<h4 id="macrotask宏任务-microtask微任务">Macrotask（宏任务） / Microtask（微任务）</h4>
+<p>上面我们提到了任务队列，那么任务队列有两种，一种是 Macrotask，另外一种是 Microtask。从最开始我给出的 Event Loop 总的流程图，大家可以看出 Microtask 优先级是高于 Macrotask 的。Microtask 当中的任务也是在执行栈当中的任务执行完成后再进行执行，执行的时候和 Macrotask 有一些区别，Microtask 当中任务不会一个⼀一个压入执⾏行行栈，而是所有任务直接压入栈中， 当 Microtask 当中的任务执行完毕后，然后我们再从 Macrotask 中取栈顶的第一个任务进行执行。</p>
+<p>那么哪些任务属于 Microtask，哪些任务属于 Macrotask 呢，这里有一个大概的总结：</p>
+<ul>
+<li><strong>Macrotask</strong>：</li>
+</ul>
+<p>setTimeout、setInterval、I/O、UI Rendering、script 当中的所有代码、 setImmediate(Node)</p>
+<ul>
+<li><strong>Microtask</strong>：</li>
+</ul>
+<p>process.nextTick(node) 、Promise 、MutationObserver</p>
+<blockquote>
+<p>Microtask 当中各种任务的优先级如下： process.nextTick &gt; Promise &gt; MutationOberse</p>
+</blockquote>
+<blockquote>
+<p>批量更新，可以利用 event-loop，在当前数据修改之后，汇总数据，统一修改，如 React 的<code>setState</code></p>
+</blockquote>
+<h2 id="防抖节流">防抖节流</h2>
+<h3 id="节流">节流</h3>
+<pre><code class="language-js">function throttle(fn, wait = 500) {
+  let lastTime = 0
+  return function(...args) {
+    let now = new Date()
+    if (now - lastTime &gt; wait) {
+      lastTime = now
+      fn(...args)
+    }
   }
 }
-
-each([1, 2, 3], function(i, n) {
-  alert([i, n])
+window.onscroll = throttle(function() {
+  console.log('懒加载判定、显示回到顶部判定……')
 })
 </code></pre>
-<h2 id="享元模式">享元模式</h2>
-<blockquote>
-<p>享元(ﬂyweight)模式是⼀种用于性能优化的模式，“ﬂy”在这⾥是苍蝇的意思，意为蝇量级。享元模式的核⼼是运⽤共享技术来有效⽀持⼤量细粒度的对象。 如果系统中因为创建了⼤量类似的对象而导致内存占用过高，享元模式就非常有⽤了。在 JavaScript 中，浏览器特别是移动端的浏览器分配的内存并不算多，如何节省内存就成了一件⾮常有意义的事情。</p>
-</blockquote>
-<p>比如只创建少数弹窗对象，动态修改弹窗内容。</p>
-<ul>
-<li>内部状态储存于对象内部 （如弹窗的位置、border 等）</li>
-<li>内部状态可以被一些对象共享</li>
-<li>内部状态独立于具体的场景，通常不会改变</li>
-<li>外部状态取决于具体的场景，并根据场景而变化，外部状态不能被共享 （如弹窗文案）</li>
-</ul>
-<h2 id="责任链模式">责任链模式</h2>
-<ul>
-<li>中间件机制</li>
-</ul>
-<blockquote>
-<p>使多个对象都有机会处理请求，从⽽避免请求的发送者和接收者之间的耦合关系， 将这些对象连成一条链，并沿着这条链传递该请求，直到有⼀个对象处理它为止。 职责链模式的名字⾮常形象，⼀系列可能会处理请求的对象被连接成一条链，请求在这些对象之间依次传递，直到遇到⼀个 可以处理它的对象，我们把这些对象称为链中的节点</p>
-</blockquote>
-<ul>
-<li>假设我们负责⼀个售卖⼿手机的电商网站，经过分别交纳 500 元定金和 200 元定金的两轮预定后(订单已在此时生成)，现在已经到了正式购买的阶段。 公司针对⽀付过定金的用户有一定的优惠政策。在正式购买后，已经支付过 500 元定金的用户会收到 100 元的商城优惠券，200 元定金的用户可以收到 50 元的优惠券，而之前没有支付定金的用户只能进入普通购买模式，也就是没有优惠券，且在库存有限的情况下，不一定保证能买到。</li>
-<li>比起 if 嵌套，我们可以先把 500 元订单、200 元订单以及普通购买分成 3 个函数。接下来把 orderType、pay、stock 这 3 个字段当作参数传递给 500 元订单函数，如果该函数不符合处理条件，则把这个请求传递给后面的 200 元订单函数，如果 200 元订单函数依然不能处理该请求，则继续传递请求给普通购买函数</li>
-<li>这样我们可以自由灵活地增加、移除和修改链中的节点顺序，假如某天网站运营人员 又想出了支持 300 元定金购买，那我们就在该链中增加⼀个节点即可</li>
-</ul>
-<pre><code class="language-js">var order500 = function(orderType, pay, stock) {
-  if (orderType === 1 &amp;&amp; pay === true) {
-    console.log('500 元定金预购，得 100 元优惠')
-  } else {
-    return 'nextSuccessor' // 我不知道下个节点是什么，反正把请求往后传
+<h3 id="防抖">防抖</h3>
+<pre><code class="language-js">function debounce(fn, wait = 500) {
+  let timer = 0
+  return function(...arg) {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() =&gt; {
+      fn(...arg)
+    }, wait)
   }
 }
 
-var order200 = function(orderType, pay, stock) {
-  if (orderType === 2 &amp;&amp; pay === true) {
-    console.log('200 元定金预购，得 50 元优惠')
-  } else {
-    return 'nextSuccessor' // 我不知道下个节点是什么，反正把请求往后传
-  }
-}
-
-var orderNormal = function(orderType, pay, stock) {
-  if (stock &gt; 0) {
-    console.log('普通购买')
-  } else {
-    console.log('没库存了')
-  }
-}
-
-// Chain.prototype.setNextSuccessor 指定在链中的下一个节点
-// Chain.prototype.passRequest 传递请求给某个节点
-var Chain = function(fn) {
-  this.fn = fn
-  this.successor = null
-}
-Chain.prototype.setNextSuccessor = function(successor) {
-  return (this.successor = successor)
-}
-Chain.prototype.passRequest = function() {
-  var ret = this.fn.apply(this, arguments)
-  if (ret === 'nextSuccessor') {
-    return this.successor &amp;&amp; this.successor.passRequest.apply(this.successor, arguments)
-  }
-  return ret
-}
-
-var chainOrder500 = new Chain(order500)
-var chainOrder200 = new Chain(order200)
-var chainOrderNormal = new Chain(orderNormal)
-
-chainOrder500.setNextSuccessor(chainOrder200)
-chainOrder200.setNextSuccessor(chainOrderNormal)
-
-chainOrder500.passRequest(1, true, 500) // 500 元定金预购，得 100 元优惠
-chainOrder500.passRequest(2, true, 500) // 200 元定金预购，得 50 元优惠
-chainOrder500.passRequest(3, true, 500) // 普通购买
-chainOrder500.passRequest(1, false, 0) // 没库存了
+window.onscroll = debounce(function() {
+  console.log('懒加载判定、显示回到顶部判定……')
+})
 </code></pre>
-<p>koa 源码还将整个链条合并为一个函数。</p>
-<h2 id="适配器模式">适配器模式</h2>
-<blockquote>
-<p>适配器模式的作用是解决两个软件实体间的接口不兼容的问题。使用适配器模式之后，原本由于接口不兼容而不能工作的两个软件实体可以一起工作。 适配器的别名是包装器(wrapper)，这是一个相对简单的模式。在程序开发中有许多这样的场景：当我们试图调用模块或者对象的某个接口 时，却发现这个接口的格式并不符合目前的需求。 这时候有两种解决办法，第一种是修改原来的接口实现，但如果原来的模块很复杂，或者我们拿到的模块是一段别人编写的经过压缩的代码， 修改原接口就显得不太现实了。第二种办法是创建一个适配器，将原接口转换为客户希望的另一个接口，客户只需要和适配器打交道。</p>
-</blockquote>
-<p>如 JSON，数据交换的格式，多语言间数据交换的解决方案。</p>
-<p>适配器不关心接口是怎么实现的，会怎样演化，也不改变已有接口。</p>
-<p>装饰器模式和代理模式也不会改变原有对象的接口，但装饰器的作用是给对象增加功能，常常形成一条长的装饰链；而适配器模式通常只包装一次；代理模式是为了控制对对象的访问，通常也只包装一次。</p>
-<p>外观模式的作用与适配器较相似，有人把外观模式看成一组对象的适配器，但外观模式最显著的特点是定义了一个新的接口。</p>
-<pre><code class="language-js">var googleMap = {
-  show: function() {},
-}
-var baiduMap = {
-  display: function() {},
-}
-var baiduMapAdapter = {
-  show: function() {
-    return baiduMap.display()
-  },
-}
-
-renderMap(googleMap)
-renderMap(baiduMapAdapter)
-</code></pre>
-<h2 id="模板方法模式">模板方法模式</h2>
-<blockquote>
-<p>模板方法模式在一个方法中定义一个算法的骨架，而将一些步骤的实现延迟到子类中。模板方法 使得子类可以在不改变算法结构的情况下，重新定义算法中某些步骤的具体实现</p>
-</blockquote>
-<p>如插槽（vue 中的 slot、react 中的 children）</p>
-<pre><code class="language-react">class Parent {
-	constructor() {}
-	render() {
-		&lt;div&gt;
-        	&lt;div&gt;{this.props.children}&lt;/div&gt;
-        &lt;/div&gt;
-	}
-}
-class Stage {
-    constructor() {}
-	render() {
-        // 在 Parent 中已经设定了 children 的渲染位置算法
-        &lt;Parent&gt;
-            // children 的具体实现
-        	&lt;div&gt;child&lt;/div&gt;
-        &lt;/Parent&gt;
+<h2 id="懒加载">懒加载</h2>
+<h3 id="图片懒加载">图片懒加载</h3>
+<pre><code class="language-html">&lt;body&gt;
+  &lt;div id=&quot;container&quot;&gt;
+    &lt;div class=&quot;img-container&quot;&gt;
+      &lt;img
+        data-src=&quot;https://i0.hdslb.com/bfs/album/8e10328d8a35d3acb957bb521170711d02fdece8.jpg@518w_1e_1c.jpg&quot;
+        alt=&quot;&quot;
+      /&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;img-container&quot;&gt;
+      &lt;img data-src=&quot;https://i0.hdslb.com/bfs/album/3f9b4b9f8a91806c1daf2ab187f2faec8174d7ae.jpg&quot; alt=&quot;&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;img-container&quot;&gt;
+      &lt;img
+        data-src=&quot;https://i0.hdslb.com/bfs/album/f14aec7ef14f0c95d359914e0927f9e1f1c3625b.png@518w_1e_1c.png&quot;
+        alt=&quot;&quot;
+      /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;script&gt;
+    const imgs = document.querySelectorAll('img')
+    // 获取可视区域高度
+    const viewHeight = window.innerHeight || window.documentElement.clientHeight
+    console.log(viewHeight, imgs)
+    num = 0
+    function loadImg() {
+      for (let i = 0; i &lt; imgs.length; i++) {
+        console.log(imgs[i].getBoundingClientRect().top)
+        let dis = viewHeight - imgs[i].getBoundingClientRect().top
+        if (dis &gt; 0) {
+          imgs[i].src = imgs[i].getAttribute('data-src')
+          num = i + 1
+        }
+      }
     }
+    loadImg()
+    // 节流
+    window.addEventListener(
+      'scroll',
+      (function(fn, wait = 500) {
+        let lastTime = 0
+        return function(...args) {
+          let now = new Date()
+          if (now - lastTime &gt; wait) {
+            lastTime = now
+            fn(...args)
+          }
+        }
+      })(loadImg),
+    )
+  &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="组件路由懒加载">组件（路由）懒加载</h3>
+<p>webpack</p>
+<h2 id="服务端渲染-同构">服务端渲染 &amp;&amp; 同构</h2>
+<ol>
+<li>服务端渲染，就是在服务端解析首屏的组件，产出 HTML，直接返回</li>
+<li>如果用户跳转页面，同构。整个应用有两个入口：
+<ol>
+<li>server-entry 首次进入的入口，使用 ssr</li>
+<li>用户点击跳转，如果是单页应用，点击不刷新，走 js 单页入口，或者客户端渲染入口</li>
+</ol>
+</li>
+</ol>
+<h2 id="移动端优化">移动端优化</h2>
+<p>svg、虚拟列表、300ms 延迟（禁用缩放解决）</p>
+<p>https://bvaughn.github.io/react-virtualized/#/components/List</p>
+<h3 id="vue">Vue</h3>
+<p>async-component、v-if / v-show</p>
+<h3 id="react">React</h3>
+<p>purecomponent、suspense</p>
+<h2 id="webpack">webpack</h2>
+<ul>
+<li>可视化优化</li>
+</ul>
+<pre><code class="language-js">const BundleAnalyzerPlugin = require('webpack-bundleanalyzer').BundleAnalyzerPlugin
+
+module.exports = {
+  plugins: [new BundleAnalyzerPlugin()],
 }
 </code></pre>
-<h2 id="备忘录模式">备忘录模式</h2>
-<p>可以恢复对象到之前的某个状态。</p>
-<p>如 react 或 redux 的时间旅行。</p>
-<p>https://zh-hans.reactjs.org/tutorial/tutorial.html#implementing-time-travel</p>
+<ul>
+<li>tree-shaking 删除冗余代码</li>
+</ul>
+<h2 id="prepack">Prepack</h2>
+<p>在编译阶段做预计算</p>
+<p><a href="prepack.io">prepack.io</a></p>
 
               </div>
               <div class="toc-container">
                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
-<li><a href="#pub-sub%E8%AE%A2%E9%98%85-%E5%8F%91%E5%B8%83%E6%A8%A1%E5%BC%8F%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F">pub / sub（订阅 / 发布模式，观察者模式）</a>
+<li><a href="#%E4%BB%8E%E8%BE%93%E5%85%A5-url-%E5%88%B0%E6%98%BE%E7%A4%BA%E9%A1%B5%E9%9D%A2%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88">从输入 url 到显示页面，发生了什么？</a></li>
+<li><a href="#%E9%9B%85%E8%99%8E%E5%86%9B%E8%A7%84">雅虎军规</a></li>
+<li><a href="#%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87">性能指标</a>
 <ul>
-<li><a href="#%E4%BC%98%E7%82%B9">优点</a></li>
-<li><a href="#%E7%9B%AE%E6%A0%87-%E5%AE%9E%E7%8E%B0">目标 &amp; 实现</a></li>
+<li><a href="#performance-api">Performance API</a></li>
+<li><a href="#%E6%B5%8F%E8%A7%88%E5%99%A8-performance-%E5%B7%A5%E5%85%B7">浏览器 Performance 工具</a></li>
+<li><a href="#lighthouse">Lighthouse</a></li>
 </ul>
 </li>
-<li><a href="#%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F">单例模式</a>
+<li><a href="#%E7%BD%91%E7%BB%9C">网络</a>
 <ul>
-<li><a href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF">适用场景</a></li>
-<li><a href="#%E7%AE%80%E5%8D%95%E4%B8%BE%E4%BE%8B">简单举例</a></li>
+<li><a href="#dns">DNS</a></li>
+<li><a href="#tcp">TCP</a>
+<ul>
+<li><a href="#ip-tcp-http-%E7%9A%84%E5%85%B3%E7%B3%BB">IP、TCP、HTTP 的关系</a></li>
+<li><a href="#%E4%BC%98%E5%8C%96tcp%E7%AD%96%E7%95%A5">优化（TCP）策略</a></li>
 </ul>
 </li>
-<li><a href="#%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F">策略模式</a>
-<ul>
-<li><a href="#%E5%88%86%E6%9E%90">分析</a></li>
-<li><a href="#%E4%B8%BE%E4%BE%8B">举例</a></li>
 </ul>
 </li>
-<li><a href="#%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F">代理模式</a>
+<li><a href="#%E5%9B%BE%E7%89%87">图片</a>
 <ul>
-<li><a href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-2">适用场景</a></li>
+<li><a href="#%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E6%A0%BC%E5%BC%8F">选择合适格式</a></li>
+<li><a href="#%E5%85%B6%E4%BB%96">其他</a></li>
 </ul>
 </li>
-<li><a href="#%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F">中介者模式</a></li>
-<li><a href="#%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F">装饰器模式</a>
+<li><a href="#%E7%BC%93%E5%AD%98">缓存</a>
 <ul>
-<li><a href="#%E5%92%8C%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%BC%82%E5%90%8C">和代理模式的异同</a></li>
-<li><a href="#%E4%B8%BE%E4%BE%8B-2">举例</a></li>
+<li><a href="#cdn">CDN</a></li>
+<li><a href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E7%BC%93%E5%AD%98">浏览器缓存</a>
+<ul>
+<li><a href="#%E6%B5%81%E7%A8%8B">流程</a></li>
+<li><a href="#%E5%BC%BA%E7%BC%93%E5%AD%98">强缓存</a>
+<ul>
+<li><a href="#expires">expires</a></li>
+<li><a href="#cache-control">Cache-Control</a></li>
 </ul>
 </li>
-<li><a href="#%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F">外观模式</a></li>
-<li><a href="#%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F">工厂模式</a>
+<li><a href="#%E5%8D%8F%E5%95%86%E7%BC%93%E5%AD%98">协商缓存</a>
 <ul>
-<li><a href="#%E4%B8%BE%E4%BE%8B-3">举例</a></li>
+<li><a href="#last-modified-if-modified-since">Last-Modified / If-Modified-Since</a></li>
+<li><a href="#etag-if-none-match">Etag / If-None-Match</a></li>
 </ul>
 </li>
-<li><a href="#%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F-builder">建造者模式 builder</a></li>
-<li><a href="#%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F">迭代器模式</a></li>
-<li><a href="#%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F">享元模式</a></li>
-<li><a href="#%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F">责任链模式</a></li>
-<li><a href="#%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F">适配器模式</a></li>
-<li><a href="#%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F">模板方法模式</a></li>
-<li><a href="#%E5%A4%87%E5%BF%98%E5%BD%95%E6%A8%A1%E5%BC%8F">备忘录模式</a></li>
+</ul>
+</li>
+<li><a href="#webpack-%E6%89%93%E5%8C%85%E5%92%8C%E7%BC%93%E5%AD%98%E7%9A%84%E5%85%B3%E7%B3%BB">webpack 打包和缓存的关系</a></li>
+<li><a href="#%E5%85%B6%E4%BB%96-2">其他</a></li>
+</ul>
+</li>
+<li><a href="#%E6%B8%B2%E6%9F%93">渲染</a>
+<ul>
+<li><a href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B8%B2%E6%9F%93%E5%8E%9F%E7%90%86">浏览器渲染原理</a>
+<ul>
+<li><a href="#tips">Tips</a></li>
+</ul>
+</li>
+<li><a href="#%E7%99%BD%E5%B1%8F%E5%BA%94%E5%AF%B9">白屏应对</a>
+<ul>
+<li><a href="#%E9%AA%A8%E6%9E%B6%E5%B1%8F">骨架屏</a>
+<ul>
+<li><a href="#%E8%87%AA%E5%8A%A8%E5%8C%96%E6%96%B9%E6%A1%88">自动化方案</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#dom-%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96">DOM 性能优化</a></li>
+<li><a href="#%E5%9B%9E%E6%B5%81%E9%87%8D%E7%BB%98">回流重绘</a></li>
+<li><a href="#event-loop">event-loop</a>
+<ul>
+<li><a href="#%E6%B5%81%E7%A8%8B-2">流程</a></li>
+<li><a href="#macrotask%E5%AE%8F%E4%BB%BB%E5%8A%A1-microtask%E5%BE%AE%E4%BB%BB%E5%8A%A1">Macrotask（宏任务） / Microtask（微任务）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E9%98%B2%E6%8A%96%E8%8A%82%E6%B5%81">防抖节流</a>
+<ul>
+<li><a href="#%E8%8A%82%E6%B5%81">节流</a></li>
+<li><a href="#%E9%98%B2%E6%8A%96">防抖</a></li>
+</ul>
+</li>
+<li><a href="#%E6%87%92%E5%8A%A0%E8%BD%BD">懒加载</a>
+<ul>
+<li><a href="#%E5%9B%BE%E7%89%87%E6%87%92%E5%8A%A0%E8%BD%BD">图片懒加载</a></li>
+<li><a href="#%E7%BB%84%E4%BB%B6%E8%B7%AF%E7%94%B1%E6%87%92%E5%8A%A0%E8%BD%BD">组件（路由）懒加载</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B8%B2%E6%9F%93-%E5%90%8C%E6%9E%84">服务端渲染 &amp;&amp; 同构</a></li>
+<li><a href="#%E7%A7%BB%E5%8A%A8%E7%AB%AF%E4%BC%98%E5%8C%96">移动端优化</a>
+<ul>
+<li><a href="#vue">Vue</a></li>
+<li><a href="#react">React</a></li>
+</ul>
+</li>
+<li><a href="#webpack">webpack</a></li>
+<li><a href="#prepack">Prepack</a></li>
 </ul>
 </li>
 </ul>
@@ -644,7 +587,7 @@ class Stage {
             <div class="next">下一篇</div>
             <a href="https://yuufen.com/blog/post/pgLxFgJc5/">
               <h3 class="post-title">
-                Vuex 总结与浅析源码
+                Vuex 总结与简单实现
               </h3>
             </a>
           </div>
