@@ -2,11 +2,11 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Vue 源码解析：从 Vue 声明发散 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583788957654">
+<title>Vue 源码解析：从入口文件到 Vue 声明 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583889957201">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：从 Vue 声明发散 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：从入口文件到 Vue 声明 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -20,10 +20,11 @@
 </script>
 
 
-    <meta name="description" content="
+    <meta name="description" content="经历了什么
+src/platforms/web/entry-runtime-with-compiler.js
+import Vue from './runtime/index'
 
-
-" />
+const mount = Vue.prototype.$m..." />
     <meta name="keywords" content="未完成,Vue,JS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
@@ -33,7 +34,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583788957654" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583889957201" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -98,14 +99,14 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              Vue 源码解析：从 Vue 声明发散
+              Vue 源码解析：从入口文件到 Vue 声明
             </h2>
             <div class="post-info">
               <span>
                 2020-03-05
               </span>
               <span>
-                0 min read
+                8 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/gx0HNoXwR/" class="post-tag">
@@ -124,13 +125,441 @@
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <ul>
-<li></li>
+                <h2 id="经历了什么">经历了什么</h2>
+<p>src/platforms/web/entry-runtime-with-compiler.js</p>
+<pre><code class="language-js">import Vue from './runtime/index'
+
+const mount = Vue.prototype.$mount
+</code></pre>
+<p>src/platforms/web/runtime.js</p>
+<pre><code class="language-js">import Vue from 'core/index'
+
+// ...
+
+// public mount method
+Vue.prototype.$mount = function (
+  el?: string | Element,
+  hydrating?: boolean
+): Component {
+  el = el &amp;&amp; inBrowser ? query(el) : undefined
+  return mountComponent(this, el, hydrating)
+}
+</code></pre>
+<ul>
+<li>mountComponent
+<ul>
+<li>虚拟 DOM</li>
+<li>diff</li>
+<li>patch</li>
+<li>......</li>
 </ul>
+</li>
+</ul>
+<p>src/core/index.js</p>
+<pre><code class="language-js">import Vue from './instance/index'
+
+initGlobalAPI(Vue)
+</code></pre>
+<ul>
+<li>initGlobalAPI
+<ul>
+<li>set</li>
+<li>delete</li>
+<li>nextTick</li>
+<li>......</li>
+</ul>
+</li>
+</ul>
+<p>src/core/instance/index.js 总算到站了</p>
+<pre><code class="language-js">function Vue (options) {
+  this._init(options)
+}
+
+// 合并参数、初始化 $parent 等属性、初始化事件中心、挂载渲染函数、调用生命周期钩子 beforeCreate
+// 获取注入的数据、获取 props、methods、data、computed、watch
+// 注入数据处理、调用生命周期钩子 created
+initMixin(Vue) 
+// 实现 $set、$delete、$watch
+stateMixin(Vue)
+// 实现 $on、$once、$off、$emit
+eventsMixin(Vue)
+// 实现 _update（调用补丁算法）、$forceUpdate、$destroy
+lifecycleMixin(Vue)
+// installRenderHelpers、$nextTick、_render(这里调用init挂载的渲染函数)
+renderMixin(Vue)
+</code></pre>
+<ul>
+<li>initMixin
+<ul>
+<li>initLifecycle</li>
+<li>initEvents</li>
+<li>initRender</li>
+<li>callHook(vm, 'beforeCreate')</li>
+<li>initInjections</li>
+<li>initState (<a href="https://yuufen.com/blog/post/LGEsZIcVg/">数据响应式细节</a>)</li>
+<li>initProvide</li>
+<li>callHook(vm, 'created')</li>
+</ul>
+</li>
+<li>stateMixin
+<ul>
+<li>$set</li>
+<li>$delete</li>
+<li>$watch</li>
+</ul>
+</li>
+<li>eventsMixin
+<ul>
+<li>$on</li>
+<li>$once</li>
+<li>$off</li>
+<li>$emit</li>
+</ul>
+</li>
+<li>lifecycleMixin
+<ul>
+<li>_update（调用补丁算法）</li>
+<li>$forceUpdate</li>
+<li>$destroy</li>
+</ul>
+</li>
+<li>renderMixin
+<ul>
+<li>installRenderHelpers</li>
+<li>$nextTick</li>
+<li>_render(这里调用init挂载的渲染函数)</li>
+</ul>
+</li>
+</ul>
+<h2 id="initmixin">initMixin</h2>
+<pre><code class="language-js">export function initMixin (Vue: Class&lt;Component&gt;) {
+  Vue.prototype._init = function (options?: Object) {
+    const vm: Component = this
+    // a uid
+    vm._uid = uid++
+
+    let startTag, endTag
+    /* istanbul ignore if */
+    if (process.env.NODE_ENV !== 'production' &amp;&amp; config.performance &amp;&amp; mark) {
+      startTag = `vue-perf-start:${vm._uid}`
+      endTag = `vue-perf-end:${vm._uid}`
+      mark(startTag)
+    }
+
+    // a flag to avoid this being observed
+    vm._isVue = true
+    // 合并参数
+    if (options &amp;&amp; options._isComponent) {
+      // optimize internal component instantiation
+      // since dynamic options merging is pretty slow, and none of the
+      // internal component options needs special treatment.
+      initInternalComponent(vm, options)
+    } else {
+      vm.$options = mergeOptions(
+        resolveConstructorOptions(vm.constructor),
+        options || {},
+        vm
+      )
+    }
+    /* istanbul ignore else */
+    if (process.env.NODE_ENV !== 'production') { 
+      initProxy(vm) // 设置上下文
+    } else {
+      vm._renderProxy = vm
+    }
+    // expose real self
+    vm._self = vm
+    initLifecycle(vm) // 初始化与当前组件相关的属性（$parent等等）（这时parent已经存在了）
+    initEvents(vm) // 初始化事件中心
+    initRender(vm) // 定义了 vm.$createElement
+    callHook(vm, 'beforeCreate') // 调用生命周期钩子 beforeCreate
+    initInjections(vm) // 获取注入的数据（是响应式的），在 initState 之前
+    initState(vm) // 获取 props、methods、data、computed、watch
+    initProvide(vm) // 注入数据处理，在 initState 之后
+    callHook(vm, 'created') // 调用生命周期钩子 created
+
+    /* istanbul ignore if */
+    if (process.env.NODE_ENV !== 'production' &amp;&amp; config.performance &amp;&amp; mark) {
+      vm._name = formatComponentName(vm, false)
+      mark(endTag)
+      measure(`vue ${vm._name} init`, startTag, endTag)
+    }
+
+    if (vm.$options.el) {
+      vm.$mount(vm.$options.el)
+    }
+  }
+}
+</code></pre>
+<h3 id="initevents">initEvents</h3>
+<pre><code class="language-js">
+export function initEvents (vm: Component) {
+  vm._events = Object.create(null)
+  vm._hasHookEvent = false
+  // init parent attached events
+  const listeners = vm.$options._parentListeners
+  if (listeners) {
+    updateComponentListeners(vm, listeners)
+  }
+}
+</code></pre>
+<ul>
+<li>updateComponentListeners</li>
+</ul>
+<h3 id="initstate">initState</h3>
+<pre><code class="language-js">export function initState (vm: Component) {
+  vm._watchers = []
+  const opts = vm.$options
+  if (opts.props) initProps(vm, opts.props)
+  if (opts.methods) initMethods(vm, opts.methods)
+  if (opts.data) {
+    initData(vm)
+  } else {
+    observe(vm._data = {}, true /* asRootData */)
+  }
+  if (opts.computed) initComputed(vm, opts.computed)
+  if (opts.watch &amp;&amp; opts.watch !== nativeWatch) {
+    initWatch(vm, opts.watch)
+  }
+}
+</code></pre>
+<ul>
+<li>initProps</li>
+<li>initMethods</li>
+<li>initData</li>
+<li>initComputed</li>
+<li>watch</li>
+</ul>
+<h2 id="statemixin">stateMixin</h2>
+<pre><code class="language-js">export function stateMixin (Vue: Class&lt;Component&gt;) {
+  // flow somehow has problems with directly declared definition object
+  // when using Object.defineProperty, so we have to procedurally build up
+  // the object here.
+  const dataDef = {}
+  dataDef.get = function () { return this._data }
+  const propsDef = {}
+  propsDef.get = function () { return this._props }
+  if (process.env.NODE_ENV !== 'production') {
+    dataDef.set = function () {
+      warn(
+        'Avoid replacing instance root $data. ' +
+        'Use nested data properties instead.',
+        this
+      )
+    }
+    propsDef.set = function () {
+      warn(`$props is readonly.`, this)
+    }
+  }
+  // 挂载只读属性
+  Object.defineProperty(Vue.prototype, '$data', dataDef)
+  Object.defineProperty(Vue.prototype, '$props', propsDef)
+  // 挂载了 $set、$delete、$watch
+  Vue.prototype.$set = set
+  Vue.prototype.$delete = del
+
+  Vue.prototype.$watch = function (...
+  }
+}
+</code></pre>
+<h2 id="eventsmixin未完成">eventsMixin（未完成）</h2>
+<pre><code class="language-js">export function eventsMixin (Vue: Class&lt;Component&gt;) {
+  const hookRE = /^hook:/
+  Vue.prototype.$on = function (event: string | Array&lt;string&gt;, fn: Function): Component {
+    const vm: Component = this
+    if (Array.isArray(event)) {
+      for (let i = 0, l = event.length; i &lt; l; i++) {
+        vm.$on(event[i], fn)
+      }
+    } else {
+      (vm._events[event] || (vm._events[event] = [])).push(fn)
+      // optimize hook:event cost by using a boolean flag marked at registration
+      // instead of a hash lookup
+      if (hookRE.test(event)) {
+        vm._hasHookEvent = true
+      }
+    }
+    return vm
+  }
+
+  Vue.prototype.$once = function (event: string, fn: Function): Component {
+    const vm: Component = this
+    function on () {
+      vm.$off(event, on)
+      fn.apply(vm, arguments)
+    }
+    on.fn = fn
+    vm.$on(event, on)
+    return vm
+  }
+
+  Vue.prototype.$off = function (event?: string | Array&lt;string&gt;, fn?: Function): Component {
+    const vm: Component = this
+    // all
+    if (!arguments.length) {
+      vm._events = Object.create(null)
+      return vm
+    }
+    // array of events
+    if (Array.isArray(event)) {
+      for (let i = 0, l = event.length; i &lt; l; i++) {
+        vm.$off(event[i], fn)
+      }
+      return vm
+    }
+    // specific event
+    const cbs = vm._events[event]
+    if (!cbs) {
+      return vm
+    }
+    if (!fn) {
+      vm._events[event] = null
+      return vm
+    }
+    // specific handler
+    let cb
+    let i = cbs.length
+    while (i--) {
+      cb = cbs[i]
+      if (cb === fn || cb.fn === fn) {
+        cbs.splice(i, 1)
+        break
+      }
+    }
+    return vm
+  }
+
+  Vue.prototype.$emit = function (event: string): Component {
+    const vm: Component = this
+    if (process.env.NODE_ENV !== 'production') {
+      const lowerCaseEvent = event.toLowerCase()
+      if (lowerCaseEvent !== event &amp;&amp; vm._events[lowerCaseEvent]) {
+        tip(
+          `Event &quot;${lowerCaseEvent}&quot; is emitted in component ` +
+          `${formatComponentName(vm)} but the handler is registered for &quot;${event}&quot;. ` +
+          `Note that HTML attributes are case-insensitive and you cannot use ` +
+          `v-on to listen to camelCase events when using in-DOM templates. ` +
+          `You should probably use &quot;${hyphenate(event)}&quot; instead of &quot;${event}&quot;.`
+        )
+      }
+    }
+    let cbs = vm._events[event]
+    if (cbs) {
+      cbs = cbs.length &gt; 1 ? toArray(cbs) : cbs
+      const args = toArray(arguments, 1)
+      const info = `event handler for &quot;${event}&quot;`
+      for (let i = 0, l = cbs.length; i &lt; l; i++) {
+        invokeWithErrorHandling(cbs[i], vm, args, vm, info)
+      }
+    }
+    return vm
+  }
+}
+</code></pre>
+<h2 id="lifecyclemixin未完成">lifecycleMixin（未完成）</h2>
+<pre><code class="language-js">export function lifecycleMixin (Vue: Class&lt;Component&gt;) {
+  Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
+    const vm: Component = this
+    const prevEl = vm.$el
+    const prevVnode = vm._vnode
+    const restoreActiveInstance = setActiveInstance(vm)
+    vm._vnode = vnode
+    // Vue.prototype.__patch__ is injected in entry points
+    // based on the rendering backend used.
+    if (!prevVnode) {
+      // initial render
+      vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
+    } else {
+      // updates
+      vm.$el = vm.__patch__(prevVnode, vnode)
+    }
+    restoreActiveInstance()
+    // update __vue__ reference
+    if (prevEl) {
+      prevEl.__vue__ = null
+    }
+    if (vm.$el) {
+      vm.$el.__vue__ = vm
+    }
+    // if parent is an HOC, update its $el as well
+    if (vm.$vnode &amp;&amp; vm.$parent &amp;&amp; vm.$vnode === vm.$parent._vnode) {
+      vm.$parent.$el = vm.$el
+    }
+    // updated hook is called by the scheduler to ensure that children are
+    // updated in a parent's updated hook.
+  }
+
+  Vue.prototype.$forceUpdate = function () {
+    const vm: Component = this
+    if (vm._watcher) {
+      vm._watcher.update()
+    }
+  }
+
+  Vue.prototype.$destroy = function () {
+    const vm: Component = this
+    if (vm._isBeingDestroyed) {
+      return
+    }
+    callHook(vm, 'beforeDestroy')
+    vm._isBeingDestroyed = true
+    // remove self from parent
+    const parent = vm.$parent
+    if (parent &amp;&amp; !parent._isBeingDestroyed &amp;&amp; !vm.$options.abstract) {
+      remove(parent.$children, vm)
+    }
+    // teardown watchers
+    if (vm._watcher) {
+      vm._watcher.teardown()
+    }
+    let i = vm._watchers.length
+    while (i--) {
+      vm._watchers[i].teardown()
+    }
+    // remove reference from data ob
+    // frozen object may not have observer.
+    if (vm._data.__ob__) {
+      vm._data.__ob__.vmCount--
+    }
+    // call the last hook...
+    vm._isDestroyed = true
+    // invoke destroy hooks on current rendered tree
+    vm.__patch__(vm._vnode, null)
+    // fire destroyed hook
+    callHook(vm, 'destroyed')
+    // turn off all instance listeners.
+    vm.$off()
+    // remove __vue__ reference
+    if (vm.$el) {
+      vm.$el.__vue__ = null
+    }
+    // release circular reference (#6759)
+    if (vm.$vnode) {
+      vm.$vnode.parent = null
+    }
+  }
+}
+</code></pre>
 
               </div>
               <div class="toc-container">
-                
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E7%BB%8F%E5%8E%86%E4%BA%86%E4%BB%80%E4%B9%88">经历了什么</a></li>
+<li><a href="#initmixin">initMixin</a>
+<ul>
+<li><a href="#initevents">initEvents</a></li>
+<li><a href="#initstate">initState</a></li>
+</ul>
+</li>
+<li><a href="#statemixin">stateMixin</a></li>
+<li><a href="#eventsmixin%E6%9C%AA%E5%AE%8C%E6%88%90">eventsMixin（未完成）</a></li>
+<li><a href="#lifecyclemixin%E6%9C%AA%E5%AE%8C%E6%88%90">lifecycleMixin（未完成）</a></li>
+</ul>
+</li>
+</ul>
+
               </div>
             </div>
           </article>

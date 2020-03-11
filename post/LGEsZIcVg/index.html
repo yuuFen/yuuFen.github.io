@@ -1,0 +1,492 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vue 源码解析：数据响应式 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583889957201">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：数据响应式 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="按引用顺序 概览
+src\core\instance\state.js &gt; initData
+function initData (vm: Component) {
+  let data = vm.$options.data
+  da..." />
+    <meta name="keywords" content="Vue,JS" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583889957201" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Vue 源码解析：数据响应式
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-03-06
+              </span>
+              <span>
+                6 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
+                  # JS
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="按引用顺序-概览">按引用顺序 概览</h2>
+<h3 id="srccoreinstancestatejs-initdata">src\core\instance\state.js &gt; initData</h3>
+<pre><code class="language-js">function initData (vm: Component) {
+  let data = vm.$options.data
+  data = vm._data = typeof data === 'function'
+    ? getData(data, vm)
+    : data || {}
+  if (!isPlainObject(data)) {
+	// data functions should return an object
+    data = {}
+  }
+  // proxy data on instance
+  const keys = Object.keys(data)
+  const props = vm.$options.props
+  const methods = vm.$options.methods
+  let i = keys.length
+  while (i--) {
+    const key = keys[i]
+    if ( /* key 是可以使用的（没有被占用也不是保留名） */ ) {
+      // 设置代理，把 key 直接挂载实例 this 上
+      proxy(vm, `_data`, key)
+    }
+  }
+  // observe data
+  // 核心：设置响应式
+  observe(data, true /* asRootData */)
+}
+</code></pre>
+<ul>
+<li>proxy</li>
+<li>observe</li>
+</ul>
+<h3 id="srccoreobserverindexjs-observe">src\core\observer\index.js &gt; observe</h3>
+<pre><code class="language-js">/**
+ * 尝试创建观察者实例
+ * returns the new observer if successfully observed,
+ * or the existing observer if the value already has one.
+ */
+export function observe (value: any, asRootData: ?boolean): Observer | void {
+  if (!isObject(value) || value instanceof VNode) {
+    return
+  }
+  let ob: Observer | void
+  if (hasOwn(value, '__ob__') &amp;&amp; value.__ob__ instanceof Observer) {
+    ob = value.__ob__
+  } else if (
+    shouldObserve &amp;&amp;
+    !isServerRendering() &amp;&amp;
+    (Array.isArray(value) || isPlainObject(value)) &amp;&amp;
+    Object.isExtensible(value) &amp;&amp;
+    !value._isVue
+  ) {
+    ob = new Observer(value)
+  }
+  if (asRootData &amp;&amp; ob) {
+    ob.vmCount++
+  }
+  return ob
+}
+</code></pre>
+<ul>
+<li>Observer</li>
+</ul>
+<h3 id="srccoreobserverindexjs-observer">src\core\observer\index.js &gt; observer</h3>
+<pre><code class="language-js">/**
+ * Observer class that is attached to each observed
+ * object. Once attached, the observer converts the target
+ * object's property keys into getter/setters that
+ * collect dependencies and dispatch updates.
+ */
+export class Observer {
+  value: any;
+  dep: Dep;
+  vmCount: number; // number of vms that have this object as root $data
+
+  constructor (value: any) {
+    this.value = value
+    this.dep = new Dep()
+    this.vmCount = 0
+    def(value, '__ob__', this)
+
+    // 判断当前的value是数组 / Object
+    if (Array.isArray(value)) {
+      // 如果是数组
+      // 就把数组的 7 个可以改变数据的方法全拦截了
+      if (hasProto) {
+        // 兼容性处理，如果浏览器有原型
+        protoAugment(value, arrayMethods)
+      } else {
+        // 如果浏览器没有原型
+        copyAugment(value, arrayMethods, arrayKeys)
+      }
+      // 然后循环一遍
+      this.observeArray(value)
+    } else {
+      // 如果是对象
+      this.walk(value)
+    }
+  }
+
+  /**
+   * Walk through all properties and convert them into
+   * getter/setters. This method should only be called when
+   * value type is Object.
+   */
+  walk (obj: Object) {
+    const keys = Object.keys(obj)
+    for (let i = 0; i &lt; keys.length; i++) {
+      // 每一项都走一遍
+      defineReactive(obj, keys[i])
+    }
+  }
+
+  /**
+   * Observe a list of Array items.
+   */
+  // 如果是对象列表，则每一项都走一遍 observe
+  observeArray (items: Array&lt;any&gt;) {
+    for (let i = 0, l = items.length; i &lt; l; i++) {
+      observe(items[i])
+    }
+  }
+}
+</code></pre>
+<ul>
+<li>arrayMethods</li>
+<li>defineReactive</li>
+</ul>
+<h3 id="srccoreobserverindexjs-definereactive">src\core\observer\index.js &gt; defineReactive</h3>
+<pre><code class="language-js">export function defineReactive (
+  obj: Object,
+  key: string,
+  val: any,
+  customSetter?: ?Function,
+  shallow?: boolean
+) {
+  const dep = new Dep()
+
+  const property = Object.getOwnPropertyDescriptor(obj, key)
+  if (property &amp;&amp; property.configurable === false) {
+    return
+  }
+
+  // 如果用户自己设置了getter和setter的处理
+  const getter = property &amp;&amp; property.get
+  const setter = property &amp;&amp; property.set
+  if ((!getter || setter) &amp;&amp; arguments.length === 2) {
+    // 原理和我们实现的一样
+    val = obj[key]
+  }
+
+  // 如果还是对象，递归，先执行
+  let childOb = !shallow &amp;&amp; observe(val)
+  // 子对象处理完之后：
+  Object.defineProperty(obj, key, {
+    enumerable: true,
+    configurable: true,
+    get: function reactiveGetter () {
+      // 如果用户自己设置了getter
+      const value = getter ? getter.call(obj) : val
+      if (Dep.target) {
+        // Dep.target 是一个 watcher 实例
+        // 原理和我们实现的一样，如果存在 target，就添加到 Dep 实例上
+        // 但是这里同时会把 dep 的 id 保存在 watcher 上，是多对多的关系
+        dep.depend()
+        if (childOb) {
+          // 父对象更新时子对象要更新，同时
+          // 子对象更新之后，父对象也要更新
+          // 比如从 &quot;{foo: 'foo'}&quot; 变成 &quot;{doo: 'doo'}&quot;
+          // 所以要把这个 watcher 添加给 childOb 的 dep
+          childOb.dep.depend()
+          if (Array.isArray(value)) {
+            // 如果是数组，还需要循环
+            dependArray(value)
+          }
+        }
+      }
+      return value
+    },
+    set: function reactiveSetter (newVal) {
+      const value = getter ? getter.call(obj) : val
+      /* eslint-disable no-self-compare */
+      if (newVal === value || (newVal !== newVal &amp;&amp; value !== value)) {
+        return
+      }
+      /* eslint-enable no-self-compare */
+      if (process.env.NODE_ENV !== 'production' &amp;&amp; customSetter) {
+        customSetter()
+      }
+      // #7981: for accessor properties without setter
+      if (getter &amp;&amp; !setter) return
+      if (setter) {
+        setter.call(obj, newVal)
+      } else {
+        val = newVal
+      }
+      // 比如本来是 'str'，用户改成了 {foo: 'str}
+      // 所以要递归
+      childOb = !shallow &amp;&amp; observe(newVal)
+      dep.notify()
+    }
+  })
+}
+</code></pre>
+<ul>
+<li>Dep</li>
+<li>Watcher</li>
+</ul>
+<h3 id="srccoreobserverwatcherjs">src\core\observer\watcher.js</h3>
+<pre><code class="language-js">  /**
+   * Subscriber interface.
+   * Will be called when a dependency changes.
+   */
+  update () {
+    /* istanbul ignore else */
+    if (this.lazy) {
+      this.dirty = true
+    } else if (this.sync) {
+      this.run()
+    } else {
+      // w atcher 队列，批量执行，使用 nextTick 减少 DOM操作
+      queueWatcher(this)
+    }
+  }
+</code></pre>
+<ul>
+<li>queueWatcher
+<ul>
+<li>nextTick
+<ul>
+<li>timerFunc（各种兼容回退）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="细节">细节</h2>
+<h3 id="数组的响应式-arraymethods">数组的响应式 arrayMethods</h3>
+<pre><code class="language-js">/*
+ * not type checking this file because flow doesn't play well with
+ * dynamically accessing methods on Array prototype
+ */
+
+import { def } from '../util/index'
+
+const arrayProto = Array.prototype
+export const arrayMethods = Object.create(arrayProto)
+
+const methodsToPatch = [
+  'push',
+  'pop',
+  'shift',
+  'unshift',
+  'splice',
+  'sort',
+  'reverse'
+]
+
+/**
+ * Intercept mutating methods and emit events
+ */
+methodsToPatch.forEach(function (method) {
+  // cache original method
+  const original = arrayProto[method]
+  def(arrayMethods, method, function mutator (...args) {
+    const result = original.apply(this, args)
+    const ob = this.__ob__
+    let inserted
+    switch (method) {
+      case 'push':
+      case 'unshift':
+        inserted = args
+        break
+      case 'splice':
+        inserted = args.slice(2)
+        break
+    }
+    if (inserted) ob.observeArray(inserted)
+    // notify change
+    ob.dep.notify()
+    return result
+  })
+})
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E6%8C%89%E5%BC%95%E7%94%A8%E9%A1%BA%E5%BA%8F-%E6%A6%82%E8%A7%88">按引用顺序 概览</a>
+<ul>
+<li><a href="#srccoreinstancestatejs-initdata">src\core\instance\state.js &gt; initData</a></li>
+<li><a href="#srccoreobserverindexjs-observe">src\core\observer\index.js &gt; observe</a></li>
+<li><a href="#srccoreobserverindexjs-observer">src\core\observer\index.js &gt; observer</a></li>
+<li><a href="#srccoreobserverindexjs-definereactive">src\core\observer\index.js &gt; defineReactive</a></li>
+<li><a href="#srccoreobserverwatcherjs">src\core\observer\watcher.js</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BB%86%E8%8A%82">细节</a>
+<ul>
+<li><a href="#%E6%95%B0%E7%BB%84%E7%9A%84%E5%93%8D%E5%BA%94%E5%BC%8F-arraymethods">数组的响应式 arrayMethods</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
