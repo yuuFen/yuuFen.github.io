@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vue 源码解析：数据响应式 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583889957201">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584196113341">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Vue 源码解析：数据响应式 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
@@ -25,7 +25,7 @@ src\core\instance\state.js &gt; initData
 function initData (vm: Component) {
   let data = vm.$options.data
   da..." />
-    <meta name="keywords" content="Vue,JS" />
+    <meta name="keywords" content="源码,Vue,JS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -34,7 +34,7 @@ function initData (vm: Component) {
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583889957201" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584196113341" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -106,8 +106,12 @@ function initData (vm: Component) {
                 2020-03-06
               </span>
               <span>
-                6 min read
+                8 min read
               </span>
+              
+                <a href="https://yuufen.com/blog/tag/bkBOcErCL/" class="post-tag">
+                  # 源码
+                </a>
               
                 <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
                   # Vue
@@ -160,6 +164,7 @@ function initData (vm: Component) {
  * or the existing observer if the value already has one.
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
+  // 如果不是 object，直接 return 了（数组也算是 objcet）
   if (!isObject(value) || value instanceof VNode) {
     return
   }
@@ -240,7 +245,8 @@ export class Observer {
   // 如果是对象列表，则每一项都走一遍 observe
   observeArray (items: Array&lt;any&gt;) {
     for (let i = 0, l = items.length; i &lt; l; i++) {
-      observe(items[i])
+      // 直接传入数组元素，省略在键上设置 getter/setter 的步骤
+      observe(items[i]) // 引用变量，传入的是指向的值
     }
   }
 }
@@ -285,6 +291,10 @@ export class Observer {
         // Dep.target 是一个 watcher 实例
         // 原理和我们实现的一样，如果存在 target，就添加到 Dep 实例上
         // 但是这里同时会把 dep 的 id 保存在 watcher 上，是多对多的关系
+        // 还有一点：这里的 watcher 是组件级的（如果不使用$watcher）
+        // 如果不使用$watcher，一个组件只有一个watcher实例（创建组件时会 new 一个）
+        // 它会把更新消息传递给组件，然后组件在进行虚拟 DOM 等操作
+        // （$watcher 还没有看到）
         dep.depend()
         if (childOb) {
           // 父对象更新时子对象要更新，同时
@@ -326,11 +336,53 @@ export class Observer {
 }
 </code></pre>
 <ul>
+<li>Dep.target （未理清）</li>
 <li>Dep</li>
 <li>Watcher</li>
 </ul>
 <h3 id="srccoreobserverwatcherjs">src\core\observer\watcher.js</h3>
-<pre><code class="language-js">  /**
+<pre><code class="language-js">  constructor (
+    vm: Component,
+    expOrFn: string | Function, // $watcher('foo.bar') / 组件的的 updateComponent
+    cb: Function,
+    options?: ?Object,
+    isRenderWatcher?: boolean
+  ) {
+    this.vm = vm
+    // 如果是render watcher，单独保存
+    if (isRenderWatcher) {
+      vm._watcher = this
+    }
+    vm._watchers.push(this)
+    // options
+ 	// 一些细节
+    // 。。。
+      
+    // parse expression for getter
+    if (typeof expOrFn === 'function') {
+      // 如果是组件创建时创建的 watcher 实例（render watcher）
+      // getter 就是更新 DOM 的方法
+      // 当然也可能是watch，原理一样，都是调用方法
+      this.getter = expOrFn
+    } else {
+      // 如果是如 $watcher('foo.bar') 创建的 watcher实例
+      // getter 就是获取 vm[foo][bar] 的方法（就是我之前写的处理嵌套的方法）
+      this.getter = parsePath(expOrFn)
+      if (!this.getter) {
+        this.getter = noop
+        process.env.NODE_ENV !== 'production' &amp;&amp; warn(
+          `Failed watching path: &quot;${expOrFn}&quot; ` +
+          'Watcher only accepts simple dot-delimited paths. ' +
+          'For full control, use a function instead.',
+          vm
+        )
+      }
+    }
+    this.value = this.lazy
+      ? undefined
+      : this.get() // 这里调用了get，get中调用了上面的getter
+  }
+  /**
    * Subscriber interface.
    * Will be called when a dependency changes.
    */
@@ -341,18 +393,24 @@ export class Observer {
     } else if (this.sync) {
       this.run()
     } else {
-      // w atcher 队列，批量执行，使用 nextTick 减少 DOM操作
+      // watcher 队列，批量执行，使用 nextTick 减少 DOM 操作
       queueWatcher(this)
     }
   }
 </code></pre>
 <ul>
-<li>queueWatcher
+<li>
+<p>queueWatcher</p>
 <ul>
-<li>nextTick
+<li>
+<p>nextTick</p>
 <ul>
-<li>timerFunc（各种兼容回退）</li>
+<li>timerFunc</li>
 </ul>
+<blockquote>
+<p>各种兼容回退，首选微任务。</p>
+<p>一次宏任务执行完之后浏览器会刷新一次画面，所以首选先在微任务中添加 DOM 操作，在一次宏任务中批量操作。</p>
+</blockquote>
 </li>
 </ul>
 </li>
@@ -369,7 +427,8 @@ import { def } from '../util/index'
 const arrayProto = Array.prototype
 export const arrayMethods = Object.create(arrayProto)
 
-const methodsToPatch = [
+// 7 个可以改变数组的方法
+const methodsToPatc h = [
   'push',
   'pop',
   'shift',
@@ -385,9 +444,11 @@ const methodsToPatch = [
 methodsToPatch.forEach(function (method) {
   // cache original method
   const original = arrayProto[method]
+  // 添加额外的功能：通知更新
   def(arrayMethods, method, function mutator (...args) {
     const result = original.apply(this, args)
     const ob = this.__ob__
+
     let inserted
     switch (method) {
       case 'push':
@@ -398,13 +459,33 @@ methodsToPatch.forEach(function (method) {
         inserted = args.slice(2)
         break
     }
+    // 如果是插入操作，新增元素，则需要额外做响应式
     if (inserted) ob.observeArray(inserted)
+    
     // notify change
     ob.dep.notify()
     return result
   })
 })
 </code></pre>
+<blockquote>
+<h2 id="数组小坑">数组小坑</h2>
+<pre><code class="language-js">// Observer 中
+observeArray (items: Array&lt;any&gt;) {
+  for (let i = 0, l = items.length; i &lt; l; i++) {
+    // 直接传入数组元素，省略在键上设置 getter/setter 的步骤
+    observe(items[i]) // 引用变量，传入的是指向的值
+  }
+}
+</code></pre>
+<p>所以数组的键没有配置 getter / setter，所以 Vue 中数组有响应式的操作只有这七种，直接通过索引赋值也不行（只能通过$set）。</p>
+<pre><code class="language-js">this.arr[0] = '123434312122' // 改的是键（地址），指向的值没有变，无响应式更新
+this.arr[0] = { doo: 'doo' } // 改的是键（地址），指向的值没有变，无响应式更新
+this.arr[0].foo = 'doo' // 有更新
+this.$set(this.arr, 0, { doo: 'doo' }) // 有更新
+</code></pre>
+<p>因为 js 操作数组很容易改变key，如果使用getter / setter，很容易失效。</p>
+</blockquote>
 
               </div>
               <div class="toc-container">
@@ -425,6 +506,7 @@ methodsToPatch.forEach(function (method) {
 <li><a href="#%E6%95%B0%E7%BB%84%E7%9A%84%E5%93%8D%E5%BA%94%E5%BC%8F-arraymethods">数组的响应式 arrayMethods</a></li>
 </ul>
 </li>
+<li><a href="#%E6%95%B0%E7%BB%84%E5%B0%8F%E5%9D%91">数组小坑</a></li>
 </ul>
 </li>
 </ul>

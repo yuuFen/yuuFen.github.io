@@ -1,0 +1,637 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vue 源码解析：从虚拟 DOM 到 DOM，mount | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584196113341">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：从虚拟 DOM 到 DOM，mount | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="虚拟 DOM
+优点
+虚拟 DOM 轻量、快速，当它们发生变化时，通过新旧虚拟DOM比对可以得到最小 DOM 操作量，从而提升性能和用户体验。本质上是使用 JavaScript 运算成本替换 DOM 操作的执行成本，前者运算速度比后者快很多。..." />
+    <meta name="keywords" content="源码,Vue,JS" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584196113341" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Vue 源码解析：从虚拟 DOM 到 DOM，mount
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-03-08
+              </span>
+              <span>
+                13 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/bkBOcErCL/" class="post-tag">
+                  # 源码
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
+                  # JS
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="虚拟-dom">虚拟 DOM</h2>
+<h3 id="优点">优点</h3>
+<p>虚拟 DOM 轻量、快速，当它们发生变化时，通过新旧虚拟DOM比对可以得到最小 DOM 操作量，从而提升性能和用户体验。本质上是使用 JavaScript 运算成本替换 DOM 操作的执行成本，前者运算速度比后者快很多。</p>
+<p>Vue 1.0 中有细粒度的数据变化侦测，它是不需要虚拟DOM的，但是细粒度造成了大量开销，这对于大型项目来说是不可接受的。</p>
+<p>因此，Vue 2.0 选择了中等粒度的解决方案，每一个组件创建一个 Watcher 实例，这样状态变化时只能通知到组件，所以再通过引入虚拟DOM去进行对比和渲染。</p>
+<h2 id="从表到里">从表到里</h2>
+<blockquote>
+<pre><code>new Vue().$mount('#app')
+</code></pre>
+</blockquote>
+<h3 id="1-mount">1. $mount</h3>
+<p>src\platforms\web\runtime\index.js</p>
+<pre><code class="language-js">// public mount method
+Vue.prototype.$mount = function (
+  el?: string | Element,
+  hydrating?: boolean
+): Component {
+  // 拿到对应 DOM 元素
+  el = el &amp;&amp; inBrowser ? query(el) : undefined
+  return mountComponent(this, el, hydrating)
+}
+</code></pre>
+<ul>
+<li>mountComponent</li>
+</ul>
+<h3 id="2-mountcomponent">2. mountComponent</h3>
+<p>src\core\instance\lifecycle.js</p>
+<pre><code class="language-js">export function mountComponent (
+  vm: Component,
+  el: ?Element,
+  hydrating?: boolean
+): Component {
+  // 挂载 el
+  vm.$el = el
+
+  // 如果带编译器，会在调用前编译出 render 函数
+  if (!vm.$options.render) {
+    vm.$options.render = createEmptyVNode
+    // 省略报错
+  }
+  // 调用生命周期钩子 beforeMount。init和编译都发生在这之前
+  // （从initMixin的created到调用$mount执行到这里，做了很多事情）
+  callHook(vm, 'beforeMount')
+
+  // 定义了更新函数
+  let updateComponent
+  updateComponent = () =&gt; {
+    // vm._render 中调用了 $options 上的 render，返回 VNode
+    // 然后 VNode 作为参数传入 vm._update，做真实 DOM 更新
+    vm._update(vm._render(), hydrating)
+  }
+
+  // 在创建组件时会 new 一个和组件对应 Watcher 实例（即render watcher），
+  // render watcher 会独立于组件的其他 watcher 单独保存
+  // 它会在数据更新时通知 组件 更新 DOM（中等粒度）
+  // 即调用 updateComponent。
+  // （使用 $watcher / watcher选项 会额外创建 Watcher 实例）
+  new Watcher(vm, updateComponent, noop, {
+    before () {
+      if (vm._isMounted &amp;&amp; !vm._isDestroyed) {
+        callHook(vm, 'beforeUpdate')
+      }
+    }
+  }, true /* isRenderWatcher */)
+  hydrating = false
+
+  // manually mounted instance, call mounted on self
+  // mounted is called for render-created child components in its inserted hook
+  if (vm.$vnode == null) {
+    vm._isMounted = true
+    // 调用生命周期钩子 mounted。beforeMounted 到 mounted 的过程，
+    // 调用了已有的render函数生成了虚拟 DOM，然后生成了真实 DOM
+    callHook(vm, 'mounted')
+  }
+  return vm
+}
+</code></pre>
+<ul>
+<li>_render</li>
+<li>_update</li>
+</ul>
+<h3 id="3-_render">3. _render</h3>
+<p>src\core\instance\render.js</p>
+<pre><code class="language-js">const { render, _parentVnode } = vm.$options	
+// ...
+vnode = render.call(vm._renderProxy, vm.$createElement)
+// ...
+return vnode
+</code></pre>
+<h3 id="4-_update">4. _update</h3>
+<p>src\core\instance\lifecycle.js</p>
+<pre><code class="language-js">    if (!prevVnode) {
+      // initial render
+      // 没有旧的 vnode，即第一次渲染时
+      vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
+    } else {
+      // updates
+      // 更新，新旧 vnode 之间 diff，返回新的 DOM
+      vm.$el = vm.__patch__(prevVnode, vnode)
+    }
+
+	// 然后做一些状态更新
+	// ...
+</code></pre>
+<ul>
+<li>_<em>patch</em>_</li>
+</ul>
+<h3 id="5-_patch_">5. _<em>patch</em>_</h3>
+<p>src\platforms\web\runtime\index.js</p>
+<pre><code class="language-js">import { patch } from './patch'
+Vue.prototype.__patch__ = inBrowser ? patch : noop
+</code></pre>
+<ul>
+<li>patch</li>
+</ul>
+<p>src\platforms\web\runtime\patch.js</p>
+<pre><code class="language-js">// 里面封装有各个浏览器平台中对 DOM 节点的操作
+import * as nodeOps from 'web/runtime/node-ops'
+import { createPatchFunction } from 'core/vdom/patch'
+import baseModules from 'core/vdom/modules/index'
+// 里面封装有各个浏览器平台中对属性的操作
+import platformModules from 'web/runtime/modules/index'
+
+// the directive module should be applied last, after all
+// built-in modules have been applied.
+// 扩展操作：把通用模块和浏览器中特有模块合并
+const modules = platformModules.concat(baseModules)
+
+// 工厂函数：创建用户使用的浏览器特有的 patch 函数，主要是为了实现跨平台
+export const patch: Function = createPatchFunction({ nodeOps, modules })
+</code></pre>
+<ul>
+<li>createPatchFunction</li>
+</ul>
+<p>src\core\vdom\patch.js</p>
+<pre><code class="language-js">// 这是一个工厂函数，返回了浏览器中使用的 patch 方法
+// 在 700 行左右 return
+// 详见下文
+</code></pre>
+<h2 id="patch-解析">patch 解析</h2>
+<p>vue 使用的 patching 算法基于 Snabbdom，VNode的 children / text 二选一，不可共存 。</p>
+<p>patch 将新老 VNode 节点进行比对（diff 算法），然后根据比较结果进行最小量的 DOM 操作，而不是将整个视图根据新的 VNode 重绘。</p>
+<p>那么 patch 是怎么工作的呢？</p>
+<p>首先说一下 patch 的核心 —— diff 算法：通过<strong>同层的树节点进行比较</strong>（一般的 web 开发不会出现跨层的 DOM 变化），而非对树进行逐层搜索遍历的方式，所以时间复杂度只有 O(n)，而不是 O(n^3)，是一种相当高效的算法。</p>
+<p>同层级只做三件事：增删改。new VNode 不存在就删；old VNode 不存在就增；都存在就比较（标签）类型和 key，有一项不同就直接整体替换，都相同执行更新（递归）。</p>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584040706895.png" alt="" loading="lazy"></figure>
+<h3 id="1-createpatchfunction">1. createPatchFunction</h3>
+<p>这是一个工厂函数，在 700 行左右返回了浏览器中使用的 patch 方法</p>
+<pre><code class="language-js">  return function patch (oldVnode, vnode, hydrating, removeOnly) {
+    // 如果没有新的 vnode：删
+    if (isUndef(vnode)) {
+      if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
+      return
+    }
+
+    let isInitialPatch = false
+    const insertedVnodeQueue = []
+
+    if (isUndef(oldVnode)) {
+      // 如果老节点不存在：增
+      // empty mount (likely as component), create new root element
+      isInitialPatch = true
+      createElm(vnode, insertedVnodeQueue)
+    } else {
+      // oldVnode，vnode 都存在，有三种情况
+      // 1. oldVnode 不是 DOM，并且新老 VNode 是 &quot;sameVnode&quot;，就调用 patchVnode
+      // 2. oldVnode 不是 DOM，但是新老 VNode 不是 &quot;sameVnode&quot;，就整体替换
+      // 3. oldVnode 是真实 DOM，初始化过程（或者是 SSR 相关，还没看），就整体替换
+      
+      // 如果 oldVnode 存在nodeType，说明传进来的是一个真实 DOM
+      const isRealElement = isDef(oldVnode.nodeType)
+      if (!isRealElement &amp;&amp; sameVnode(oldVnode, vnode)) {
+        // 自定义组件的补丁操作
+        // patch existing root node
+        patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
+      } else {
+        if (isRealElement) {
+          // mounting to a real element
+          // check if this is server-rendered content and if we can perform
+          // a successful hydration.
+          if (oldVnode.nodeType === 1 &amp;&amp; oldVnode.hasAttribute(SSR_ATTR)) {
+            oldVnode.removeAttribute(SSR_ATTR)
+            hydrating = true
+          }
+          if (isTrue(hydrating)) {
+            if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
+              invokeInsertHook(vnode, insertedVnodeQueue, true)
+              return oldVnode
+            } else if (process.env.NODE_ENV !== 'production') {
+              warn(
+                'The client-side rendered virtual DOM tree is not matching ' +
+                'server-rendered content. This is likely caused by incorrect ' +
+                'HTML markup, for example nesting block-level elements inside ' +
+                '&lt;p&gt;, or missing &lt;tbody&gt;. Bailing hydration and performing ' +
+                'full client-side render.'
+              )
+            }
+          }
+          // either not server-rendered, or hydration failed.
+          // create an empty node and replace it
+          oldVnode = emptyNodeAt(oldVnode)
+        }
+
+        // replacing existing element
+        // 下面是替换操作，可以打断点看看
+        const oldElm = oldVnode.elm
+        const parentElm = nodeOps.parentNode(oldElm)
+
+        // create new node
+        // 以老节点为模板，新建了一个节点（其中值已经更新）
+        createElm(
+          vnode,
+          insertedVnodeQueue,
+          // extremely rare edge case: do not insert if old element is in a
+          // leaving transition. Only happens when combining transition +
+          // keep-alive + HOCs. (#4590)
+          oldElm._leaveCb ? null : parentElm,
+          nodeOps.nextSibling(oldElm)
+        )
+
+        // update parent placeholder node element, recursively
+        // 这时 parent 中存在着 新老两个节点
+        if (isDef(vnode.parent)) {
+          let ancestor = vnode.parent
+          const patchable = isPatchable(vnode)
+          while (ancestor) {
+            for (let i = 0; i &lt; cbs.destroy.length; ++i) {
+              cbs.destroy[i](ancestor)
+            }
+            ancestor.elm = vnode.elm
+            if (patchable) {
+              for (let i = 0; i &lt; cbs.create.length; ++i) {
+                cbs.create[i](emptyNode, ancestor)
+              }
+              // #6513
+              // invoke insert hooks that may have been merged by create hooks.
+              // e.g. for directives that uses the &quot;inserted&quot; hook.
+              const insert = ancestor.data.hook.insert
+              if (insert.merged) {
+                // start at index 1 to avoid re-invoking component mounted hook
+                for (let i = 1; i &lt; insert.fns.length; i++) {
+                  insert.fns[i]()
+                }
+              }
+            } else {
+              registerRef(ancestor)
+            }
+            ancestor = ancestor.parent
+          }
+        }
+
+        // destroy old node
+        // 直到这里，老节点被销毁
+        if (isDef(parentElm)) {
+          removeVnodes([oldVnode], 0, 0) // 这里 remove 了老节点，parent 中只剩新节点
+        } else if (isDef(oldVnode.tag)) {
+          invokeDestroyHook(oldVnode)
+        }
+      }
+    }
+
+    invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
+    return vnode.elm
+  }
+</code></pre>
+<h3 id="2-samevnode">2. sameVnode</h3>
+<pre><code class="language-js">function sameVnode (a, b) {
+  return (
+    a.key === b.key &amp;&amp; (
+      (
+        a.tag === b.tag &amp;&amp;
+        a.isComment === b.isComment &amp;&amp;
+        isDef(a.data) === isDef(b.data) &amp;&amp;
+        sameInputType(a, b)
+      ) || (
+        isTrue(a.isAsyncPlaceholder) &amp;&amp;
+        a.asyncFactory === b.asyncFactory &amp;&amp;
+        isUndef(b.asyncFactory.error)
+      )
+    )
+  )
+}
+</code></pre>
+<h3 id="2-patchvnode">2. patchVnode</h3>
+<p>两个 VNode 是 “sameVnode”，就执行更新操作，包括：<strong>属性更新 props</strong>、<strong>文本更新 text</strong>、<strong>子节点更新 如reorder</strong>。（VNode 的 children / text 二者只能存在一个）</p>
+<p>patchVNode 具体规则如下：</p>
+<ol>
+<li>
+<p>如果新旧 VNode 都是<strong>静态的</strong>（不会改变），同时它们的 key 相同（代表同一节点），并且新的 VNode 是 clone 或者标记了 v-once，那么只需要替换 elm 以及 <code>componentInstance</code> 即可；</p>
+</li>
+<li>
+<p>如果新老节点都有 <code>children</code> 子节点，则对子节点进行 diff 操作，调用 updateChildren，它是 diff 的核心之一；</p>
+</li>
+<li>
+<p>如果老节点没有子节点，而新节点存在子节点，则先清空老节点 DOM 的文本内容，然后为当前 DOM 节点加入子节点；</p>
+</li>
+<li>
+<p>当新节点没有子节点，而老节点存在子节点时，则移除该 DOM 节点的所有子节点；</p>
+</li>
+<li>
+<p>当新老节点都无子节点时，就只是文本的替换。</p>
+</li>
+</ol>
+<pre><code class="language-js">  function patchVnode (
+    oldVnode,
+    vnode,
+    insertedVnodeQueue,
+    ownerArray,
+    index,
+    removeOnly
+  ) {
+    // 新旧 VNode 相同就直接返回
+    if (oldVnode === vnode) {
+      return
+    }
+
+    if (isDef(vnode.elm) &amp;&amp; isDef(ownerArray)) {
+      // clone reused vnode
+      vnode = ownerArray[index] = cloneVNode(vnode)
+    }
+
+    // elm 保存着对应的 DOM，这里新的从老的那里获取到 elm
+    const elm = vnode.elm = oldVnode.elm
+
+    // 异步组件的特殊处理
+    if (isTrue(oldVnode.isAsyncPlaceholder)) {
+      if (isDef(vnode.asyncFactory.resolved)) {
+        hydrate(oldVnode.elm, vnode, insertedVnodeQueue)
+      } else {
+        vnode.isAsyncPlaceholder = true
+      }
+      return
+    }
+
+    // reuse element for static trees.
+    // note we only do this if the vnode is cloned -
+    // if the new node is not cloned it means the render functions have been
+    // reset by the hot-reload-api and we need to do a proper re-render.
+    // 静态节点可复用，更新 componentIstance ，然后跳过
+    if (isTrue(vnode.isStatic) &amp;&amp;
+      isTrue(oldVnode.isStatic) &amp;&amp;
+      vnode.key === oldVnode.key &amp;&amp;
+      (isTrue(vnode.isCloned) || isTrue(vnode.isOnce))
+    ) {
+      vnode.componentInstance = oldVnode.componentInstance
+      return
+    }
+
+    // 更新属性？
+    let i
+    const data = vnode.data
+    if (isDef(data) &amp;&amp; isDef(i = data.hook) &amp;&amp; isDef(i = i.prepatch)) {
+      i(oldVnode, vnode)
+    }
+
+    const oldCh = oldVnode.children
+    const ch = vnode.children
+
+    // 更新属性？
+    if (isDef(data) &amp;&amp; isPatchable(vnode)) {
+      for (i = 0; i &lt; cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
+      if (isDef(i = data.hook) &amp;&amp; isDef(i = i.update)) i(oldVnode, vnode)
+    }
+
+    // 前提：vnode 的 children / text 只能存在一个
+    if (isUndef(vnode.text)) {
+      // 新的 没有 text（即只可能存在 children）时：
+      if (isDef(oldCh) &amp;&amp; isDef(ch)) {
+        // 如果新老 都有子节点
+        if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
+      } else if (isDef(ch)) {
+        // 如果老的没有子节点，新的有子节点：
+        if (process.env.NODE_ENV !== 'production') {
+          checkDuplicateKeys(ch)
+        }
+        if (isDef(oldVnode.text)){
+          // 如果老的有 text：清空
+          nodeOps.setTextContent(elm, '')
+        }
+        // 往 elm 中加东西
+        addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
+      } else if (isDef(oldCh)) {
+        // 如果老的有子节点，新的没有子节点：删掉
+        removeVnodes(oldCh, 0, oldCh.length - 1)
+      } else if (isDef(oldVnode.text)) {
+        // 如果老的没有子节点，有 text；新的没有子节点也没有 text：清空
+        nodeOps.setTextContent(elm, '')
+      }
+    } else if (oldVnode.text !== vnode.text) {
+      // 新节点有text，新老 text 不同（如果相同就不改了）时：
+      nodeOps.setTextContent(elm, vnode.text)
+    }
+
+    // 钩子，暂时不看了
+    if (isDef(data)) {
+      if (isDef(i = data.hook) &amp;&amp; isDef(i = i.postpatch)) i(oldVnode, vnode)
+    }
+  }
+</code></pre>
+<ul>
+<li>updateChildren</li>
+</ul>
+<h3 id="3-updatechildren">3. updateChildren</h3>
+<p>updateChildren 的主要作用是用一种较高效的方式比对新旧两个 VNode 的 children，得出最小操作。</p>
+<p>传统方式是执行一个双循环，Vue 中针对 web  场景特点做了特别的算法优化：</p>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1584051570854.png" alt="" loading="lazy"></figure>
+<p>新老两组 VNode 节点的左右头尾两侧都有一个变量标记，在遍历过程中这几个变量都会向中间靠拢。当 oldStartIdx &gt; oldEndIdx 或者 newStartIdx &gt; newEndIdx 时，结束循环（不需要再 updateChildren，而是做其他操作）。</p>
+<p>下面是遍历规则：</p>
+<p>首先，oldStartVNode、oldEndVNode 与 newStartVNode、newEndVNode <strong>两两交叉比较</strong>，共有 4 种比较方法。其中当 oldStartVNode 和 newStartVNode 或者 oldEndVNode 和 newEndVNode 满足 sameVNode，直接将该 VNode 节点进行 patchVNode 即可，不需要再遍历就完成了一次循环（之后对后面的元素进行下一次循环）：</p>
+<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1584051578325.png" alt="" loading="lazy"></figure>
+<p>如果 oldStartVNode 与 newEndVNode 满足 sameVNode，说明 oldStartVNode 已经被移动到 oldEndVNode 后面了，进行patchVNode 的同时还要将真实 DOM 节点移动到 oldEndVNode 的后面（之后对后面的元素进行下一次循环）：</p>
+<figure data-type="image" tabindex="4"><img src="https://yuufen.com/blog/post-images/1584051582834.png" alt="" loading="lazy"></figure>
+<p>如果 oldEndVNode 与 oldEndVNode newStartVNode 满足 sameVNode，说明 oldEndVNode 已经被移动到 newStartVNode 前面了，进行patchVNode 的同时还要将真实 DOM 节点移动到 newStartVNode 的前面（之后对后面的元素进行下一次循环）：</p>
+<figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1584051587249.png" alt="" loading="lazy"></figure>
+<p>如果以上情况都不符合，则在 old VNode 中找与 newStartVNode 满足 sameVNode 的 VNode（标记为 vnodeToMove），若存在，则执行 patchVNode，同时将 vnodeToMove 对应 DOM 移动到 oldStartVNode 对应 DOM 的前面（然后将 new VNode 中游标后移一个，进入下一次循环）：</p>
+<figure data-type="image" tabindex="6"><img src="https://yuufen.com/blog/post-images/1584051592284.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="7"><img src="https://yuufen.com/blog/post-images/1584051596648.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="8"><img src="https://yuufen.com/blog/post-images/1584051601336.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="9"><img src="https://yuufen.com/blog/post-images/1584051605554.png" alt="" loading="lazy"></figure>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E8%99%9A%E6%8B%9F-dom">虚拟 DOM</a>
+<ul>
+<li><a href="#%E4%BC%98%E7%82%B9">优点</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BB%8E%E8%A1%A8%E5%88%B0%E9%87%8C">从表到里</a>
+<ul>
+<li><a href="#1-mount">1. $mount</a></li>
+<li><a href="#2-mountcomponent">2. mountComponent</a></li>
+<li><a href="#3-_render">3. _render</a></li>
+<li><a href="#4-_update">4. _update</a></li>
+<li><a href="#5-_patch_">5. _<em>patch</em>_</a></li>
+</ul>
+</li>
+<li><a href="#patch-%E8%A7%A3%E6%9E%90">patch 解析</a>
+<ul>
+<li><a href="#1-createpatchfunction">1. createPatchFunction</a></li>
+<li><a href="#2-samevnode">2. sameVnode</a></li>
+<li><a href="#2-patchvnode">2. patchVnode</a></li>
+<li><a href="#3-updatechildren">3. updateChildren</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

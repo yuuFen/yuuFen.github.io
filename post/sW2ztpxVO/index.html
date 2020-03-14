@@ -2,11 +2,11 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Vue 源码解析：从入口文件到 Vue 声明 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1583889957201">
+<title>Vue 源码解析：从入口文件到 Vue 声明，create | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584196113341">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：从入口文件到 Vue 声明 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：从入口文件到 Vue 声明，create | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -25,7 +25,7 @@ src/platforms/web/entry-runtime-with-compiler.js
 import Vue from './runtime/index'
 
 const mount = Vue.prototype.$m..." />
-    <meta name="keywords" content="未完成,Vue,JS" />
+    <meta name="keywords" content="源码,Vue,JS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -34,7 +34,7 @@ const mount = Vue.prototype.$m..." />
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1583889957201" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584196113341" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -99,18 +99,18 @@ const mount = Vue.prototype.$m..." />
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              Vue 源码解析：从入口文件到 Vue 声明
+              Vue 源码解析：从入口文件到 Vue 声明，create
             </h2>
             <div class="post-info">
               <span>
                 2020-03-05
               </span>
               <span>
-                8 min read
+                9 min read
               </span>
               
-                <a href="https://yuufen.com/blog/tag/gx0HNoXwR/" class="post-tag">
-                  # 未完成
+                <a href="https://yuufen.com/blog/tag/bkBOcErCL/" class="post-tag">
+                  # 源码
                 </a>
               
                 <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
@@ -136,6 +136,9 @@ const mount = Vue.prototype.$mount
 
 // ...
 
+// 补丁算法，VNode diff -&gt; DOM
+Vue.prototype.__patch__ = inBrowser ? patch : noop
+
 // public mount method
 Vue.prototype.$mount = function (
   el?: string | Element,
@@ -154,6 +157,7 @@ Vue.prototype.$mount = function (
 <li>......</li>
 </ul>
 </li>
+<li>_<em>patch</em>_</li>
 </ul>
 <p>src/core/index.js</p>
 <pre><code class="language-js">import Vue from './instance/index'
@@ -175,9 +179,11 @@ initGlobalAPI(Vue)
   this._init(options)
 }
 
-// 合并参数、初始化 $parent 等属性、初始化事件中心、挂载渲染函数、调用生命周期钩子 beforeCreate
-// 获取注入的数据、获取 props、methods、data、computed、watch
-// 注入数据处理、调用生命周期钩子 created
+// 合并参数、初始化 $parent 等属性、初始化事件中心、挂载 h 函数（$createElement）
+// 调用生命周期钩子 beforeCreate
+// 获取注入的数据、初始化 props、methods、data、computed、watch
+// 注入数据处理
+// 调用生命周期钩子 created
 initMixin(Vue) 
 // 实现 $set、$delete、$watch
 stateMixin(Vue)
@@ -185,7 +191,8 @@ stateMixin(Vue)
 eventsMixin(Vue)
 // 实现 _update（调用补丁算法）、$forceUpdate、$destroy
 lifecycleMixin(Vue)
-// installRenderHelpers、$nextTick、_render(这里调用init挂载的渲染函数)
+// installRenderHelpers
+// 实现了 $nextTick、_render(这里调用 $options 上的渲染函数)
 renderMixin(Vue)
 </code></pre>
 <ul>
@@ -271,10 +278,10 @@ renderMixin(Vue)
     vm._self = vm
     initLifecycle(vm) // 初始化与当前组件相关的属性（$parent等等）（这时parent已经存在了）
     initEvents(vm) // 初始化事件中心
-    initRender(vm) // 定义了 vm.$createElement
+    initRender(vm) // 定义了 vm.$createElement （render 函数里的 h 函数）
     callHook(vm, 'beforeCreate') // 调用生命周期钩子 beforeCreate
     initInjections(vm) // 获取注入的数据（是响应式的），在 initState 之前
-    initState(vm) // 获取 props、methods、data、computed、watch
+    initState(vm) // 初始化 props、methods、data、computed、watch
     initProvide(vm) // 注入数据处理，在 initState 之后
     callHook(vm, 'created') // 调用生命周期钩子 created
 
