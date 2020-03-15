@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vue 源码解析：从虚拟 DOM 到 DOM，mount | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584196113341">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584240148245">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Vue 源码解析：从虚拟 DOM 到 DOM，mount | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
@@ -32,7 +32,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584196113341" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584240148245" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -104,7 +104,7 @@
                 2020-03-08
               </span>
               <span>
-                13 min read
+                16 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/bkBOcErCL/" class="post-tag">
@@ -539,9 +539,95 @@ export const patch: Function = createPatchFunction({ nodeOps, modules })
 <figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1584051587249.png" alt="" loading="lazy"></figure>
 <p>如果以上情况都不符合，则在 old VNode 中找与 newStartVNode 满足 sameVNode 的 VNode（标记为 vnodeToMove），若存在，则执行 patchVNode，同时将 vnodeToMove 对应 DOM 移动到 oldStartVNode 对应 DOM 的前面（然后将 new VNode 中游标后移一个，进入下一次循环）：</p>
 <figure data-type="image" tabindex="6"><img src="https://yuufen.com/blog/post-images/1584051592284.png" alt="" loading="lazy"></figure>
+<p>也有可能 newStartVNode 在 old VNode 中找不到 sameVNode，这是会调用 createElm 创建一个新的 DOM 节点：</p>
 <figure data-type="image" tabindex="7"><img src="https://yuufen.com/blog/post-images/1584051596648.png" alt="" loading="lazy"></figure>
+<p>直到循环结束，但是我们还需要处理剩下的节点：</p>
+<ol>
+<li>如果结束时 oldStartIdx &gt; oldEndIdx，说明这个时候旧的 VNode 节点已经遍历完了，但是新的节点还没有；说明新的 VNode 节点实际上比老的 VNode 节点多，需要将剩下的 VNode 对应的 DOM 插入到真实 DOM 中，此时调用 addVNodes（其中批量调用 createE lm 接口）：</li>
+</ol>
 <figure data-type="image" tabindex="8"><img src="https://yuufen.com/blog/post-images/1584051601336.png" alt="" loading="lazy"></figure>
+<ol start="2">
+<li>如果 newStart &gt; newEndIdx，说明新的 VNode 节点已经遍历完了，但是老的节点还有多，需要执行 remove 操作</li>
+</ol>
 <figure data-type="image" tabindex="9"><img src="https://yuufen.com/blog/post-images/1584051605554.png" alt="" loading="lazy"></figure>
+<pre><code class="language-js">  function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
+    let oldStartIdx = 0
+    let newStartIdx = 0
+    let oldEndIdx = oldCh.length - 1
+    let oldStartVnode = oldCh[0]
+    let oldEndVnode = oldCh[oldEndIdx]
+    let newEndIdx = newCh.length - 1
+    let newStartVnode = newCh[0]
+    let newEndVnode = newCh[newEndIdx]
+    let oldKeyToIdx, idxInOld, vnodeToMove, refElm
+
+    // removeOnly is a special flag used only by &lt;transition-group&gt;
+    // to ensure removed elements stay in correct relative positions
+    // during leaving transitions
+    const canMove = !removeOnly
+
+    if (process.env.NODE_ENV !== 'production') {
+      checkDuplicateKeys(newCh)
+    }
+
+    while (oldStartIdx &lt;= oldEndIdx &amp;&amp; newStartIdx &lt;= newEndIdx) {
+      if (isUndef(oldStartVnode)) {
+        oldStartVnode = oldCh[++oldStartIdx] // Vnode has been moved left
+      } else if (isUndef(oldEndVnode)) {
+        oldEndVnode = oldCh[--oldEndIdx]
+      } else if (sameVnode(oldStartVnode, newStartVnode)) {
+        patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
+        oldStartVnode = oldCh[++oldStartIdx]
+        newStartVnode = newCh[++newStartIdx]
+      } else if (sameVnode(oldEndVnode, newEndVnode)) {
+        patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
+        oldEndVnode = oldCh[--oldEndIdx]
+        newEndVnode = newCh[--newEndIdx]
+      } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
+        patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
+        canMove &amp;&amp; nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm))
+        oldStartVnode = oldCh[++oldStartIdx]
+        newEndVnode = newCh[--newEndIdx]
+      } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
+        patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
+        canMove &amp;&amp; nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm)
+        oldEndVnode = oldCh[--oldEndIdx]
+        newStartVnode = newCh[++newStartIdx]
+      } else {
+        // 新老首尾两两不同，开始遍历 
+        if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
+        idxInOld = isDef(newStartVnode.key)
+          ? oldKeyToIdx[newStartVnode.key]
+          : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx)
+        if (isUndef(idxInOld)) { // New element
+          // 新元素在老的里面不存在
+          createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx)
+        } else {
+          vnodeToMove = oldCh[idxInOld]
+          if (sameVnode(vnodeToMove, newStartVnode)) {
+            // 找到了相同的
+            patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
+            oldCh[idxInOld] = undefined
+            canMove &amp;&amp; nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm)
+          } else {
+            // same key but different element. treat as new element
+            createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx)
+          }
+        }
+        newStartVnode = newCh[++newStartIdx]
+      }
+    }
+    // 循环结束之后，新老 VNode 可能有还有一个的孩子节点没有处理完
+    if (oldStartIdx &gt; oldEndIdx) {
+      // 新的还剩，批量新增
+      refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
+      addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
+    } else if (newStartIdx &gt; newEndIdx) {
+      //老的还剩，批量删除
+      removeVnodes(oldCh, oldStartIdx, oldEndIdx)
+    }
+  }
+</code></pre>
 
               </div>
               <div class="toc-container">
