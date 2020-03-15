@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vue 源码解析：从虚拟 DOM 到 DOM，mount | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584240148245">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584311119463">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Vue 源码解析：从虚拟 DOM 到 DOM，mount | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
@@ -32,7 +32,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584240148245" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584311119463" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -104,7 +104,7 @@
                 2020-03-08
               </span>
               <span>
-                16 min read
+                17 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/bkBOcErCL/" class="post-tag">
@@ -127,7 +127,7 @@
 <h3 id="优点">优点</h3>
 <p>虚拟 DOM 轻量、快速，当它们发生变化时，通过新旧虚拟DOM比对可以得到最小 DOM 操作量，从而提升性能和用户体验。本质上是使用 JavaScript 运算成本替换 DOM 操作的执行成本，前者运算速度比后者快很多。</p>
 <p>Vue 1.0 中有细粒度的数据变化侦测，它是不需要虚拟DOM的，但是细粒度造成了大量开销，这对于大型项目来说是不可接受的。</p>
-<p>因此，Vue 2.0 选择了中等粒度的解决方案，每一个组件创建一个 Watcher 实例，这样状态变化时只能通知到组件，所以再通过引入虚拟DOM去进行对比和渲染。</p>
+<p>因此，Vue 2.0 选择了中等粒度的解决方案，每一个组件创建一个 Watcher 实例，这样状态变化时只能通知到组件，所以再通过引入虚拟DOM去进行对比和渲染（同时可以解决跨平台的问题）。</p>
 <h2 id="从表到里">从表到里</h2>
 <blockquote>
 <pre><code>new Vue().$mount('#app')
@@ -471,7 +471,6 @@ export const patch: Function = createPatchFunction({ nodeOps, modules })
       return
     }
 
-    // 更新属性？
     let i
     const data = vnode.data
     if (isDef(data) &amp;&amp; isDef(i = data.hook) &amp;&amp; isDef(i = i.prepatch)) {
@@ -525,7 +524,7 @@ export const patch: Function = createPatchFunction({ nodeOps, modules })
 <ul>
 <li>updateChildren</li>
 </ul>
-<h3 id="3-updatechildren">3. updateChildren</h3>
+<h3 id="31-updatechildren">3.1 updateChildren</h3>
 <p>updateChildren 的主要作用是用一种较高效的方式比对新旧两个 VNode 的 children，得出最小操作。</p>
 <p>传统方式是执行一个双循环，Vue 中针对 web  场景特点做了特别的算法优化：</p>
 <figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1584051570854.png" alt="" loading="lazy"></figure>
@@ -628,6 +627,41 @@ export const patch: Function = createPatchFunction({ nodeOps, modules })
     }
   }
 </code></pre>
+<h3 id="32-属性更新">3.2 属性更新</h3>
+<pre><code class="language-js">// patch.js
+const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
+export function createPatchFunction (backend) {
+  let i, j
+  const cbs = {}
+
+  // 传进来的扩展模块和节点操作对象
+  const { modules, nodeOps } = backend
+
+  for (i = 0; i &lt; hooks.length; ++i) {
+    // cbs['update'] = []
+    cbs[hooks[i]] = []
+    //modules: [ attrs, klass, events, domProps, style, transition]
+    for (j = 0; j &lt; modules.length; ++j) {
+      // modules[0]['update'] 是创建属性执⾏行行函数，其他hook以此类推
+      if (isDef(modules[j][hooks[i]])) {
+        cbs[hooks[i]].push(modules[j][hooks[i]])
+      }
+    }
+    // cbs['update']: [fn,fn,fn....]
+  }
+  // ...
+    
+  function patchVnode (...) {
+    // 更新属性
+    if (isDef(data) &amp;&amp; isPatchable(vnode)) {
+      // 每次 patch 先更新属性
+      for (i = 0; i &lt; cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
+      if (isDef(i = data.hook) &amp;&amp; isDef(i = i.update)) i(oldVnode, vnode)
+    }
+    // ...
+  }
+}
+</code></pre>
 
               </div>
               <div class="toc-container">
@@ -653,7 +687,8 @@ export const patch: Function = createPatchFunction({ nodeOps, modules })
 <li><a href="#1-createpatchfunction">1. createPatchFunction</a></li>
 <li><a href="#2-samevnode">2. sameVnode</a></li>
 <li><a href="#2-patchvnode">2. patchVnode</a></li>
-<li><a href="#3-updatechildren">3. updateChildren</a></li>
+<li><a href="#31-updatechildren">3.1 updateChildren</a></li>
+<li><a href="#32-%E5%B1%9E%E6%80%A7%E6%9B%B4%E6%96%B0">3.2 属性更新</a></li>
 </ul>
 </li>
 </ul>
@@ -665,6 +700,15 @@ export const patch: Function = createPatchFunction({ nodeOps, modules })
           </article>
         </div>
 
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/LGEsZIcVg/">
+              <h3 class="post-title">
+                Vue 源码解析：数据响应式
+              </h3>
+            </a>
+          </div>
         
 
         
