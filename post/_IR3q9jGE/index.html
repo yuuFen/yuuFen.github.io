@@ -1,0 +1,1008 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>仿照 Vue1.0 实现简单的 MVVM 模式 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584650057325">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="仿照 Vue1.0 实现简单的 MVVM 模式 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="https://github.com/yuuFen/vue-reimplement
+Vue 工作机制
+在 new Vue() 时会调用 _init() 进行初始化，会初始化生命周期、事件、props、methods、data、compute..." />
+    <meta name="keywords" content="MVVM,Vue,JS" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584650057325" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              仿照 Vue1.0 实现简单的 MVVM 模式
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-02-28
+              </span>
+              <span>
+                15 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/eQLRPEbGD/" class="post-tag">
+                  # MVVM
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
+                  # JS
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <p><a href="https://github.com/yuuFen/vue-reimplement">https://github.com/yuuFen/vue-reimplement</a></p>
+<h2 id="vue-工作机制">Vue 工作机制</h2>
+<p>在 <code>new Vue()</code> 时会调用 _init() 进行初始化，会初始化生命周期、事件、props、methods、data、computed 和 watch 等。其中最重要的是 <code>Object.defineProperty</code> 设置 <code>setter</code> 与 <code>getter</code> ，用来实现<strong>响应式</strong>以及<strong>依赖收集</strong>。</p>
+<p>初始化后调用 <code>$mount</code> 挂载组件：</p>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583512098725.png" alt="" loading="lazy"></figure>
+<p>化简版：</p>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1583502362745.png" alt="" loading="lazy"></figure>
+<h2 id="响应式">响应式</h2>
+<h3 id="实现">实现</h3>
+<pre><code class="language-js">class Vue {
+  constructor(options) {
+    this.$options = options
+
+    this.$data = options.data
+
+    // 响应化处理
+    this.observe(this.$data)
+
+    Object.keys(this.$data).forEach((key) =&gt; {
+      // 只需要给 data 的第一层设置代理
+      // 不然 set 多余的键时会给 data 添加属性
+      this.proxyData(key)
+    })
+  }
+
+  observe(value) {
+    if (!value || typeof value !== 'object') {
+      return
+    }
+
+    Object.keys(value).forEach((key) =&gt; {
+      // setter 和 getter 使用中介 val，防止无限循环
+      // 需要新建一个作用域（闭包）来保存 val,
+      // Object.defineProperty(obj, key, { // val })
+      this.defineReactive(value, key, value[key])
+    })
+  }
+
+  defineReactive(obj, key, val) {
+    // 递归，处理对象
+    this.observe(val)
+
+    // 会在 obj 上添加新属性，或者修改现有属性
+    // 所以是个引用变量
+    Object.defineProperty(obj, key, {
+      get() {
+        return val
+      },
+      set(newVal) {
+        if (newVal !== val) {
+          val = newVal
+        }
+      },
+    })
+  }
+
+  // 在 Vue 实例根上定义属性转发至 data 中的数据
+  proxyData(key) {
+    // this 指 Vue 实例
+    Object.defineProperty(this, key, {
+      get() {
+        return this.$data[key]
+      },
+      set(newVal) {
+        this.$data[key] = newVal
+      },
+    })
+  }
+}
+</code></pre>
+<h3 id="测试">测试</h3>
+<pre><code class="language-html">&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+  const app = new Vue({
+    data: {
+      foo: 'foooooo',
+      bar: {
+        doo: 'dooooooo',
+      },
+    },
+  })
+
+  console.log(app.bar)
+  app.bar = 'baaaar'
+  console.log(app.bar)
+&lt;/script&gt;
+</code></pre>
+<h2 id="依赖收集与追踪">依赖收集与追踪</h2>
+<p>流程：</p>
+<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1583577271564.png" alt="" loading="lazy"></figure>
+<p>关系：</p>
+<figure data-type="image" tabindex="4"><img src="https://yuufen.com/blog/post-images/1583579033936.png" alt="" loading="lazy"></figure>
+<h3 id="案例">案例</h3>
+<pre><code class="language-js">new Vue({
+  template: `
+    &lt;div&gt;
+      &lt;span&gt;{{name1}}&lt;/span&gt;  
+      &lt;span&gt;{{name2}}&lt;/span&gt;  
+      &lt;span&gt;{{name1}}&lt;/span&gt;  
+    &lt;/div&gt;
+  `,
+  data: {
+    name1: 'name1',
+    name2: 'name2',
+    name3: 'name3',
+  },
+})
+</code></pre>
+<blockquote>
+<p>修改 name1，视图更新，且要更新两处；</p>
+<p>修改 name2，视图更新；</p>
+<p>修改 name3，没有使用，视图不更新。</p>
+<p>需要扫描视图收集依赖，知道视图中到底那些地方对数据有依赖。</p>
+</blockquote>
+<h3 id="实现-2">实现</h3>
+<pre><code class="language-js">class Vue {
+  constructor(options) {
+    this.$options = options
+
+    this.$data = options.data
+
+    // 响应化处理
+    this.observe(this.$data)
+
+    Object.keys(this.$data).forEach((key) =&gt; {
+      // 只需要给 data 的第一层设置代理
+      // 不然 set 多余的键时会给 data 添加属性
+      this.proxyData(key)
+    })
+
+    // 测试
+    new Watcher(this, 'foo')
+    new Watcher(this, 'bar.doo')
+  }
+
+  observe(value) {
+    if (!value || typeof value !== 'object') {
+      return
+    }
+
+    Object.keys(value).forEach((key) =&gt; {
+      // setter 和 getter 使用中介 val，防止无限循环
+      // 需要新建一个作用域（闭包）来保存 val,
+      // Object.defineProperty(obj, key, { // val })
+      this.defineReactive(value, key, value[key])
+    })
+  }
+
+  defineReactive(obj, key, val) {
+    // 递归，处理对象
+    this.observe(val)
+
+    const dep = new Dep()
+
+    // 会在 obj 上添加新属性，或者修改现有属性，是个引用变量
+    // 这里导致形成闭包
+    Object.defineProperty(obj, key, {
+      get() {
+        // 若存在 targetWatcher（watcher的构造阶段），则添加
+        Dep.targetWatcher &amp;&amp; dep.addWatcher(Dep.targetWatcher)
+        return val
+      },
+      set(newVal) {
+        if (newVal !== val) {
+          val = newVal
+          // 通知更新
+          dep.notify()
+        }
+      },
+    })
+  }
+
+  // 在 Vue 实例根上定义属性转发至 data 中的数据
+  proxyData(key) {
+    // this 指 Vue 实例
+    Object.defineProperty(this, key, {
+      get() {
+        return this.$data[key]
+      },
+      set(newVal) {
+        this.$data[key] = newVal
+      },
+    })
+  }
+}
+
+// 创建 Dep: 管理所有的 Watcher
+class Dep {
+  constructor() {
+    this.watchers = []
+  }
+  addWatcher(watcher) {
+    this.watchers.push(watcher)
+  }
+  notify() {
+    this.watchers.forEach((watcher) =&gt; {
+      watcher.update()
+    })
+  }
+}
+
+// 创建 Watcher：与视图中的变量对应(出现一次就创建一个 Watcher 实例)
+class Watcher {
+  constructor(vm, key) {
+    this.vm = vm
+    this.key = key
+
+    Dep.targetWatcher = this
+    this.vm[this.key] // key解析出来之后为字符串， 但是若如 'bar.doo'，需要额外操作
+    Dep.targetWatcher = null
+  }
+  update() {
+    console.log(this.key, '更新——来自 watcher')
+    // do something
+  }
+}
+</code></pre>
+<h2 id="编译-compile">编译 compile</h2>
+<figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1583580639945.png" alt="" loading="lazy"></figure>
+<ol>
+<li>获取并遍历 DOM 树</li>
+<li>文本节点：获取 <code>{{}}</code> 格式的内容并解析</li>
+<li>元素节点：访问节点特性，截获 <code>v-</code> 开头和 <code>@</code> 开头内容并解析</li>
+</ol>
+<h3 id="使用场景">使用场景</h3>
+<pre><code>new Vue {
+  el: '#app',
+}
+</code></pre>
+<pre><code class="language-js">class Vue {
+  constructor(options) {
+    // ...
+    new Compile(this, options.el)
+  }
+  // ...
+}
+</code></pre>
+<h3 id="遍历节点">遍历节点</h3>
+<pre><code class="language-js">class Compile {
+  constructor(vm, el) {
+    // new Watcher 需要 vm
+    this.$vm = vm
+    this.$el = document.querySelector(el)
+
+    if (this.$el) {
+      // 提取宿主中模板内容到 fragment 标签（结束后 $el 中没有子元素）
+      // 不会引起页面回流（对元素位置和几何上的计算），性能更好
+      this.$fragment = this.node2Fragment(this.$el)
+      // 编译，并进行依赖收集
+      this.compile(this.$fragment)
+      // 编译结束后把 fragment 再添加到 el 中
+      this.$el.appendChild(this.$fragment)
+    }
+  }
+
+  node2Fragment(el) {
+    const fragment = document.createDocumentFragment()
+    let child
+    while ((child = el.firstChild)) {
+      fragment.appendChild(child)
+    }
+    return fragment
+  }
+
+  compile(el) {
+    const childNodes = el.childNodes
+
+    Array.from(childNodes).forEach((node) =&gt; {
+      // 判断节点类型
+      if (node.nodeType === 1) {
+        // Element 节点
+        console.log('遍历到节点', node.nodeName)
+      } else if (this.isInterpolation(node)) {
+        // 插值表达式
+        console.log('遍历到插值表达式', node.textContent)
+      }
+      // 如果有子节点
+      if (node.children &amp;&amp; node.childNodes.length &gt; 0) {
+        this.compile(node)
+      }
+    })
+  }
+
+  isInterpolation(node) {
+    // 是文本且符合{{...}}
+    return node.nodeType === 3 &amp;&amp; /\{\{(.*)\}\}/.test(node.textContent)
+  }
+}
+</code></pre>
+<h3 id="插值表达式的响应式更新">插值表达式的响应式更新</h3>
+<p>Compile：</p>
+<pre><code class="language-js">  // ...
+  // 遍历到插值表达式时
+  compileText(node) {
+    // console.log(RegExp.$1)
+    const exp = RegExp.$1
+    this.update(node, exp, 'text')
+  }
+
+  update(node, exp, dir) {
+    const updater = this[dir + 'Updater']
+    updater &amp;&amp; updater(node, exp)
+    // 注意 this
+    const get = this.getContent
+    // 形成闭包，和一个 Watcher 实例对应
+    new Watcher(
+      this.$vm,
+      // exp, // 在闭包中处理
+      function() {
+        get(exp)
+      },
+      function() {
+        updater &amp;&amp; updater(node, exp)
+      },
+    )
+  }
+
+  // 注意 this
+  textUpdater = (node, exp) =&gt; {
+    node.textContent = this.getContent(exp)
+  }
+
+  // 注意 this
+  getContent = (exp) =&gt; {
+    // 解决嵌套，get 嵌套属性的值
+    const p = exp.split('.')
+    let content = this.$vm[p[0]]
+    for (let i = 1; i &lt; p.length; i++) {
+      content = content[p[i]]
+    }
+    return content
+  }
+}
+</code></pre>
+<p>Watcher：</p>
+<pre><code class="language-js">// 初始化时再接受 get 和 updater，不再需要 key 和 vm
+// 对应的 update(node, keys, dir) {...} 形成闭包
+
+class Watcher {
+  constructor(get, cb) {
+    // this.vm = vm
+    // this.key = key
+    this.cb = cb
+
+    this.get = get // 获取嵌套属性的方法
+
+    Dep.targetWatcher = this
+    // key解析出来之后为字符串， 但是若如 'bar.doo'，需要额外操作
+    // 访问 bar.doo，会将它同时挂载到 bar 和 doo 的 Dep 实例（也是有必要的）
+    // 这里直接在闭包中处理
+    this.get()
+    Dep.targetWatcher = null
+  }
+  update() {
+    // 更新视图
+    this.cb()
+  }
+}
+</code></pre>
+<blockquote>
+<p>Watcher 实例对应的 update 形成闭包，存有 get、updater、node、exp。</p>
+<p>也可以把 update 的相关内容直接放在 watcher 里面，更直观一点，但是 Watcher 太臃肿。</p>
+</blockquote>
+<pre><code class="language-js">class Watcher {
+  constructor(vm, node, exp, dir) {
+    this.vm = vm
+    this.node = node
+    this.exp = exp
+    this.dir = dir
+
+    this.updater = this[dir + 'Updater']
+
+    Dep.targetWatcher = this
+    this.getContent()
+    Dep.targetWatcher = null
+
+    this.updater()
+  }
+  update() {
+    this.updater()
+  }
+
+  textUpdater() {
+    this.node.textContent = this.getContent(this.exp)
+  }
+
+  // ...
+
+  getContent() {
+    // 解决嵌套，get 嵌套属性的值
+    const p = this.exp.split('.')
+    let content = this.vm[p[0]]
+    for (let i = 1; i &lt; p.length; i++) {
+      content = content[p[i]]
+    }
+    return content
+  }
+}
+</code></pre>
+<h3 id="元素属性的响应式">元素属性的响应式</h3>
+<h4 id="v-text">v-text</h4>
+<pre><code class="language-js">  compileElement(node) {
+    const nodeAttrs = node.attributes
+    Array.from(nodeAttrs).forEach((attr) =&gt; {
+      const attrName = attr.name
+      const exp = attr.value
+      if (attrName.indexOf('v-') === 0) {
+        const dir = attrName.substring(2)
+        this[dir] &amp;&amp; this[dir](node, exp)
+      }
+    })
+  }
+
+  text(node, exp) {
+    this.update(node, exp, 'text')
+  }
+</code></pre>
+<h4 id="v-html">v-html</h4>
+<p>和 text 一样，把 node.textContent 改为 node.innerHTML</p>
+<h4 id="v-model">v-model</h4>
+<p>修改 node.value，监听 node 的 input 事件</p>
+<p>新建 set 方法，解决嵌套属性的 set 问题</p>
+<pre><code class="language-js">setContent = (exp, value) =&gt; {
+  const p = exp.split('.')
+  if (p.length === 1) {
+    this.$vm[p] = value
+  } else if (p.length &gt; 1) {
+    let content = this.$vm[p[0]]
+    for (let i = 1; i &lt; p.length - 1; i++) {
+      content = content[p[i]]
+    }
+    content[p[p.length - 1]] = value
+  }
+}
+</code></pre>
+<h4 id="事件绑定">@ 事件绑定</h4>
+<pre><code>@click=&quot;handleClick&quot;
+</code></pre>
+<p>获取到 click、handleClick，绑定到 node 上，注意 this。</p>
+<h2 id="汇总">汇总</h2>
+<h3 id="compilejs">compile.js</h3>
+<pre><code class="language-js">class Compile {
+  constructor(vm) {
+    // new Watcher 需要 vm
+    this.$vm = vm
+    this.$el = document.querySelector(this.$vm.$options.el)
+
+    if (this.$el) {
+      // 提取宿主中模板内容到 fragment 标签（结束后 $el 中没有子元素）
+      // 不会引起页面回流（对元素位置和几何上的计算），性能更好
+      this.$fragment = this.node2Fragment(this.$el)
+      // 编译，并进行依赖收集
+      this.compile(this.$fragment)
+      // 编译结束后把 fragment 再添加到 el 中
+      this.$el.appendChild(this.$fragment)
+    }
+  }
+
+  node2Fragment(el) {
+    const fragment = document.createDocumentFragment()
+    let child
+    while ((child = el.firstChild)) {
+      fragment.appendChild(child)
+    }
+    return fragment
+  }
+
+  compile(el) {
+    const childNodes = el.childNodes
+
+    Array.from(childNodes).forEach((node) =&gt; {
+      // 判断节点类型
+      if (node.nodeType === 1) {
+        // Element 节点
+        console.log('遍历到节点', node.nodeName)
+        this.compileElement(node)
+      } else if (this.isInterpolation(node)) {
+        // 插值表达式
+        console.log('遍历到插值表达式', node.textContent)
+        this.compileText(node)
+      }
+      // 如果有子节点
+      if (node.children &amp;&amp; node.childNodes.length &gt; 0) {
+        this.compile(node)
+      }
+    })
+  }
+
+  isInterpolation(node) {
+    // 是文本且符合{{...}}
+    return node.nodeType === 3 &amp;&amp; /\{\{(.*)\}\}/.test(node.textContent)
+  }
+
+  compileText(node) {
+    // console.log(RegExp.$1)
+    const exp = RegExp.$1
+    this.update(this.$vm, node, exp, 'text')
+  }
+
+  update(vm, node, exp, dir) {
+    const updater = this[dir + 'Updater']
+    // 也可以把 updater 的实现直接放在 watcher 里面
+    // 就不用形成闭包，但是这样 watcher 就太臃肿了。
+    updater &amp;&amp; updater(node, exp)
+    // 注意 this
+    const get = this.getContent
+    // 形成闭包，和一个 Watcher 实例对应
+    new Watcher(
+      // vm, // 在这里处理
+      // exp, // 在这里处理
+      function() {
+        get(exp)
+      },
+      function() {
+        updater &amp;&amp; updater(node, exp)
+      },
+    )
+  }
+
+  // 注意 this
+  textUpdater = (node, exp) =&gt; {
+    node.textContent = this.getContent(exp)
+  }
+  htmlUpdater = (node, exp) =&gt; {
+    node.innerHTML = this.getContent(exp)
+  }
+  modelUpdater = (node, exp) =&gt; {
+    node.value = this.getContent(exp)
+  }
+
+  // 注意 this
+  getContent = (exp) =&gt; {
+    // 解决嵌套，get 嵌套属性的值
+    const p = exp.split('.')
+    let content = this.$vm[p[0]]
+    for (let i = 1; i &lt; p.length; i++) {
+      content = content[p[i]]
+    }
+    return content
+  }
+  setContent = (exp, value) =&gt; {
+    const p = exp.split('.')
+    if (p.length === 1) {
+      this.$vm[p] = value
+    } else if (p.length &gt; 1) {
+      let content = this.$vm[p[0]]
+      for (let i = 1; i &lt; p.length - 1; i++) {
+        content = content[p[i]]
+      }
+      content[p[p.length - 1]] = value
+    }
+  }
+
+  compileElement(node) {
+    const nodeAttrs = node.attributes
+    Array.from(nodeAttrs).forEach((attr) =&gt; {
+      const attrName = attr.name
+      const exp = attr.value
+      if (attrName.indexOf('v-') === 0) {
+        const dir = attrName.substring(2)
+        this[dir] &amp;&amp; this[dir](this.$vm, node, exp)
+      } else if (attrName.indexOf('@') === 0) {
+        // @click=&quot;handleClick&quot;
+        const dir = attrName.substring(1)
+        this.eventHandler(this.$vm, node, exp, dir)
+      }
+    })
+  }
+
+  text(vm, node, exp) {
+    this.update(vm, node, exp, 'text')
+  }
+
+  html(vm, node, exp) {
+    this.update(vm, node, exp, 'html')
+  }
+
+  model(vm, node, exp) {
+    this.update(vm, node, exp, 'model')
+    node.addEventListener('input', (e) =&gt; {
+      this.setContent(exp, e.target.value)
+    })
+  }
+
+  eventHandler(vm, node, exp, dir) {
+    const fn = vm.$options.methods &amp;&amp; vm.$options.methods[exp]
+    // console.log(node, exp, dir, fn)
+    if (dir &amp;&amp; fn) {
+      // 注意 this
+      node.addEventListener(dir, fn.bind(vm))
+    }
+  }
+}
+</code></pre>
+<h3 id="vuejs">vue.js</h3>
+<pre><code class="language-js">class Vue {
+  constructor(options) {
+    this.$options = options
+
+    this.$data = options.data
+
+    // 响应化处理
+    this.observe(this.$data)
+
+    Object.keys(this.$data).forEach((key) =&gt; {
+      // 只需要给 data 的第一层设置代理
+      // 不然 set 多余的键时会给 data 添加属性
+      this.proxyData(key)
+    })
+
+    // new Watcher(this, 'foo')
+    // new Watcher(this, 'bar.doo')
+
+    new Compile(this)
+  }
+
+  observe(value) {
+    if (!value || typeof value !== 'object') {
+      return
+    }
+
+    Object.keys(value).forEach((key) =&gt; {
+      // setter 和 getter 使用中介 val，防止无限循环
+      // 需要新建一个作用域（闭包）来保存 val,
+      // Object.defineProperty(obj, key, { // val })
+      this.defineReactive(value, key, value[key])
+    })
+  }
+
+  defineReactive(obj, key, val) {
+    // 递归，处理对象
+    this.observe(val)
+
+    const dep = new Dep()
+
+    // 会在 obj 上添加新属性，或者修改现有属性，是个引用变量
+    // 这里导致形成闭包
+    Object.defineProperty(obj, key, {
+      get() {
+        // 若存在 targetWatcher（watcher的构造阶段），则添加
+        Dep.targetWatcher &amp;&amp; dep.addWatcher(Dep.targetWatcher)
+        // console.log('get');
+        return val
+      },
+      set(newVal) {
+        if (newVal !== val) {
+          // console.log('set');
+          val = newVal
+          // 通知更新
+          dep.notify()
+        }
+      },
+    })
+  }
+
+  // 在 Vue 实例根上定义属性转发至 data 中的数据
+  proxyData(key) {
+    // this 指 Vue 实例
+    Object.defineProperty(this, key, {
+      get() {
+        return this.$data[key]
+      },
+      set(newVal) {
+        this.$data[key] = newVal
+      },
+    })
+  }
+}
+
+// 创建 Dep: 管理所有的 Watcher
+class Dep {
+  constructor() {
+    this.watchers = []
+  }
+  addWatcher(watcher) {
+    this.watchers.push(watcher)
+  }
+  notify() {
+    this.watchers.forEach((watcher) =&gt; {
+      watcher.update()
+    })
+  }
+}
+
+// 创建 Watcher：与视图中的变量对应(出现一次就创建一个 Watcher 实例)
+class Watcher {
+  constructor(get, cb) {
+    // this.vm = vm
+    // this.key = key
+    this.cb = cb
+
+    this.get = get // 获取嵌套属性的方法
+
+    Dep.targetWatcher = this
+    // key解析出来之后为字符串， 但是若如 'bar.doo'，需要额外操作
+    // 访问 bar.doo，会将它同时挂载到 bar 和 doo 的 Dep 实例（也是有必要的）
+    // 这里直接在闭包中处理
+    this.get()
+    Dep.targetWatcher = null
+  }
+  update() {
+    // 更新视图
+    this.cb()
+  }
+}
+</code></pre>
+<h3 id="indexhtml">index.html</h3>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;Document&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;
+      &lt;p&gt;{{name}}&lt;/p&gt;
+      &lt;p v-text=&quot;name&quot;&gt;&lt;/p&gt;
+      &lt;p&gt;{{age}}&lt;/p&gt;
+      &lt;p&gt;{{doubleAge}}&lt;/p&gt;
+      &lt;p&gt;{{bar}}&lt;/p&gt;
+      &lt;p&gt;{{bar.doo}}&lt;/p&gt;
+      &lt;div&gt;{{}}&lt;/div&gt;
+      &lt;input type=&quot;text&quot; v-model=&quot;name&quot; /&gt; &lt;button @click=&quot;changeName&quot;&gt;修改name&lt;/button&gt;
+      &lt;input type=&quot;text&quot; v-model=&quot;bar.doo&quot; /&gt; &lt;button @click=&quot;changeDoo&quot;&gt;修改doo&lt;/button&gt;
+      &lt;div v-html=&quot;html&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script src=&quot;compile.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+    &lt;script&gt;
+      const app = new Vue({
+        el: '#app',
+        data: {
+          name: 'I am test.',
+          age: 12,
+          html: '&lt;button&gt;html测试&lt;/button&gt;',
+          foo: 'foooooo',
+          bar: {
+            doo: '嵌套属性',
+          },
+        },
+        methods: {
+          changeName() {
+            // console.log('执行了吗')
+            // 注意 this
+            this.name = '调用了methods'
+          },
+          changeDoo() {
+            this.bar.doo = '调用了methods'
+          },
+        },
+      })
+
+      setTimeout(() =&gt; {
+        app.name = '666666666666'
+        app.bar.doo = 'oooo'
+        // console.log(app.bar.doo)
+        // app.bar = 'oooo'
+      }, 1000)
+
+      // console.log(app['bar.doo'])
+      // app.foo = 'ffff'
+      // console.log(app.bar)
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#vue-%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6">Vue 工作机制</a></li>
+<li><a href="#%E5%93%8D%E5%BA%94%E5%BC%8F">响应式</a>
+<ul>
+<li><a href="#%E5%AE%9E%E7%8E%B0">实现</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95">测试</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BE%9D%E8%B5%96%E6%94%B6%E9%9B%86%E4%B8%8E%E8%BF%BD%E8%B8%AA">依赖收集与追踪</a>
+<ul>
+<li><a href="#%E6%A1%88%E4%BE%8B">案例</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0-2">实现</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BC%96%E8%AF%91-compile">编译 compile</a>
+<ul>
+<li><a href="#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF">使用场景</a></li>
+<li><a href="#%E9%81%8D%E5%8E%86%E8%8A%82%E7%82%B9">遍历节点</a></li>
+<li><a href="#%E6%8F%92%E5%80%BC%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%9A%84%E5%93%8D%E5%BA%94%E5%BC%8F%E6%9B%B4%E6%96%B0">插值表达式的响应式更新</a></li>
+<li><a href="#%E5%85%83%E7%B4%A0%E5%B1%9E%E6%80%A7%E7%9A%84%E5%93%8D%E5%BA%94%E5%BC%8F">元素属性的响应式</a>
+<ul>
+<li><a href="#v-text">v-text</a></li>
+<li><a href="#v-html">v-html</a></li>
+<li><a href="#v-model">v-model</a></li>
+<li><a href="#%E4%BA%8B%E4%BB%B6%E7%BB%91%E5%AE%9A">@ 事件绑定</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E6%B1%87%E6%80%BB">汇总</a>
+<ul>
+<li><a href="#compilejs">compile.js</a></li>
+<li><a href="#vuejs">vue.js</a></li>
+<li><a href="#indexhtml">index.html</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/_lKjmwEdd/">
+              <h3 class="post-title">
+                常见设计模式总结
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

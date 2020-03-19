@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vue 源码解析：模板编译 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584311119463">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584650057325">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Vue 源码解析：模板编译 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
@@ -20,10 +20,9 @@
 </script>
 
 
-    <meta name="description" content="
-
-
-" />
+    <meta name="description" content="模板编译的目的
+模板编译的主要目标是将模板（template）转换为渲染函数（render）
+Vue 2.0 需要用 VNode 描述视图以及各种交互，手写显然不切实际，因此用户可只编写类似 HTML 代码的 Vue 模板，通过编译器将模板..." />
     <meta name="keywords" content="源码,Vue,JS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
@@ -33,7 +32,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584311119463" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584650057325" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -105,7 +104,7 @@
                 2020-03-11
               </span>
               <span>
-                0 min read
+                7 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/bkBOcErCL/" class="post-tag">
@@ -124,13 +123,261 @@
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <ul>
-<li></li>
+                <h2 id="模板编译的目的">模板编译的目的</h2>
+<p>模板编译的主要目标是将模板（template）转换为渲染函数（render）</p>
+<p>Vue 2.0 需要用 VNode 描述视图以及各种交互，手写显然不切实际，因此用户可只编写类似 HTML 代码的 Vue 模板，通过编译器将模板转换为可返回 VNode 的 render 函数。</p>
+<h2 id="输入输出">输入输出</h2>
+<p>带编译器的版本中，可以使用 template 或 el 的方式声明模板</p>
+<pre><code class="language-html">&lt;div id=&quot;demo&quot;&gt;
+  &lt;h1&gt;测试&lt;/h1&gt;
+  &lt;p&gt;{{foo}}&lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  // 使用 el
+  const app = new Vue({
+    date: { foo: 'foo' },
+    el: &quot;#demo&quot;
+  })
+  // 输出渲染函数
+  console.log(app.$options.render)
+&lt;/script&gt;
+</code></pre>
+<blockquote>
+<p>得到输出结果大致如下：</p>
+<pre><code class="language-js">ƒunction anonymous() { 
+     with (this) {
+       return _c('div', { attrs: { &quot;id&quot;: &quot;demo&quot; } }, [
+          _c('h1', [_v(&quot;Vue.js测试&quot;)]), 
+          _v(&quot; &quot;), 
+          _c('p', [_v(_s(foo))])
+       ])
+     }
+}
+</code></pre>
+<p>元素节点使用 createElement 创建，别名 _c</p>
+<p>文本节点使用 createTextVNode 创建，别名 _v</p>
+<p>表达式先使用 toString 格式化，别名 _s</p>
+</blockquote>
+<h2 id="过程">过程</h2>
+<p>实现模板编译共有三个阶段：解析、优化和生成。</p>
+<pre><code class="language-js">// src\compiler\index.js
+export const createCompiler = createCompilerCreator(function baseCompile (
+  template: string,
+  options: CompilerOptions
+): CompiledResult {
+  // 解析，将模板转换为抽象语法树
+  const ast = parse(template.trim(), options)
+  if (options.optimize !== false) {
+    // 优化得到的抽象语法树
+    optimize(ast, options)
+  }
+  // 生成，将 AST 转换成渲染函数中的内容，即代码字符串
+  // 作为 code 的属性，之后用 new Function(str) 生成函数
+  const code = generate(ast, options)
+  return {
+    ast,
+    render: code.render,
+    staticRenderFns: code.staticRenderFns
+  }
+})
+</code></pre>
+<h3 id="解析-parse">解析 - parse</h3>
+<p>解析器将模板解析为抽象语法树 AST，只有将模板解析成 AST 后，才能基于它做优化或者生成代码字符串。</p>
+<p>调试查看得到的 AST，结构如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584314460429.png" alt="" loading="lazy"></figure>
+<p>解析器内部分了 <strong>HTML 解析器</strong>、<strong>文本解析器</strong>和<strong>过滤器解析器</strong>，其中最主要的是 HTML 解析器，核心算法如下：</p>
+<pre><code class="language-js">// src\compiler\parser\index.js
+parseHTML(tempalte, {
+  start(tag, attrs, unary){}, // 遇到开始标签的处理理    
+  end(){},// 遇到结束标签的处理理    
+  chars(text){},// 遇到⽂文本标签的处理理   
+  comment(text){}// 遇到注释标签的处理理 
+})
+</code></pre>
+<h3 id="优化-optimize">优化 - optimize</h3>
+<p>优化器的作用是在 AST 中找出静态子树并打上标记。静态子树是在 AST 中永远不变的节点，如纯文本节点。</p>
+<p>标记静态子树的好处：</p>
+<ul>
+<li>每次重新渲染，不需要为静态子树创建新节点</li>
+<li>虚拟 DOM 中 patch 时，可以跳过静态子树</li>
 </ul>
+<p>代码实现：</p>
+<pre><code class="language-js">// src\compiler\optimizer.js
+export function optimize (root: ?ASTElement, options: CompilerOptions) {
+  if (!root) return
+  isStaticKey = genStaticKeysCached(options.staticKeys || '')
+  isPlatformReservedTag = options.isReservedTag || no
+  // first pass: 找出静态节点并标记
+  markStatic(root)
+  // second pass: 找出静态根节点（即所有子节点都是静态节点）并标记
+  markStaticRoots(root, false)
+}
+</code></pre>
+<p>标记结束：</p>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1584316301907.png" alt="" loading="lazy"></figure>
+<h3 id="代码生成-generate">代码生成 -generate</h3>
+<p>将 AST 转换成渲染函数中的内容，即代码字符串。</p>
+<p>代码实现：</p>
+<pre><code class="language-js">// src\compiler\codegen\index.js
+export function generate (
+  ast: ASTElement | void,
+  options: CompilerOptions
+): CodegenResult {
+  const state = new CodegenState(options)
+  const code = ast ? genElement(ast, state) : '_c(&quot;div&quot;)'
+  return {
+    render: `with(this){return ${code}}`,
+    staticRenderFns: state.staticRenderFns
+  }
+}
+
+// 生成的 code 长这样 
+// `_c('div',{attrs:{&quot;id&quot;:&quot;demo&quot;}},[ 
+//   _c('h1',[_v(&quot;Vue.js测试&quot;)]), 
+//   _c('p',[_v(_s(foo))]) 
+// ])`
+
+</code></pre>
+<h3 id="v-if-v-for">v-if、v-for</h3>
+<p>着重观察几个结构性指令的解析过程：</p>
+<pre><code class="language-js">// src\compiler\parser\index.js
+// 解析 v-if
+function processIf (el) {
+  const exp = getAndRemoveAttr(el, 'v-if') // 获取 v-if=&quot;exp&quot; 中的 exp，并删除 v-if 属性
+  if (exp) {
+    el.if = exp // 为 AST 添加 if 表示条件
+    addIfCondition(el, { // 为 AST 添加 ifConditions 表示各种情况对应结果
+      exp: exp,
+      block: el
+    })
+  } else { 
+    // 其他情况处理
+    if (getAndRemoveAttr(el, 'v-else') != null) {
+      el.else = true
+    }
+    const elseif = getAndRemoveAttr(el, 'v-else-if')
+    if (elseif) {
+      el.elseif = elseif
+    }
+  }
+}
+</code></pre>
+<pre><code class="language-js">// src\compiler\codegen\index.js
+// ifConditions 代码生成
+function genIfConditions (
+  conditions: ASTIfConditions,
+  state: CodegenState,
+  altGen?: Function,
+  altEmpty?: string
+): string {
+  if (!conditions.length) {
+    return altEmpty || '_e()'
+  }
+
+  const condition = conditions.shift() // 每次处理一个条件
+  if (condition.exp) { // 每种条件生成一个 三目表达式
+    return `(${condition.exp})?${
+      genTernaryExp(condition.block)
+    }:${
+      genIfConditions(conditions, state, altGen, altEmpty)
+    }`
+  } else {
+    return `${genTernaryExp(condition.block)}`
+  }
+
+  // v-if with v-once should generate code like (a)?_m(0):_m(1)
+  function genTernaryExp (el) {
+    return altGen
+      ? altGen(el, state)
+      : el.once
+        ? genOnce(el, state)
+        : genElement(el, state)
+  }
+}
+</code></pre>
+<p>解析结果：</p>
+<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1584320046441.png" alt="" loading="lazy"></figure>
+<p>生成结果：</p>
+<pre><code class="language-js">&quot;with(this){return _c('div',{attrs:{&quot;id&quot;:&quot;demo&quot;}},[  
+  (foo) ? _c('h1',[_v(_s(foo))]) : _c('h1',[_v(&quot;no title&quot;)]), 
+    _v(&quot; &quot;),_c('abc')],1)}&quot;
+
+</code></pre>
+<blockquote>
+<p>所以可知 v-if、v-for 这些指令只能在编译阶段处理，如果要在 render 函数中处理条件或循环，需要使用 js 的 if 和 for</p>
+<pre><code class="language-js">Vue.component('comp', {
+  props: ['foo'],
+  render(h) {
+    if (this.foo == 'foo') {
+      return h('div', 'foo')
+    }
+    return h('div', 'bar')
+  }
+})
+</code></pre>
+</blockquote>
+<h3 id="插槽">插槽</h3>
+<p>组件编译的顺序是<strong>先编译父组件，在编译子组件</strong>。</p>
+<p><strong>普通插槽</strong>是在<strong>父元素编译和渲染阶段</strong>生成 <code>vnodes</code>，数据的<strong>作用域</strong>是<strong>父组件</strong>，子组件渲染的时候直接拿到这些</p>
+<p>渲染好的 <code>vnodes</code>。</p>
+<p><strong>作用域插槽</strong>，父组件在编译和渲染阶段并不会直接生成 <code>vnodes</code>，而是在父节点保留一个 <code>scopedSlots</code> 对象，<strong>储存着不同名称的插槽以及它们对应的渲染函数</strong>，只有<strong>在编译和渲染子组件阶段才会执行</strong>这个渲染函数生成 <code>vnodes</code>，由于是在子组件环境执行的，所以<strong>对应的数据作用域是子组件实例</strong>。</p>
+<p>解析相关代码：</p>
+<pre><code class="language-js">// src\compiler\parser\index.js
+
+// processSlotContent: 处理 &lt;template v-slot:xxx=&quot;yyy&quot;&gt;
+const slotBinding = getAndRemoveAttrByRegex(el, slotRE) // 查找 v-slot:xxx 然后 remove 该属性
+if (slotBinding) {
+  const { name, dynamic } = getSlotName(slotBinding) // name 是 xxx
+  // xxx 赋值给 slotTarget
+  el.slotTarget = name
+  el.slotTargetDynamic = dynamic
+  // yyy 赋值给 slotScope
+  el.slotScope = slotBinding.value || emptySlotScopeToken // force it into a scoped slot for perf
+}
+
+// processSlotContent: 处理 &lt;slot&gt;
+function processSlotOutlet (el) {
+  if (el.tag === 'slot') {
+    // 获取 slot 的 name 并赋值给 slotName
+    el.slotName = getBindingAttr(el, 'name')
+  }
+}
+</code></pre>
+<p>生成相关代码</p>
+<pre><code class="language-js">// src\compiler\codegen\index.js
+// genScopedSlot: 把 slotScope 作为形参转换为工厂函数返回内容
+  const fn = `function(${slotScope}){` +
+    `return ${el.tag === 'template'
+      ? el.if &amp;&amp; isLegacySyntax
+        ? `(${el.if})?${genChildren(el, state) || 'undefined'}:undefined`
+        : genChildren(el, state) || 'undefined'
+      : genElement(el, state)
+    }}`
+  // reverse proxy v-slot without scope on this.$slots
+  const reverseProxy = slotScope ? `` : `,proxy:true`
+  return `{key:${el.slotTarget || `&quot;default&quot;`},fn:${fn}${reverseProxy}}`
+</code></pre>
 
               </div>
               <div class="toc-container">
-                
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E6%A8%A1%E6%9D%BF%E7%BC%96%E8%AF%91%E7%9A%84%E7%9B%AE%E7%9A%84">模板编译的目的</a></li>
+<li><a href="#%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA">输入输出</a></li>
+<li><a href="#%E8%BF%87%E7%A8%8B">过程</a>
+<ul>
+<li><a href="#%E8%A7%A3%E6%9E%90-parse">解析 - parse</a></li>
+<li><a href="#%E4%BC%98%E5%8C%96-optimize">优化 - optimize</a></li>
+<li><a href="#%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90-generate">代码生成 -generate</a></li>
+<li><a href="#v-if-v-for">v-if、v-for</a></li>
+<li><a href="#%E6%8F%92%E6%A7%BD">插槽</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
               </div>
             </div>
           </article>
