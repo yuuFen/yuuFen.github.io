@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vue 实践总结 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584650057325">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1585738318143">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Vue 实践总结 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
@@ -20,17 +20,20 @@
 </script>
 
 
-    <meta name="description" content="config
-查看配置
-vue inspect
-vue inspect --rules
-vue inspect --rule vue
+    <meta name="description" content="
+        从封装一个 SVG 图标组件开始
 
-配置 svg loader
-已有配置：
-/* config.module.rule('svg') */
+
+        权限控制（路由/指令）
+
+
+        Vue 中的数据交互
+
+
+        测试
+
 ..." />
-    <meta name="keywords" content="Vue" />
+    <meta name="keywords" content="知识点汇总,Vue" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -39,7 +42,7 @@ vue inspect --rule vue
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584650057325" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1585738318143" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -108,11 +111,15 @@ vue inspect --rule vue
             </h2>
             <div class="post-info">
               <span>
-                2020-03-14
+                2020-03-25
               </span>
               <span>
-                7 min read
+                1 min read
               </span>
+              
+                <a href="https://yuufen.com/blog/tag/_rDPxCqhS/" class="post-tag">
+                  # 知识点汇总
+                </a>
               
                 <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
                   # Vue
@@ -122,441 +129,22 @@ vue inspect --rule vue
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <h2 id="config">config</h2>
-<h3 id="查看配置">查看配置</h3>
-<pre><code>vue inspect
-vue inspect --rules
-vue inspect --rule vue
-</code></pre>
-<h3 id="配置-svg-loader">配置 svg loader</h3>
-<p>已有配置：</p>
-<pre><code class="language-js">/* config.module.rule('svg') */
-{
-  test: /\.(svg)(\?.*)?$/,
-  use: [
-    {
-      loader: 'file-loader',        
-      options: {
-        name: 'img/[name].[hash:8].[ext]'
-      }
-    }
-  ]
-}
-</code></pre>
-<blockquote>
-<p>目标：</p>
-<ol>
-<li>svg 配置忽略 src/icons</li>
-<li>创建新的配置使用 scg-sprite-loader 来加载 src/icons</li>
-</ol>
-</blockquote>
-<p>实现：</p>
-<pre><code class="language-js">const port = 7070
-const title = 'Vue Learning Record'
-
-const path = require('path')
-// 将传入的相对路径转换为绝对路径，跨平台
-function resolve(dir) {
-  return path.join(__dirname, dir)
-}
-
-module.exports = {
-  publicPath: '/practice',
-  devServer: {
-    port,
-  },
-  configureWebpack: {
-    // 不够灵活
-    name: title,
-  },
-  chainWebpack(config) {
-    // 修改已有配置，忽略 src/icons
-    config.module.rule('svg')
-      .exclude.add(resolve('src/icons'))
-
-    // 新建配置，使用 svg-sprite-loader 加载 src/icons
-    config.module.rule('icons')
-      .test(/\.svg$/)
-      .include.add(resolve('src/icons')) // add 会改变上下文进入数组
-        .end() // 结束数组操作，上下文回退
-      .use('svg-sprite-loader') // 添加 loader
-      .loader('svg-sprite-loader') // 切换上下文到 loader
-        .options({ symbolId: 'icon-[name]' }) // 指定选项
-        .end()
-  }
-}
-</code></pre>
-<pre><code class="language-js">/* config.module.rule('icons') */
-{
-  test: /\.svg$/,
-  include: [
-    'C:\\Users\\u\\Desktop\\vue-learning-record\\src\\icons'
-  ],
-  use: [
-    {
-      loader: 'svg-sprite-loader',
-      options: {
-        symbolId: 'icon-[name]'
-      }
-    }
-  ]
-}
-</code></pre>
-<p>使用：</p>
-<pre><code class="language-html">  &lt;svg&gt;
-    &lt;use :xlink:href=&quot;#icon-msg&quot; /&gt;
-  &lt;/svg&gt;
-&lt;script&gt;
-import '@/icons/svg/msg.svg'
-</code></pre>
-<h3 id="自动导入-封装组件">自动导入、封装组件</h3>
-<pre><code class="language-js">import Vue from 'vue'
-import Icon from '@/components/Icon.vue'
-// 图标自动导入
-// 利用 webpack 的 require.context
-
-// 返回的 req 是一个函数，只能加载 svg 目录中符合 /\.svg$/ 的文件
-// 它的 keys() 会返回所有符合规定的文件的相对路径
-const req = require.context('./svg', false, /\.svg$/) // (不递归，只加载 .svg )
-
-console.log(req.keys())
-
-req.keys().map(req)
-
-Vue.component('Icon', Icon)
-</code></pre>
-<h2 id="权限控制">权限控制</h2>
-<h3 id="1-架构">1. 架构</h3>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584603744487.png" alt="" loading="lazy"></figure>
-<h3 id="2-定义路由">2. 定义路由</h3>
-<pre><code class="language-js">// src/router/index.js
-import Vue from 'vue'
-import Router from 'vue-router'
-
-import Layout from '@/layout'
-
-Vue.use(Router)
-
-// 静态部分 通用部分
-export const constRoutes = [
-  {
-    path: '/login',
-    component: () =&gt; import('@/views/Login'),
-    hidden: true,
-  },
-  {
-    path: '/',
-    component: Layout,
-    redirect: '/home',
-    children: [
-      {
-        path: 'home',
-        component: () =&gt; import(/* webpackChunkName: &quot;home&quot; */ '@/views/Home'),
-        name: 'Home',
-        meta: {
-          title: 'Home', // 导航菜单项标题
-          icon: 'msg', // 导航菜单项图标
-        },
-      },
-    ],
-  },
-]
-
-export const asyncRoutes = [
-  {
-    path: '/about',
-    component: Layout,
-    redirect: '/about/index',
-    children: [
-      {
-        path: 'index',
-        component: () =&gt; import(/* webpackChunkName: &quot;home&quot; */ '@/views/About.vue'),
-        name: 'about',
-        meta: {
-          title: 'About',
-          icon: 'img',
-          // 角色
-          role: ['admin', 'editor'],
-        },
-      },
-    ],
-  },
-]
-
-export default new Router({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes: constRoutes,
-})
-</code></pre>
-<h3 id="3-完成动态生成路由登录的逻辑">3. 完成动态生成路由（登录）的逻辑</h3>
-<pre><code class="language-js">// src/permission.js
-// 生成全局路由
-import router from './router'
-import store from './store'
-import { getToken } from '@/utils/auth' // 从 cookie 中获取 token
-
-const whiteList = ['/login']
-
-router.beforeEach(async (to, from, next) =&gt; {
-  const hasToken = getToken()
-  if (hasToken) {
-    if (to.path === '/login') {
-      next({ path: '/home' })
-    } else {
-      // 已登录，获取用户角色
-      const hasRoles = store.getters.roles &amp;&amp; store.getters.roles.length &gt; 0
-
-      if (hasRoles) {
-        next()
-      } else {
-        // 这样会阻塞配置里的重定向
-        // 先请求用户信息
-        const { roles } = await store.dispatch('user/getInfo')
-        // 根据角色生成动态路由
-        const accessedRoutes = await store.dispatch('permission/generateRoutes', roles)
-        // 添加至 router
-        router.addRoutes(accessedRoutes)
-        // 重定向
-        next()
-      }
-    }
-  } else {
-    if (whiteList.indexOf(to.path) !== -1) {
-      next()
-    } else {
-      next(`/login?redirect=${to.path}`)
-    }
-  }
-})
-
-</code></pre>
-<h3 id="4-具体实现">4. 具体实现</h3>
-<ul>
-<li>src/utils/auth</li>
-</ul>
-<pre><code class="language-js">import Cookies from 'js-cookie'
-
-const TOKEN = 'token'
-
-export function getToken() {
-  return Cookies.get(TOKEN)
-}
-
-export function setToken(token) {
-  return Cookies.set(TOKEN,token)
-}
-export function removeToken() {
-  return Cookies.remove(TOKEN)
-}
-</code></pre>
-<ul>
-<li>src/store/user.js</li>
-</ul>
-<pre><code class="language-js">// 用户信息
-import { getToken, setToken, removeToken } from '@/utils/auth'
-
-const state = {
-  token: getToken(),
-  roles: [],
-}
-
-const mutations = {
-  SET_TOKEN: (state, token) =&gt; {
-    state.token = token
-  },
-  SET_ROLES: (state, roles) =&gt; {
-    state.roles = roles
-  },
-}
-
-const actions = {
-  // user login
-  login({ commit }, userInfo) {
-    const { username } = userInfo
-    return new Promise((resolve, reject) =&gt; {
-      setTimeout(() =&gt; {
-        if (username === 'admin' || username === 'jerry') {
-          commit('SET_TOKEN', username)
-          setToken(username)
-          resolve()
-        } else {
-          reject('用户名不存在')
-        }
-      }, 1000)
-    })
-  },
-  // get user info
-  getInfo({ commit, state }) {
-    return new Promise((resolve) =&gt; {
-      setTimeout(() =&gt; {
-        const roles = state.token === 'admin' ? ['admin'] : ['editor']
-        commit('SET_ROLES', roles)
-        resolve({ roles })
-      }, 1000)
-    })
-  },
-
-  // remove token
-  resetToken({ commit }) {
-    return new Promise((resolve) =&gt; {
-      commit('SET_TOKEN', '')
-      commit('SET_ROLES', [])
-      removeToken()
-      resolve()
-    })
-  },
-}
-export default {
-  namespaced: true,
-  state,
-  mutations,
-  actions,
-}
-</code></pre>
-<ul>
-<li>src/store/permission.js</li>
-</ul>
-<pre><code class="language-js">// 路由配置信息、路由生成逻辑
-import { constRoutes, asyncRoutes } from '@/router'
-
-/**
- * 根据路由 meta.role 确定当前用户是否具有访问权限
- * @roles 用户的拥有角色
- * @route 待判断路由
- */
-function hasPermission(roles, route) {
-  if (route.meta &amp;&amp; route.meta.roles) {
-    // 如果当前路由有 roles 字段，则需要判断用户权限
-    return roles.some((role) =&gt; route.meta.roles.includes(role))
-  } else {
-    return true
-  }
-}
-
-/**
- * 递归过滤 AsyncRoutes 路由表
- * @roles 用户拥有的角色
- * @routes 待过滤路由表， 首次传入的就是 AsyncRoutes
- */
-export function filterAsyncRoutes(roles, routes) {
-  const res = []
-  routes.forEach((route) =&gt; {
-    // 复制一份
-    const tmp = { ...route }
-    // 如果用户有访问权限则加入结果路由表
-    if (hasPermission(roles, tmp)) {
-      // 如果存在子路由则递归过滤
-      if (tmp.children) {
-        tmp.children = filterAsyncRoutes(roles, tmp.children)
-      }
-      res.push(tmp)
-    }
-  })
-  return res
-}
-
-const state = {
-  // 完整路由
-  routes: [],
-  // 能够访问的动态路由
-  addRoutes: [],
-}
-
-const mutations = {
-  SET_ROUTES: (state, routes) =&gt; {
-    state.addRoutes = routes
-    state.routes = constRoutes.concat(routes)
-  },
-}
-
-const actions = {
-  // 生成路由，在得到用户角色后会第一时间调用
-  generateRoutes({ commit }, roles) {
-    return new Promise((resolve) =&gt; {
-      let accessedRoutes
-      if (roles.includes('admin')) {
-        // 如果是管理员，有全部权限
-        accessedRoutes = asyncRoutes || []
-      } else {
-        // 否则过滤
-        accessedRoutes = filterAsyncRoutes(roles, asyncRoutes)
-      }
-      commit('SET_ROUTES', accessedRoutes)
-      resolve(accessedRoutes)
-    })
-  },
-}
-
-export default {
-  namespaced: true,
-  state,
-  mutations,
-  actions,
-}
-</code></pre>
-<ul>
-<li>src/store/index.js</li>
-</ul>
-<pre><code class="language-js">import Vue from 'vue'
-import Vuex from 'vuex'
-
-import permission from './permission'
-import user from './user'
-
-Vue.use(Vuex)
-
-export default new Vuex.Store({
-  modules: {
-    permission, // 权限
-    user, // 用户信息
-  },
-  getters: {
-    roles: (state) =&gt; state.user.roles,  
-  },
-})
-</code></pre>
-<ul>
-<li>登录</li>
-</ul>
-<pre><code class="language-js">    login() {
-      this.$store
-        .dispatch('user/login', { username: this.username })
-        .then(() =&gt; {
-          this.$router.push({
-            path: this.$route.query.redirect || '/',
-          })
-        })
-        .catch((error) =&gt; {
-          alert(error)
-        })
-    },
-</code></pre>
+                <center>
+        <a href="https://yuufen.com/blog/post/OIY1225PH/">从封装一个 SVG 图标组件开始</a>
+</center>
+<center>
+        <a href="https://yuufen.com/blog/post/Xoj8uZb5R/">权限控制（路由/指令）</a>
+</center>
+<center>
+        <a href="https://yuufen.com/blog/LR9CET7_-/">Vue 中的数据交互</a>
+</center>
+<center>
+        <a href="https://yuufen.com/blog/post/VkzI4KJ9x/">测试</a>
+</center>
 
               </div>
               <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#config">config</a>
-<ul>
-<li><a href="#%E6%9F%A5%E7%9C%8B%E9%85%8D%E7%BD%AE">查看配置</a></li>
-<li><a href="#%E9%85%8D%E7%BD%AE-svg-loader">配置 svg loader</a></li>
-<li><a href="#%E8%87%AA%E5%8A%A8%E5%AF%BC%E5%85%A5-%E5%B0%81%E8%A3%85%E7%BB%84%E4%BB%B6">自动导入、封装组件</a></li>
-</ul>
-</li>
-<li><a href="#%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6">权限控制</a>
-<ul>
-<li><a href="#1-%E6%9E%B6%E6%9E%84">1. 架构</a></li>
-<li><a href="#2-%E5%AE%9A%E4%B9%89%E8%B7%AF%E7%94%B1">2. 定义路由</a></li>
-<li><a href="#3-%E5%AE%8C%E6%88%90%E5%8A%A8%E6%80%81%E7%94%9F%E6%88%90%E8%B7%AF%E7%94%B1%E7%99%BB%E5%BD%95%E7%9A%84%E9%80%BB%E8%BE%91">3. 完成动态生成路由（登录）的逻辑</a></li>
-<li><a href="#4-%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0">4. 具体实现</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
+                
               </div>
             </div>
           </article>
@@ -565,9 +153,9 @@ export default new Vuex.Store({
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://yuufen.com/blog/post/jD_rI1NpH/">
+            <a href="https://yuufen.com/blog/post/vY7s6sh95/">
               <h3 class="post-title">
-                Vue 源码解析
+                Nuxt / SSR 再实现
               </h3>
             </a>
           </div>

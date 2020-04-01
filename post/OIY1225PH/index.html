@@ -2,11 +2,11 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>语录 摘抄 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1584650057325">
+<title>从封装一个 svg 图标组件开始 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1585738318143">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="语录 摘抄 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="从封装一个 svg 图标组件开始 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -20,9 +20,17 @@
 </script>
 
 
-    <meta name="description" content="虽然随着 Vue、React、Angular 这些框架的流行，雅虎军规当中一些优化的方法已不在适用，但是，更多的时候，我们是学习这些方法背后的思想，而不是去死记硬背某个方法，技术总是在更迭，只有握方法背后的思想，才能够立于不败之地。
-act..." />
-    <meta name="keywords" content="" />
+    <meta name="description" content="查看配置
+vue inspect
+vue inspect --rules
+vue inspect --rule vue
+
+配置 svg loader
+已有配置：
+/* config.module.rule('svg') */
+{
+  tes..." />
+    <meta name="keywords" content="Vue" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -31,7 +39,7 @@ act..." />
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1584650057325" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1585738318143" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -96,26 +104,139 @@ act..." />
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              语录 摘抄
+              从封装一个 svg 图标组件开始
             </h2>
             <div class="post-info">
               <span>
-                2022-03-31
+                2020-03-14
               </span>
               <span>
-                1 min read
+                2 min read
               </span>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
               
             </div>
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <p>虽然随着 Vue、React、Angular 这些框架的流行，雅虎军规当中一些优化的方法已不在适用，但是，更多的时候，我们是学习这些方法背后的思想，而不是去死记硬背某个方法，技术总是在更迭，只有握方法背后的思想，才能够立于不败之地。</p>
-<p>actions在Vuex中是异步的。让调用函数（动作的发起者）知道某个动作已完成的唯一方法是通过返回Promise并在以后解决它。</p>
+                <h2 id="查看配置">查看配置</h2>
+<pre><code>vue inspect
+vue inspect --rules
+vue inspect --rule vue
+</code></pre>
+<h2 id="配置-svg-loader">配置 svg loader</h2>
+<p>已有配置：</p>
+<pre><code class="language-js">/* config.module.rule('svg') */
+{
+  test: /\.(svg)(\?.*)?$/,
+  use: [
+    {
+      loader: 'file-loader',        
+      options: {
+        name: 'img/[name].[hash:8].[ext]'
+      }
+    }
+  ]
+}
+</code></pre>
+<blockquote>
+<p>目标：</p>
+<ol>
+<li>svg 配置忽略 src/icons</li>
+<li>创建新的配置使用 scg-sprite-loader 来加载 src/icons</li>
+</ol>
+</blockquote>
+<p>实现：</p>
+<pre><code class="language-js">const port = 7070
+const title = 'Vue Learning Record'
+
+const path = require('path')
+// 将传入的相对路径转换为绝对路径，跨平台
+function resolve(dir) {
+  return path.join(__dirname, dir)
+}
+
+module.exports = {
+  publicPath: '/practice',
+  devServer: {
+    port,
+  },
+  configureWebpack: {
+    // 不够灵活
+    name: title,
+  },
+  chainWebpack(config) {
+    // 修改已有配置，忽略 src/icons
+    config.module.rule('svg')
+      .exclude.add(resolve('src/icons'))
+
+    // 新建配置，使用 svg-sprite-loader 加载 src/icons
+    config.module.rule('icons')
+      .test(/\.svg$/)
+      .include.add(resolve('src/icons')) // add 会改变上下文进入数组
+        .end() // 结束数组操作，上下文回退
+      .use('svg-sprite-loader') // 添加 loader
+      .loader('svg-sprite-loader') // 切换上下文到 loader
+        .options({ symbolId: 'icon-[name]' }) // 指定选项
+        .end()
+  }
+}
+</code></pre>
+<pre><code class="language-js">/* config.module.rule('icons') */
+{
+  test: /\.svg$/,
+  include: [
+    'C:\\Users\\u\\Desktop\\vue-learning-record\\src\\icons'
+  ],
+  use: [
+    {
+      loader: 'svg-sprite-loader',
+      options: {
+        symbolId: 'icon-[name]'
+      }
+    }
+  ]
+}
+</code></pre>
+<p>使用：</p>
+<pre><code class="language-html">  &lt;svg&gt;
+    &lt;use :xlink:href=&quot;#icon-msg&quot; /&gt;
+  &lt;/svg&gt;
+&lt;script&gt;
+import '@/icons/svg/msg.svg'
+</code></pre>
+<h2 id="自动导入-封装组件">自动导入、封装组件</h2>
+<pre><code class="language-js">import Vue from 'vue'
+import Icon from '@/components/Icon.vue'
+// 图标自动导入
+// 利用 webpack 的 require.context
+
+// 返回的 req 是一个函数，只能加载 svg 目录中符合 /\.svg$/ 的文件
+// 它的 keys() 会返回所有符合规定的文件的相对路径
+const req = require.context('./svg', false, /\.svg$/) // (不递归，只加载 .svg )
+
+console.log(req.keys())
+
+req.keys().map(req)
+
+Vue.component('Icon', Icon)
+</code></pre>
 
               </div>
               <div class="toc-container">
-                
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E6%9F%A5%E7%9C%8B%E9%85%8D%E7%BD%AE">查看配置</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE-svg-loader">配置 svg loader</a></li>
+<li><a href="#%E8%87%AA%E5%8A%A8%E5%AF%BC%E5%85%A5-%E5%B0%81%E8%A3%85%E7%BB%84%E4%BB%B6">自动导入、封装组件</a></li>
+</ul>
+</li>
+</ul>
+
               </div>
             </div>
           </article>
@@ -124,9 +245,9 @@ act..." />
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://yuufen.com/blog/post/M0Xa7RsWm/">
+            <a href="https://yuufen.com/blog/post/jD_rI1NpH/">
               <h3 class="post-title">
-                虚拟 DOM 深入与简单实现
+                Vue 源码解析
               </h3>
             </a>
           </div>

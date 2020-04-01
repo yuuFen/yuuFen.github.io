@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-03-19T20:34:20.082Z</updated>
+    <updated>2020-04-01T10:52:34.387Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -34,21 +34,11 @@
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[语录 摘抄]]></title>
-        <id>https://yuufen.com/blog/post/m2rntOl9f/</id>
-        <link href="https://yuufen.com/blog/post/m2rntOl9f/">
-        </link>
-        <updated>2022-03-30T21:19:42.000Z</updated>
-        <content type="html"><![CDATA[<p>虽然随着 Vue、React、Angular 这些框架的流行，雅虎军规当中一些优化的方法已不在适用，但是，更多的时候，我们是学习这些方法背后的思想，而不是去死记硬背某个方法，技术总是在更迭，只有握方法背后的思想，才能够立于不败之地。</p>
-<p>actions在Vuex中是异步的。让调用函数（动作的发起者）知道某个动作已完成的唯一方法是通过返回Promise并在以后解决它。</p>
-]]></content>
-    </entry>
-    <entry>
         <title type="html"><![CDATA[虚拟 DOM 深入与简单实现]]></title>
         <id>https://yuufen.com/blog/post/M0Xa7RsWm/</id>
         <link href="https://yuufen.com/blog/post/M0Xa7RsWm/">
         </link>
-        <updated>2020-03-18T03:24:31.000Z</updated>
+        <updated>2020-03-29T03:24:31.000Z</updated>
         <content type="html"><![CDATA[<ul>
 <li></li>
 </ul>
@@ -59,36 +49,420 @@
         <id>https://yuufen.com/blog/post/pXhlFIaIC/</id>
         <link href="https://yuufen.com/blog/post/pXhlFIaIC/">
         </link>
-        <updated>2020-03-14T07:41:28.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="config">config</h2>
-<h3 id="查看配置">查看配置</h3>
-<pre><code>vue inspect
-vue inspect --rules
-vue inspect --rule vue
+        <updated>2020-03-25T07:41:28.000Z</updated>
+        <content type="html"><![CDATA[<center>
+        <a href="https://yuufen.com/blog/post/OIY1225PH/">从封装一个 SVG 图标组件开始</a>
+</center>
+<center>
+        <a href="https://yuufen.com/blog/post/Xoj8uZb5R/">权限控制（路由/指令）</a>
+</center>
+<center>
+        <a href="https://yuufen.com/blog/LR9CET7_-/">Vue 中的数据交互</a>
+</center>
+<center>
+        <a href="https://yuufen.com/blog/post/VkzI4KJ9x/">测试</a>
+</center>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Nuxt / SSR 再实现]]></title>
+        <id>https://yuufen.com/blog/post/vY7s6sh95/</id>
+        <link href="https://yuufen.com/blog/post/vY7s6sh95/">
+        </link>
+        <updated>2020-03-21T00:54:17.000Z</updated>
+        <content type="html"><![CDATA[<p>1</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Vue 测试]]></title>
+        <id>https://yuufen.com/blog/post/VkzI4KJ9x/</id>
+        <link href="https://yuufen.com/blog/post/VkzI4KJ9x/">
+        </link>
+        <updated>2020-03-16T01:03:54.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="测试分类">测试分类</h2>
+<ul>
+<li>黑盒测试
+<ul>
+<li><strong>E2E 测试</strong>，设计 N 个用例，测试某个功能的正确性</li>
+<li><strong>集成测试</strong>，集合多个测试过的单元一起测试</li>
+</ul>
+</li>
+<li>白盒测试
+<ul>
+<li><strong>单元测试</strong>，如针对一些内部核心实现逻辑编写测试代码</li>
+</ul>
+</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584914075235.png" alt="" loading="lazy"></figure>
+<h2 id="为什么要编写测试代码">为什么要编写测试代码</h2>
+<ul>
+<li>提供描述组件行为的文档</li>
+<li>节省手动测试的时间</li>
+<li>减少研发新特性时产生的 bug</li>
+<li>改进设计</li>
+<li>促进重构</li>
+</ul>
+<h2 id="准备工作">准备工作</h2>
+<p>要完成测试任务，需要测试框架（运行测试代码，如 Mocha）、 断言库（编写测试代码，如 Chai）和编程框架特有的测试套件。Vue 中的组件等测试代码的编写需要 <a href="https://vue-test-utils.vuejs.org/zh/">vue-text-utils</a> 套件支持。</p>
+<p>Jest 同时包含测试框架与断言库，所以演示代码使用 Jest，但是它们的语法基本一致。</p>
+<h3 id="新建-vue-项目时集成">新建 vue 项目时集成</h3>
+<p>选择特性 <code>Unit Testing</code> 和 <code>E2E Testing</code></p>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1584924220583.png" alt="" loading="lazy"></figure>
+<p>单元测试解决方案选择 <code>Jest</code></p>
+<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1584924289071.png" alt="" loading="lazy"></figure>
+<p>端到端测试解决方案选择 <code>Cypress</code></p>
+<figure data-type="image" tabindex="4"><img src="https://yuufen.com/blog/post-images/1584924306319.png" alt="" loading="lazy"></figure>
+<h3 id="在已存在项目中集成">在已存在项目中集成</h3>
+<p>运行 <code>vue add @vue/unit-jest</code> 和 <code>vue add @vue/e2e-cypress</code></p>
+<h2 id="编写单元测试">编写单元测试</h2>
+<p>单元测试（unit testing），是指对软件中最小可测试单元进行检查和验证。</p>
+<ul>
+<li>test/unit/demo.spec.js（<code>*.spec.js</code> 是命名规范）</li>
+</ul>
+<pre><code class="language-js">function add(num1, num2) {
+  return num1 + num2
+}
+
+// 测试套件 test suite
+describe('demo', () =&gt; {
+  // 测试用例 test case
+  it('测试 add 函数', () =&gt; {
+    // 断言 assert
+    expect(add(1,3)).toBe(3)
+    expect(add('str',4)).toBe(5)
+    expect(add(1,3)).toBe(4)
+  })
+}) 
 </code></pre>
-<h3 id="配置-svg-loader">配置 svg loader</h3>
-<p>已有配置：</p>
-<pre><code class="language-js">/* config.module.rule('svg') */
-{
-  test: /\.(svg)(\?.*)?$/,
-  use: [
-    {
-      loader: 'file-loader',        
-      options: {
-        name: 'img/[name].[hash:8].[ext]'
-      }
-    }
-  ]
+<ul>
+<li><code>yarn test:unit</code></li>
+</ul>
+<h3 id="断言-api-简介">断言 API 简介</h3>
+<ul>
+<li>
+<p><code>describe</code>：定义测试套件</p>
+</li>
+<li>
+<p><code>it</code>：定义一个测试用例</p>
+</li>
+<li>
+<p><code>expect</code>：断言的判断条件</p>
+<blockquote>
+<p><a href="https://jestjs.io/docs/zh-Hans/expect">更多断言 API</a></p>
+</blockquote>
+</li>
+</ul>
+<h3 id="测试-vue-组件">测试 Vue 组件</h3>
+<ul>
+<li>创建一个 vue 组件 components/testDemo.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div&gt;
+    &lt;span&gt;{{ message }}&lt;/span&gt; &lt;button @click=&quot;changeMsg&quot;&gt;点击&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+  data() {
+    return { message: 'vue-text' }
+  },
+  created() {
+    this.message = 'Demo'
+  },
+  methods: {
+    changeMsg() {
+      this.message = '按钮点击'
+    },
+  },
+}
+&lt;/script&gt;
+</code></pre>
+<ul>
+<li>tests/unit/compDemo.spec.js</li>
+</ul>
+<pre><code class="language-js">import Vue from 'vue'
+import TestDemo from '@/components/TestDemo.vue'
+
+import { mount } from '@vue/test-utils'
+
+describe('TestDemo', () =&gt; {
+  // 原始写法：
+
+  // 检查原始组件选项
+  it('存在 created 生命周期', () =&gt; {
+    expect(typeof TestDemo.created).toBe('function')
+  })
+
+  // 评估原始组件选项中的函数的结果
+  it('初始 data 是 vue-text', () =&gt; {
+    // 检查 data 函数存在性
+    expect(typeof TestDemo.data).toBe('function')
+    // 检查 data 返回的默认值
+    const defaultData = TestDemo.data()
+    expect(defaultData.message).toBe('Hello!')
+  })
+
+  it('mount 之后 data.message 是 Demo', () =&gt; {
+    const vm = new Vue(TestDemo).$mount()
+    expect(vm.message).toBe('Demo')
+  })
+
+  // 使用 vue test utils：
+    
+  it('按钮点击后', () =&gt; {
+    // 挂载组件
+    const wrapper = mount(TestDemo)
+    // 查找元素，触发事件
+    wrapper.find('button').trigger('click')
+    // 测试数据变化
+    expect(wrapper.vm.message).toBe('按钮点击')
+    // 测试 html 渲染结果
+    expect(wrapper.find('span').html()).toBe('&lt;span&gt;按钮点击&lt;/span&gt;')
+    // 等效的方式
+    expect(wrapper.find('span').text()).toBe('按钮点击')
+  })
+})
+</code></pre>
+<h3 id="测试覆盖率">测试覆盖率</h3>
+<p>在jest.conﬁg.js中添加</p>
+<pre><code class="language-js">module.exports = {
+  collectCoverage: true,
+  collectCoverageFrom: ['src/**/*.{js,vue}'],
 }
 </code></pre>
+<p>执行 <code>yarn test:unit</code>，即可看到测试覆盖率：</p>
+<figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1585008205915.png" alt="" loading="lazy"></figure>
 <blockquote>
-<p>目标：</p>
+<p><code>%Stmts</code> - 语句覆盖率（statement coverage）：是不是每个语句都执行了？<br>
+<code>%Branch</code> - 分支覆盖率（branch coverage）：是不是每个 if 代码块都执行了？<br>
+<code>%Funcs</code> - 函数覆盖率（function coverage）：是不是每个函数都调用过了？<br>
+<code>%Lines</code> - 行覆盖率（line coverage）：是不是每一行都执行了？</p>
+</blockquote>
+<h3 id="e2e-测试">E2E 测试</h3>
+<p>借用浏览器的能力，站在用户测试人员的角度，输入框，点击按钮等，完全模拟用户，这个和具体的框架关系不⼤，完全模拟浏览器行为。</p>
+<ul>
+<li>修改 tests/e2e/spec/test.js</li>
+</ul>
+<pre><code class="language-js">// https://docs.cypress.io/api/introduction/api.html
+describe('端到端测试，抢测试⼈人员的饭碗', () =&gt; {
+  it('先访问⼀一下', () =&gt; {
+    cy.visit('/')
+    // cy.contains('h1', 'Welcome to Your Vue.js App')
+    cy.contains('span', 'Demo')
+  })
+})
+</code></pre>
+<p>测试未通过，因为没有使用 TestDemo.vue，修改 App.vue</p>
+<pre><code class="language-vue">&lt;div id=&quot;app&quot;&gt;   
+  &lt;img alt=&quot;Vue logo&quot; src=&quot;./assets/logo.png&quot;&gt; 
+  &lt;test-demo&gt;&lt;/test-demo&gt; 
+&lt;/div&gt;
+
+import Kaikeba from './components/Kaikeba.vue' 
+export default { 
+  name: 'app', 
+  components: { 
+    HelloWorld,Kaikeba
+  } 
+}
+</code></pre>
+<figure data-type="image" tabindex="6"><img src="https://yuufen.com/blog/post-images/1585012934606.png" alt="" loading="lazy"></figure>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Vue 中的数据交互]]></title>
+        <id>https://yuufen.com/blog/post/LR9CET7_-/</id>
+        <link href="https://yuufen.com/blog/post/LR9CET7_-/">
+        </link>
+        <updated>2020-03-14T19:13:16.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="封装-request-api">封装 request / api</h2>
+<p>api service =&gt; request =&gt; local mock / easy-mock / service api</p>
+<blockquote>
+<p>主要问题分析：</p>
 <ol>
-<li>svg 配置忽略 src/icons</li>
-<li>创建新的配置使用 scg-sprite-loader 来加载 src/icons</li>
+<li>有时需要请求头、响应，进行统一预处理</li>
+<li>请求不同数据源时 url 会变化，需要能根据环境自动修改url</li>
+<li>可能出现的跨域问题</li>
 </ol>
 </blockquote>
-<p>实现：</p>
+<h3 id="srcutilsrequestjs">src/utils/request.js</h3>
+<pre><code class="language-js">import axios from 'axios'
+import { MessageBox, Message } from 'element-ui'
+import store from '@/store'
+import { getToken } from '@/utils/auth'
+
+// 创建 axios 实例
+const service = axios.create({
+  baseURL: process.env.VUE_APP_BASE_API, // url 基础地址，解决不同数据源 url 变化问题
+  // withCredentials: true, // 跨域时若要发送 cookie 需设置该项
+  timeout: 5000, // 超时
+})
+
+// 请求拦截
+service.interceptors.request.use(
+  (config) =&gt; {
+    // do something
+
+    if (store.getters.token) {
+      // 设置令牌请求头
+      // 后端采用默认配置（规范: http://www.rfcreader.com/#rfc6750_line188）：
+      config.headers['Authorization'] = 'Bearer' + getToken()
+      // // 后端自定义如：
+      // config.headers['x-token'] = getToken()
+    }
+    return config
+  },
+  (error) =&gt; {
+    // 请求错误预处理
+    // console.log(error) // for debug
+    return Promise.reject(error)
+  },
+)
+
+// 响应拦截
+service.interceptors.response.use(
+  // 通过自定义 code 判断响应状态，也可以通过 HTTP 状态码判定
+  (response) =&gt; {
+    // 仅返回数据部分
+    const res = response.data
+    // 使用自定义状态码判断错误：
+    // code 不为 1 则判定为错误
+    if (res.code !== 1) {
+      Message({
+        message: res.message || 'Error',
+        type: 'error',
+        duration: 5 * 1000,
+      })
+
+      // 假设：10008-非法令牌；10012-其他客户端已登录；10014-令牌过期
+      if (res.code === 10008 || res.code === 10012 || res.code === 10014) {
+        MessageBox.confirm('登陆状态异常，请重新登录', '确认登录信息', {
+          confirmButtonText: '重新登陆',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }).then(() =&gt; {
+          store.dispatch('user/resetToken').then(() =&gt; {
+            location.reload()
+          })
+        })
+      }
+      return Promise.reject(new Error(res.message || 'Error'))
+    } else {
+      return res
+    }
+  },
+  (error) =&gt; {
+    // 使用错误码：
+    Message({
+      message: error.message,
+      type: 'error',
+      duration: 5 * 1000,
+    })
+  },
+)
+
+export default service
+</code></pre>
+<h3 id="srcapiuserjs">src/api/user.js</h3>
+<pre><code class="language-js">import request from '@/utils/request'
+
+export function login(data) {
+  return request({
+    url: '/user/login',
+    methods: 'post',
+    data,
+  })
+}
+
+export function getInfo() {
+  return request({
+    url: '/user/info',
+    methods: 'get',
+  })
+}
+</code></pre>
+<h3 id="srcstoreuserjs">src/store/user.js</h3>
+<pre><code class="language-js">  getters: {
+    roles: (state) =&gt; state.user.roles,
++   token: (state) =&gt; state.user.token,
+    permission_routes: (state) =&gt; state.permission.routes,
+  },
+</code></pre>
+<h3 id="srcstoreuserjs-2">src/store/user.js</h3>
+<pre><code class="language-js">import { login, getInfo } from '@/api/user'
+
+const actions = {
+  // user login
+  login({ commit }, userInfo) {
+    // 调用接口，并处理结果，错误处理已拦截所以无需处理
+    return login(userInfo).then((res) =&gt; {
+      commit('SET_TOKEN', res.data)
+      setToken(res.data)
+    })
+  },
+  // get user info
+  getInfo({ commit, state }) {
+    return getInfo().then(({ data: roles }) =&gt; {
+      commit('SET_ROLES', roles)
+      return { roles }
+    })
+  },
+</code></pre>
+<h2 id="mock">mock</h2>
+<h3 id="本地-mock">本地 mock</h3>
+<p>vue.config.js</p>
+<pre><code class="language-js">// 处理 post 请求参数
+const bodyParser = require('body-parser')
+
+// ...
+
+module.exports = {
+  publicPath: '/practice',
+  devServer: {
+    port,
+    // 配置 mock 接口
+    // app 是 express 的实例
+    before: (app) =&gt; {
+      // 注册中间件，处理 post 参数
+      app.use(bodyParser.json())
+
+      app.post('/dev-api/user/login', (req, res) =&gt; {
+        const { username } = req.body
+
+        if (username === 'admin' || username === 'jerry') {
+          res.json({
+            code: 1,
+            data: username,
+          })
+        } else {
+          res.json({
+            code: 10204,
+            message: '用户名或密码错误',
+          })
+        }
+      })
+
+      // get 之前需要一个中间件来判断 token 合法性，这里没写
+      app.get('/dev-api/user/info', (req, res) =&gt; {
+        const auth = req.headers['authorization']
+        const roles = auth.split(' ')[1] === 'admin' ? ['admin'] : ['editor']
+        res.json({
+          code: 1,
+          data: roles,
+        })
+      })
+    },
+  },
+    
+  // ...
+</code></pre>
+<h3 id="easy-mock">easy-mock</h3>
+<p><a href="easy-mock.com">项目地址</a></p>
+<h2 id="解决跨域">解决跨域</h2>
+<blockquote>
+<p>如果请求的接口在另一台服务器上，开发时则需要在本地设置代理服务器，避免跨域问题</p>
+</blockquote>
+<h3 id="配置代理-vueconfigjs">配置代理 vue.config.js</h3>
 <pre><code class="language-js">const port = 7070
 const title = 'Vue Learning Record'
 
@@ -102,68 +476,398 @@ module.exports = {
   publicPath: '/practice',
   devServer: {
     port,
-  },
-  configureWebpack: {
-    // 不够灵活
-    name: title,
-  },
-  chainWebpack(config) {
-    // 修改已有配置，忽略 src/icons
-    config.module.rule('svg')
-      .exclude.add(resolve('src/icons'))
-
-    // 新建配置，使用 svg-sprite-loader 加载 src/icons
-    config.module.rule('icons')
-      .test(/\.svg$/)
-      .include.add(resolve('src/icons')) // add 会改变上下文进入数组
-        .end() // 结束数组操作，上下文回退
-      .use('svg-sprite-loader') // 添加 loader
-      .loader('svg-sprite-loader') // 切换上下文到 loader
-        .options({ symbolId: 'icon-[name]' }) // 指定选项
-        .end()
-  }
-}
-</code></pre>
-<pre><code class="language-js">/* config.module.rule('icons') */
-{
-  test: /\.svg$/,
-  include: [
-    'C:\\Users\\u\\Desktop\\vue-learning-record\\src\\icons'
-  ],
-  use: [
-    {
-      loader: 'svg-sprite-loader',
-      options: {
-        symbolId: 'icon-[name]'
+    // 如果请求的接口在另一台服务器上，开发时则需要设置代理避免跨域问题
+    proxy: {
+      // 代理 /dev-api/user/login 到 http://127.0.0.1:3000/user/login
+      // 请求的还是 http://localhost:7070/..，之后的代理转发浏览器不可知
+      // 代理转发发生在 before 之后，所以会被 before 拦截，所以这俩互斥 
+      // 当使用绝对路径时，代理不生效
+      [process.env.VUE_APP_BASE_API]: {
+        target: `http://127.0.0.1:3000/`,
+        changeOrigin: true,  
+        pathRewrite: { // dev-api/user/login =&gt; /user/login
+          ['^' + process.env.VUE_APP_BASE_API]: ''
+        }
+        
       }
-    }
-  ]
-}
+    },
+      
+    // ..
 </code></pre>
-<p>使用：</p>
-<pre><code class="language-html">  &lt;svg&gt;
-    &lt;use :xlink:href=&quot;#icon-msg&quot; /&gt;
-  &lt;/svg&gt;
+<h3 id="创建一个独立接口服务器~serverindexjs">创建一个独立接口服务器，~/server/index.js</h3>
+<pre><code class="language-js">const express = require('express')
+const app = express()
+const bodyParser = require('body-parser')
+
+app.use(bodyParser.json())
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  }),
+)
+
+app.post('/user/login', (req, res) =&gt; {
+  const { username } = req.body
+  if (username === 'admin' || username === 'jerry') {
+    res.json({
+      code: 1,
+      data: username,
+    })
+  } else {
+    res.json({
+      code: 10204,
+      message: '⽤用户名或密码错误',
+    })
+  }
+})
+
+app.get('/user/info', (req, res) =&gt; {
+  const roles = req.headers['authorization'].split(' ')[1] ? ['admin'] : ['editor']
+  res.json({ code: 1, data: roles })
+})
+
+app.listen(3000)
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[动态导航菜单组件]]></title>
+        <id>https://yuufen.com/blog/post/SZ8FawuZz/</id>
+        <link href="https://yuufen.com/blog/post/SZ8FawuZz/">
+        </link>
+        <updated>2020-03-13T20:50:11.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="简单实现">简单实现</h2>
+<blockquote>
+<p>也可以使用 name，但是容易造成冲突，并且 name 属性不必要</p>
+</blockquote>
+<ul>
+<li>路由数据模板：</li>
+</ul>
+<pre><code class="language-js">export const constRoutes = [
+  {
+    path: '/login',
+    component: () =&gt; import('@/views/Login'),
+    hidden: true,
+  },
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/home',
+    meta: {
+      title: '主页',
+    },
+    children: [
+      {
+        path: 'home',
+        component: () =&gt; import(/* webpackChunkName: &quot;home&quot; */ '@/views/Home'),
+        name: 'Home',
+        meta: {
+          title: 'Home', // 导航菜单项标题
+          icon: 'msg', // 导航菜单项图标
+        },
+      },
+    ],
+  },
+]
+</code></pre>
+<ul>
+<li>src/components/SideMenu/index.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;ul&gt;
+      &lt;item
+        class=&quot;item&quot;
+        v-for=&quot;route in permission_routes&quot;
+        :key=&quot;route.path&quot;
+        :model=&quot;route&quot;
+        :base-path=&quot;route.path&quot;
+      &gt;&lt;/item&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
 &lt;script&gt;
-import '@/icons/svg/msg.svg'
+import Item from './Item'
+import { mapGetters } from 'vuex'
+
+export default {
+  name: 'SideMenu',
+  components: { Item },
+  computed: {
+    ...mapGetters(['permission_routes']),
+  },
+  mounted() {
+    console.log(this.permission_routes)
+  },
+}
+&lt;/script&gt;
 </code></pre>
-<h3 id="自动导入-封装组件">自动导入、封装组件</h3>
-<pre><code class="language-js">import Vue from 'vue'
-import Icon from '@/components/Icon.vue'
-// 图标自动导入
-// 利用 webpack 的 require.context
+<ul>
+<li>src/components/SideMenu/Item.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;!-- hidden 选项存在则不显示 --&gt;
+  &lt;li v-if=&quot;!model.hidden&quot;&gt;
+    &lt;div @click=&quot;toggle&quot;&gt;
+      &lt;!-- 图标 --&gt;
+      &lt;Icon v-if=&quot;model.meta &amp;&amp; model.meta.icon&quot; :icon-class=&quot;model.meta.icon&quot;&gt;&lt;/Icon&gt;
+      &lt;!-- 标题 --&gt;
+      &lt;span v-if=&quot;isFolder&quot;&gt;
+        &lt;!-- 如果是父节点 --&gt;
+        &lt;span v-if=&quot;model.meta &amp;&amp; model.meta.title&quot;&gt;
+          {{ model.meta.title }}
+        &lt;/span&gt;
+        &lt;span&gt;{{ open ? '-' : '+' }}&lt;/span&gt;
+      &lt;/span&gt;
+      &lt;template v-else&gt;
+        &lt;!-- 如果是叶子节点，渲染链接 --&gt;
+        &lt;router-link v-if=&quot;model.meta &amp;&amp; model.meta.title&quot; :to=&quot;resolvePath(model.path)&quot;&gt;
+          {{ model.meta.title }}
+        &lt;/router-link&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
 
-// 返回的 req 是一个函数，只能加载 svg 目录中符合 /\.svg$/ 的文件
-// 它的 keys() 会返回所有符合规定的文件的相对路径
-const req = require.context('./svg', false, /\.svg$/) // (不递归，只加载 .svg )
+    &lt;!-- 子树，递归组件 --&gt;
+    &lt;ul v-show=&quot;open&quot; v-if=&quot;isFolder&quot;&gt;
+      &lt;Item
+        class=&quot;item&quot;
+        v-for=&quot;route in model.children&quot;
+        :key=&quot;route.path&quot;
+        :model=&quot;route&quot;
+        :base-path=&quot;resolvePath(model.path)&quot;
+      &gt;&lt;/Item&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/template&gt;
 
-console.log(req.keys())
+&lt;script&gt;
+import path from 'path'
 
-req.keys().map(req)
-
-Vue.component('Icon', Icon)
+export default {
+  name: 'Item',
+  props: {
+    model: Object,
+    basePath: {
+      tpye: String,
+      default: '',
+    },
+  },
+  data() {
+    return {
+      open: false,
+    }
+  },
+  computed: {
+    // 判断是否有子树
+    isFolder: function() {
+      return this.model.children &amp;&amp; this.model.children.length
+    },
+  },
+  methods: {
+    // 考虑跨平台，拼接父 path 和子 path 为完整 path
+    resolvePath(routePath) {
+      return path.resolve(this.basePath, routePath)
+    },
+    toggle() {
+      if (this.isFolder) {
+        this.open = !this.open
+      }
+    },
+  },
+}
+&lt;/script&gt;
 </code></pre>
-<h2 id="权限控制">权限控制</h2>
+<ul>
+<li>src/layout/index.js</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div class=&quot;app-wrapper&quot;&gt;
+    &lt;!-- &lt;sidebar class=&quot;sidebar-container&quot; /&gt; --&gt;
+    &lt;SideMenu&gt;&lt;/SideMenu&gt;
+    &lt;div class=&quot;main-container&quot;&gt;
+      &lt;router-view /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import SideMenu from '@/components/SideMenu'
+export default {
+  components: { SideMenu },
+}
+&lt;/script&gt;
+</code></pre>
+<ul>
+<li>src/store/index.js</li>
+</ul>
+<pre><code class="language-js">  getters: {
+    roles: (state) =&gt; state.user.roles,
++   permission_routes: (state) =&gt; state.permission.routes,
+  },
+</code></pre>
+<h2 id="扩展">扩展</h2>
+<ul>
+<li>components/Sidebar/index.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div&gt;
+    &lt;el-scrollbar wrap-class=&quot;scrollbar-wrapper&quot;&gt;
+      &lt;el-menu
+        :default-active=&quot;activeMenu&quot;
+        :background-color=&quot;variables.menuBg&quot;
+        :text-color=&quot;variables.menuText&quot;
+        :unique-opened=&quot;false&quot;
+        :active-text-color=&quot;variables.menuActiveText&quot;
+        :collapse-transition=&quot;false&quot;
+        mode=&quot;vertical&quot;
+      &gt;
+        &lt;sidebar-item v-for=&quot;route in permission_routes&quot; :key=&quot;route.path&quot; :item=&quot;route&quot; :base-path=&quot;route.path&quot; /&gt;
+      &lt;/el-menu&gt;
+    &lt;/el-scrollbar&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+import { mapGetters } from 'vuex'
+import SidebarItem from './SidebarItem'
+export default {
+  components: { SidebarItem },
+  computed: {
+    ...mapGetters(['permission_routes']),
+    activeMenu() {
+      const route = this.$route
+      const { meta, path } = route
+      // 默认激活项
+      if (meta.activeMenu) {
+        return meta.activeMenu
+      }
+      return path
+    },
+    variables() {
+      return { menuText: '#bfcbd9', menuActiveText: '#409EFF', menuBg: '#304156' }
+    },
+  },
+}
+&lt;/script&gt;
+</code></pre>
+<ul>
+<li>layout/components/Sidebar/SidebarItem.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div v-if=&quot;!item.hidden&quot; class=&quot;menu-wrapper&quot;&gt;
+    &lt;template
+      v-if=&quot;
+        hasOneShowingChild(item.children, item) &amp;&amp;
+          (!onlyOneChild.children || onlyOneChild.noShowingChildren) &amp;&amp;
+          !item.alwaysShow
+      &quot;
+    &gt;
+      &lt;router-link v-if=&quot;onlyOneChild.meta&quot; :to=&quot;resolvePath(onlyOneChild.path)&quot;&gt;
+        &lt;el-menu-item :index=&quot;resolvePath(onlyOneChild.path)&quot; :class=&quot;{ 'submenu-title-noDropdown': !isNest }&quot;&gt;
+          &lt;item :icon=&quot;onlyOneChild.meta.icon || (item.meta &amp;&amp; item.meta.icon)&quot; :title=&quot;onlyOneChild.meta.title&quot; /&gt;
+        &lt;/el-menu-item&gt;
+      &lt;/router-link&gt;
+    &lt;/template&gt;
+    &lt;el-submenu v-else ref=&quot;subMenu&quot; :index=&quot;resolvePath(item.path)&quot; popperappend-to-body&gt;
+      &lt;template v-slot:title&gt;
+        &lt;item v-if=&quot;item.meta&quot; :icon=&quot;item.meta &amp;&amp; item.meta.icon&quot; :title=&quot;item.meta.title&quot; /&gt;
+      &lt;/template&gt;
+      &lt;sidebar-item
+        v-for=&quot;child in item.children&quot;
+        :key=&quot;child.path&quot;
+        :is-nest=&quot;true&quot;
+        :item=&quot;child&quot;
+        :base-path=&quot;resolvePath(child.path)&quot;
+        class=&quot;nest-menu&quot;
+      /&gt;
+    &lt;/el-submenu&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+import path from 'path'
+import Item from './Item'
+export default {
+  name: 'SidebarItem',
+  components: { Item },
+  props: {
+    item: { type: Object, required: true },
+    isNest: { type: Boolean, default: false },
+    basePath: { type: String, default: '' },
+  },
+  data() {
+    this.onlyOneChild = null
+    return {}
+  },
+  methods: {
+    hasOneShowingChild(children = [], parent) {
+      const showingChildren = children.filter((item) =&gt; {
+        if (item.hidden) {
+          return false
+        } else {
+          // 如果只有一个子菜单
+          this.onlyOneChild = item
+          return true
+        }
+      })
+      // 如果只有一个子路由，则不显示父级
+      if (showingChildren.length === 1) {
+        return true
+      }
+      // 否则显示父级
+      if (showingChildren.length === 0) {
+        this.onlyOneChild = { ...parent, path: '', noShowingChildren: true }
+        return true
+      }
+      return false
+    },
+    resolvePath(routePath) {
+      return path.resolve(this.basePath, routePath)
+    },
+  },
+}
+&lt;/script&gt;
+
+</code></pre>
+<ul>
+<li>layout/components/Sidebar/Item.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;script&gt;
+export default {
+  name: 'MenuItem',
+  functional: true,
+  props: {
+    icon: {
+      type: String,
+      default: '',
+    },
+    title: {
+      type: String,
+      default: '',
+    },
+  },
+  render(h, context) {
+    const { icon, title } = context.props
+    const vnodes = []
+    if (icon) {
+      vnodes.push(&lt;Icon icon-class={icon} /&gt;)
+    }
+    if (title) {
+      vnodes.push(&lt;span slot=&quot;title&quot;&gt;{title}&lt;/span&gt;)
+    }
+    return vnodes
+  },
+}
+&lt;/script&gt;
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Vue 中的权限控制]]></title>
+        <id>https://yuufen.com/blog/post/Xoj8uZb5R/</id>
+        <link href="https://yuufen.com/blog/post/Xoj8uZb5R/">
+        </link>
+        <updated>2020-03-13T20:40:50.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="路由权限控制">路由权限控制</h2>
 <h3 id="1-架构">1. 架构</h3>
 <figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584603744487.png" alt="" loading="lazy"></figure>
 <h3 id="2-定义路由">2. 定义路由</h3>
@@ -227,7 +931,7 @@ export default new Router({
   routes: constRoutes,
 })
 </code></pre>
-<h3 id="3-完成动态生成路由登录的逻辑">3. 完成动态生成路由（登录）的逻辑</h3>
+<h3 id="3-路由守卫完成动态生成路由登录的逻辑">3. 路由守卫：完成动态生成路由（登录）的逻辑</h3>
 <pre><code class="language-js">// src/permission.js
 // 生成全局路由
 import router from './router'
@@ -470,6 +1174,192 @@ export default new Vuex.Store({
         })
     },
 </code></pre>
+<blockquote>
+<p>如果路由来自后端：</p>
+<pre><code class="language-js">// 前端组件名和组件的映射表
+const map = {
+    // login: require('login/index').default // 同步
+    login: () =&gt; import('login/index')       // 异步
+}
+// 服务端返回的 map 类似于
+const serviceMap = [
+    {path: '/login', component: 'login', hidden: true},
+]
+// 遍历 serviceMap，将 component 替换为 map[component]，动态生成 asyncRoutes
+function mapComponent(route) {
+    route.component = map[route.component]
+    if(route.children) {
+		route.children = route.children.map(child =&gt; mapComponent(child))
+    }
+    return route
+}
+</code></pre>
+</blockquote>
+<h2 id="组件权限控制指令">组件权限控制：指令</h2>
+<ul>
+<li>使用</li>
+</ul>
+<pre><code class="language-html">    &lt;button v-permission=&quot;['admin', 'editor']&quot;&gt;editor button&lt;/button&gt;
+    &lt;button v-permission=&quot;['admin']&quot;&gt;admin button&lt;/button&gt;
+</code></pre>
+<ul>
+<li>src/directive/permission.js</li>
+</ul>
+<pre><code class="language-js">// v-permission=&quot;[]&quot;
+// 完成一个指令，通过传递进来的权限数组和当前用户的角色数组进行过滤
+// 如果用户拥有要求的角色，则可以看到
+
+import store from '@/store'
+
+// 否则删除指令挂钩 DOM 元素
+export default {
+  // el 挂载的dom
+  // binding 绑定的数组
+  inserted(el, binding) {
+    // 获取值
+    const { value: permissionRoles } = binding
+    console.log(binding)
+    // 获取用户角色
+    const roles = store.getters.roles
+    // 合法性判断
+    if (permissionRoles &amp;&amp; permissionRoles instanceof Array &amp;&amp; permissionRoles.length &gt; 0) {
+      // 判断用户角色中是否有符合要求的
+      const hasPermission = roles.some((role) =&gt; {
+        return permissionRoles.includes(role)
+      })
+      // 如果没有权限，则删除当前 DOM
+      if (!hasPermission) {
+        el.parentNode &amp;&amp; el.parentNode.removeChild(el)
+      }
+    } else {
+      throw new Error('v-permission 接收数组类型 value')
+    }
+  },
+}
+
+</code></pre>
+<ul>
+<li>main.js</li>
+</ul>
+<pre><code class="language-js">// 注册指令
+import permission from '@/directive/permission'
+Vue.directive('permission', permission)
+</code></pre>
+<blockquote>
+<p>该指令只能删除挂载指令的元素，其他的相关元素不能查找到，如 el-tabs&gt;el-tab-pane</p>
+<p>此时只能用 v-if 实现，如 <code>v-if=&quot;checkPermission(['admin'])&quot;</code></p>
+<p>v-if 在编译过程就会体现，所以如果没有权限根本不会被渲染，就用不着去删除了</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[从封装一个 svg 图标组件开始]]></title>
+        <id>https://yuufen.com/blog/post/OIY1225PH/</id>
+        <link href="https://yuufen.com/blog/post/OIY1225PH/">
+        </link>
+        <updated>2020-03-13T19:03:43.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="查看配置">查看配置</h2>
+<pre><code>vue inspect
+vue inspect --rules
+vue inspect --rule vue
+</code></pre>
+<h2 id="配置-svg-loader">配置 svg loader</h2>
+<p>已有配置：</p>
+<pre><code class="language-js">/* config.module.rule('svg') */
+{
+  test: /\.(svg)(\?.*)?$/,
+  use: [
+    {
+      loader: 'file-loader',        
+      options: {
+        name: 'img/[name].[hash:8].[ext]'
+      }
+    }
+  ]
+}
+</code></pre>
+<blockquote>
+<p>目标：</p>
+<ol>
+<li>svg 配置忽略 src/icons</li>
+<li>创建新的配置使用 scg-sprite-loader 来加载 src/icons</li>
+</ol>
+</blockquote>
+<p>实现：</p>
+<pre><code class="language-js">const port = 7070
+const title = 'Vue Learning Record'
+
+const path = require('path')
+// 将传入的相对路径转换为绝对路径，跨平台
+function resolve(dir) {
+  return path.join(__dirname, dir)
+}
+
+module.exports = {
+  publicPath: '/practice',
+  devServer: {
+    port,
+  },
+  configureWebpack: {
+    // 不够灵活
+    name: title,
+  },
+  chainWebpack(config) {
+    // 修改已有配置，忽略 src/icons
+    config.module.rule('svg')
+      .exclude.add(resolve('src/icons'))
+
+    // 新建配置，使用 svg-sprite-loader 加载 src/icons
+    config.module.rule('icons')
+      .test(/\.svg$/)
+      .include.add(resolve('src/icons')) // add 会改变上下文进入数组
+        .end() // 结束数组操作，上下文回退
+      .use('svg-sprite-loader') // 添加 loader
+      .loader('svg-sprite-loader') // 切换上下文到 loader
+        .options({ symbolId: 'icon-[name]' }) // 指定选项
+        .end()
+  }
+}
+</code></pre>
+<pre><code class="language-js">/* config.module.rule('icons') */
+{
+  test: /\.svg$/,
+  include: [
+    'C:\\Users\\u\\Desktop\\vue-learning-record\\src\\icons'
+  ],
+  use: [
+    {
+      loader: 'svg-sprite-loader',
+      options: {
+        symbolId: 'icon-[name]'
+      }
+    }
+  ]
+}
+</code></pre>
+<p>使用：</p>
+<pre><code class="language-html">  &lt;svg&gt;
+    &lt;use :xlink:href=&quot;#icon-msg&quot; /&gt;
+  &lt;/svg&gt;
+&lt;script&gt;
+import '@/icons/svg/msg.svg'
+</code></pre>
+<h2 id="自动导入-封装组件">自动导入、封装组件</h2>
+<pre><code class="language-js">import Vue from 'vue'
+import Icon from '@/components/Icon.vue'
+// 图标自动导入
+// 利用 webpack 的 require.context
+
+// 返回的 req 是一个函数，只能加载 svg 目录中符合 /\.svg$/ 的文件
+// 它的 keys() 会返回所有符合规定的文件的相对路径
+const req = require.context('./svg', false, /\.svg$/) // (不递归，只加载 .svg )
+
+console.log(req.keys())
+
+req.keys().map(req)
+
+Vue.component('Icon', Icon)
+</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -493,1743 +1383,5 @@ export default new Vuex.Store({
 <center>
         <a href="https://yuufen.com/blog/post/cRGCDD5es/">模板编译</a>
 </center>]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Vue 源码解析：模板编译]]></title>
-        <id>https://yuufen.com/blog/post/cRGCDD5es/</id>
-        <link href="https://yuufen.com/blog/post/cRGCDD5es/">
-        </link>
-        <updated>2020-03-10T21:20:32.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="模板编译的目的">模板编译的目的</h2>
-<p>模板编译的主要目标是将模板（template）转换为渲染函数（render）</p>
-<p>Vue 2.0 需要用 VNode 描述视图以及各种交互，手写显然不切实际，因此用户可只编写类似 HTML 代码的 Vue 模板，通过编译器将模板转换为可返回 VNode 的 render 函数。</p>
-<h2 id="输入输出">输入输出</h2>
-<p>带编译器的版本中，可以使用 template 或 el 的方式声明模板</p>
-<pre><code class="language-html">&lt;div id=&quot;demo&quot;&gt;
-  &lt;h1&gt;测试&lt;/h1&gt;
-  &lt;p&gt;{{foo}}&lt;/p&gt;
-&lt;/div&gt;
-&lt;script&gt;
-  // 使用 el
-  const app = new Vue({
-    date: { foo: 'foo' },
-    el: &quot;#demo&quot;
-  })
-  // 输出渲染函数
-  console.log(app.$options.render)
-&lt;/script&gt;
-</code></pre>
-<blockquote>
-<p>得到输出结果大致如下：</p>
-<pre><code class="language-js">ƒunction anonymous() { 
-     with (this) {
-       return _c('div', { attrs: { &quot;id&quot;: &quot;demo&quot; } }, [
-          _c('h1', [_v(&quot;Vue.js测试&quot;)]), 
-          _v(&quot; &quot;), 
-          _c('p', [_v(_s(foo))])
-       ])
-     }
-}
-</code></pre>
-<p>元素节点使用 createElement 创建，别名 _c</p>
-<p>文本节点使用 createTextVNode 创建，别名 _v</p>
-<p>表达式先使用 toString 格式化，别名 _s</p>
-</blockquote>
-<h2 id="过程">过程</h2>
-<p>实现模板编译共有三个阶段：解析、优化和生成。</p>
-<pre><code class="language-js">// src\compiler\index.js
-export const createCompiler = createCompilerCreator(function baseCompile (
-  template: string,
-  options: CompilerOptions
-): CompiledResult {
-  // 解析，将模板转换为抽象语法树
-  const ast = parse(template.trim(), options)
-  if (options.optimize !== false) {
-    // 优化得到的抽象语法树
-    optimize(ast, options)
-  }
-  // 生成，将 AST 转换成渲染函数中的内容，即代码字符串
-  // 作为 code 的属性，之后用 new Function(str) 生成函数
-  const code = generate(ast, options)
-  return {
-    ast,
-    render: code.render,
-    staticRenderFns: code.staticRenderFns
-  }
-})
-</code></pre>
-<h3 id="解析-parse">解析 - parse</h3>
-<p>解析器将模板解析为抽象语法树 AST，只有将模板解析成 AST 后，才能基于它做优化或者生成代码字符串。</p>
-<p>调试查看得到的 AST，结构如下：</p>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584314460429.png" alt="" loading="lazy"></figure>
-<p>解析器内部分了 <strong>HTML 解析器</strong>、<strong>文本解析器</strong>和<strong>过滤器解析器</strong>，其中最主要的是 HTML 解析器，核心算法如下：</p>
-<pre><code class="language-js">// src\compiler\parser\index.js
-parseHTML(tempalte, {
-  start(tag, attrs, unary){}, // 遇到开始标签的处理理    
-  end(){},// 遇到结束标签的处理理    
-  chars(text){},// 遇到⽂文本标签的处理理   
-  comment(text){}// 遇到注释标签的处理理 
-})
-</code></pre>
-<h3 id="优化-optimize">优化 - optimize</h3>
-<p>优化器的作用是在 AST 中找出静态子树并打上标记。静态子树是在 AST 中永远不变的节点，如纯文本节点。</p>
-<p>标记静态子树的好处：</p>
-<ul>
-<li>每次重新渲染，不需要为静态子树创建新节点</li>
-<li>虚拟 DOM 中 patch 时，可以跳过静态子树</li>
-</ul>
-<p>代码实现：</p>
-<pre><code class="language-js">// src\compiler\optimizer.js
-export function optimize (root: ?ASTElement, options: CompilerOptions) {
-  if (!root) return
-  isStaticKey = genStaticKeysCached(options.staticKeys || '')
-  isPlatformReservedTag = options.isReservedTag || no
-  // first pass: 找出静态节点并标记
-  markStatic(root)
-  // second pass: 找出静态根节点（即所有子节点都是静态节点）并标记
-  markStaticRoots(root, false)
-}
-</code></pre>
-<p>标记结束：</p>
-<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1584316301907.png" alt="" loading="lazy"></figure>
-<h3 id="代码生成-generate">代码生成 -generate</h3>
-<p>将 AST 转换成渲染函数中的内容，即代码字符串。</p>
-<p>代码实现：</p>
-<pre><code class="language-js">// src\compiler\codegen\index.js
-export function generate (
-  ast: ASTElement | void,
-  options: CompilerOptions
-): CodegenResult {
-  const state = new CodegenState(options)
-  const code = ast ? genElement(ast, state) : '_c(&quot;div&quot;)'
-  return {
-    render: `with(this){return ${code}}`,
-    staticRenderFns: state.staticRenderFns
-  }
-}
-
-// 生成的 code 长这样 
-// `_c('div',{attrs:{&quot;id&quot;:&quot;demo&quot;}},[ 
-//   _c('h1',[_v(&quot;Vue.js测试&quot;)]), 
-//   _c('p',[_v(_s(foo))]) 
-// ])`
-
-</code></pre>
-<h3 id="v-if-v-for">v-if、v-for</h3>
-<p>着重观察几个结构性指令的解析过程：</p>
-<pre><code class="language-js">// src\compiler\parser\index.js
-// 解析 v-if
-function processIf (el) {
-  const exp = getAndRemoveAttr(el, 'v-if') // 获取 v-if=&quot;exp&quot; 中的 exp，并删除 v-if 属性
-  if (exp) {
-    el.if = exp // 为 AST 添加 if 表示条件
-    addIfCondition(el, { // 为 AST 添加 ifConditions 表示各种情况对应结果
-      exp: exp,
-      block: el
-    })
-  } else { 
-    // 其他情况处理
-    if (getAndRemoveAttr(el, 'v-else') != null) {
-      el.else = true
-    }
-    const elseif = getAndRemoveAttr(el, 'v-else-if')
-    if (elseif) {
-      el.elseif = elseif
-    }
-  }
-}
-</code></pre>
-<pre><code class="language-js">// src\compiler\codegen\index.js
-// ifConditions 代码生成
-function genIfConditions (
-  conditions: ASTIfConditions,
-  state: CodegenState,
-  altGen?: Function,
-  altEmpty?: string
-): string {
-  if (!conditions.length) {
-    return altEmpty || '_e()'
-  }
-
-  const condition = conditions.shift() // 每次处理一个条件
-  if (condition.exp) { // 每种条件生成一个 三目表达式
-    return `(${condition.exp})?${
-      genTernaryExp(condition.block)
-    }:${
-      genIfConditions(conditions, state, altGen, altEmpty)
-    }`
-  } else {
-    return `${genTernaryExp(condition.block)}`
-  }
-
-  // v-if with v-once should generate code like (a)?_m(0):_m(1)
-  function genTernaryExp (el) {
-    return altGen
-      ? altGen(el, state)
-      : el.once
-        ? genOnce(el, state)
-        : genElement(el, state)
-  }
-}
-</code></pre>
-<p>解析结果：</p>
-<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1584320046441.png" alt="" loading="lazy"></figure>
-<p>生成结果：</p>
-<pre><code class="language-js">&quot;with(this){return _c('div',{attrs:{&quot;id&quot;:&quot;demo&quot;}},[  
-  (foo) ? _c('h1',[_v(_s(foo))]) : _c('h1',[_v(&quot;no title&quot;)]), 
-    _v(&quot; &quot;),_c('abc')],1)}&quot;
-
-</code></pre>
-<blockquote>
-<p>所以可知 v-if、v-for 这些指令只能在编译阶段处理，如果要在 render 函数中处理条件或循环，需要使用 js 的 if 和 for</p>
-<pre><code class="language-js">Vue.component('comp', {
-  props: ['foo'],
-  render(h) {
-    if (this.foo == 'foo') {
-      return h('div', 'foo')
-    }
-    return h('div', 'bar')
-  }
-})
-</code></pre>
-</blockquote>
-<h3 id="插槽">插槽</h3>
-<p>组件编译的顺序是<strong>先编译父组件，在编译子组件</strong>。</p>
-<p><strong>普通插槽</strong>是在<strong>父元素编译和渲染阶段</strong>生成 <code>vnodes</code>，数据的<strong>作用域</strong>是<strong>父组件</strong>，子组件渲染的时候直接拿到这些</p>
-<p>渲染好的 <code>vnodes</code>。</p>
-<p><strong>作用域插槽</strong>，父组件在编译和渲染阶段并不会直接生成 <code>vnodes</code>，而是在父节点保留一个 <code>scopedSlots</code> 对象，<strong>储存着不同名称的插槽以及它们对应的渲染函数</strong>，只有<strong>在编译和渲染子组件阶段才会执行</strong>这个渲染函数生成 <code>vnodes</code>，由于是在子组件环境执行的，所以<strong>对应的数据作用域是子组件实例</strong>。</p>
-<p>解析相关代码：</p>
-<pre><code class="language-js">// src\compiler\parser\index.js
-
-// processSlotContent: 处理 &lt;template v-slot:xxx=&quot;yyy&quot;&gt;
-const slotBinding = getAndRemoveAttrByRegex(el, slotRE) // 查找 v-slot:xxx 然后 remove 该属性
-if (slotBinding) {
-  const { name, dynamic } = getSlotName(slotBinding) // name 是 xxx
-  // xxx 赋值给 slotTarget
-  el.slotTarget = name
-  el.slotTargetDynamic = dynamic
-  // yyy 赋值给 slotScope
-  el.slotScope = slotBinding.value || emptySlotScopeToken // force it into a scoped slot for perf
-}
-
-// processSlotContent: 处理 &lt;slot&gt;
-function processSlotOutlet (el) {
-  if (el.tag === 'slot') {
-    // 获取 slot 的 name 并赋值给 slotName
-    el.slotName = getBindingAttr(el, 'name')
-  }
-}
-</code></pre>
-<p>生成相关代码</p>
-<pre><code class="language-js">// src\compiler\codegen\index.js
-// genScopedSlot: 把 slotScope 作为形参转换为工厂函数返回内容
-  const fn = `function(${slotScope}){` +
-    `return ${el.tag === 'template'
-      ? el.if &amp;&amp; isLegacySyntax
-        ? `(${el.if})?${genChildren(el, state) || 'undefined'}:undefined`
-        : genChildren(el, state) || 'undefined'
-      : genElement(el, state)
-    }}`
-  // reverse proxy v-slot without scope on this.$slots
-  const reverseProxy = slotScope ? `` : `,proxy:true`
-  return `{key:${el.slotTarget || `&quot;default&quot;`},fn:${fn}${reverseProxy}}`
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Vue 源码解析：从虚拟 DOM 到 DOM，mount]]></title>
-        <id>https://yuufen.com/blog/post/xFIRxtfFh/</id>
-        <link href="https://yuufen.com/blog/post/xFIRxtfFh/">
-        </link>
-        <updated>2020-03-08T12:28:02.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="虚拟-dom">虚拟 DOM</h2>
-<h3 id="优点">优点</h3>
-<p>虚拟 DOM 轻量、快速，当它们发生变化时，通过新旧虚拟DOM比对可以得到最小 DOM 操作量，从而提升性能和用户体验。本质上是使用 JavaScript 运算成本替换 DOM 操作的执行成本，前者运算速度比后者快很多。</p>
-<p>Vue 1.0 中有细粒度的数据变化侦测，它是不需要虚拟DOM的，但是细粒度造成了大量开销，这对于大型项目来说是不可接受的。</p>
-<p>因此，Vue 2.0 选择了中等粒度的解决方案，每一个组件创建一个 Watcher 实例，这样状态变化时只能通知到组件，所以再通过引入虚拟DOM去进行对比和渲染（同时可以解决跨平台的问题）。</p>
-<h2 id="从表到里">从表到里</h2>
-<blockquote>
-<pre><code>new Vue().$mount('#app')
-</code></pre>
-</blockquote>
-<h3 id="1-mount">1. $mount</h3>
-<p>src\platforms\web\runtime\index.js</p>
-<pre><code class="language-js">// public mount method
-Vue.prototype.$mount = function (
-  el?: string | Element,
-  hydrating?: boolean
-): Component {
-  // 拿到对应 DOM 元素
-  el = el &amp;&amp; inBrowser ? query(el) : undefined
-  return mountComponent(this, el, hydrating)
-}
-</code></pre>
-<ul>
-<li>mountComponent</li>
-</ul>
-<h3 id="2-mountcomponent">2. mountComponent</h3>
-<p>src\core\instance\lifecycle.js</p>
-<pre><code class="language-js">export function mountComponent (
-  vm: Component,
-  el: ?Element,
-  hydrating?: boolean
-): Component {
-  // 挂载 el
-  vm.$el = el
-
-  // 如果带编译器，会在调用前编译出 render 函数
-  if (!vm.$options.render) {
-    vm.$options.render = createEmptyVNode
-    // 省略报错
-  }
-  // 调用生命周期钩子 beforeMount。init和编译都发生在这之前
-  // （从initMixin的created到调用$mount执行到这里，做了很多事情）
-  callHook(vm, 'beforeMount')
-
-  // 定义了更新函数
-  let updateComponent
-  updateComponent = () =&gt; {
-    // vm._render 中调用了 $options 上的 render，返回 VNode
-    // 然后 VNode 作为参数传入 vm._update，做真实 DOM 更新
-    vm._update(vm._render(), hydrating)
-  }
-
-  // 在创建组件时会 new 一个和组件对应 Watcher 实例（即render watcher），
-  // render watcher 会独立于组件的其他 watcher 单独保存
-  // 它会在数据更新时通知 组件 更新 DOM（中等粒度）
-  // 即调用 updateComponent。
-  // （使用 $watcher / watcher选项 会额外创建 Watcher 实例）
-  new Watcher(vm, updateComponent, noop, {
-    before () {
-      if (vm._isMounted &amp;&amp; !vm._isDestroyed) {
-        callHook(vm, 'beforeUpdate')
-      }
-    }
-  }, true /* isRenderWatcher */)
-  hydrating = false
-
-  // manually mounted instance, call mounted on self
-  // mounted is called for render-created child components in its inserted hook
-  if (vm.$vnode == null) {
-    vm._isMounted = true
-    // 调用生命周期钩子 mounted。beforeMounted 到 mounted 的过程，
-    // 调用了已有的render函数生成了虚拟 DOM，然后生成了真实 DOM
-    callHook(vm, 'mounted')
-  }
-  return vm
-}
-</code></pre>
-<ul>
-<li>_render</li>
-<li>_update</li>
-</ul>
-<h3 id="3-_render">3. _render</h3>
-<p>src\core\instance\render.js</p>
-<pre><code class="language-js">const { render, _parentVnode } = vm.$options	
-// ...
-vnode = render.call(vm._renderProxy, vm.$createElement)
-// ...
-return vnode
-</code></pre>
-<h3 id="4-_update">4. _update</h3>
-<p>src\core\instance\lifecycle.js</p>
-<pre><code class="language-js">    if (!prevVnode) {
-      // initial render
-      // 没有旧的 vnode，即第一次渲染时
-      vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
-    } else {
-      // updates
-      // 更新，新旧 vnode 之间 diff，返回新的 DOM
-      vm.$el = vm.__patch__(prevVnode, vnode)
-    }
-
-	// 然后做一些状态更新
-	// ...
-</code></pre>
-<ul>
-<li>_<em>patch</em>_</li>
-</ul>
-<h3 id="5-_patch_">5. _<em>patch</em>_</h3>
-<p>src\platforms\web\runtime\index.js</p>
-<pre><code class="language-js">import { patch } from './patch'
-Vue.prototype.__patch__ = inBrowser ? patch : noop
-</code></pre>
-<ul>
-<li>patch</li>
-</ul>
-<p>src\platforms\web\runtime\patch.js</p>
-<pre><code class="language-js">// 里面封装有各个浏览器平台中对 DOM 节点的操作
-import * as nodeOps from 'web/runtime/node-ops'
-import { createPatchFunction } from 'core/vdom/patch'
-import baseModules from 'core/vdom/modules/index'
-// 里面封装有各个浏览器平台中对属性的操作
-import platformModules from 'web/runtime/modules/index'
-
-// the directive module should be applied last, after all
-// built-in modules have been applied.
-// 扩展操作：把通用模块和浏览器中特有模块合并
-const modules = platformModules.concat(baseModules)
-
-// 工厂函数：创建用户使用的浏览器特有的 patch 函数，主要是为了实现跨平台
-export const patch: Function = createPatchFunction({ nodeOps, modules })
-</code></pre>
-<ul>
-<li>createPatchFunction</li>
-</ul>
-<p>src\core\vdom\patch.js</p>
-<pre><code class="language-js">// 这是一个工厂函数，返回了浏览器中使用的 patch 方法
-// 在 700 行左右 return
-// 详见下文
-</code></pre>
-<h2 id="patch-解析">patch 解析</h2>
-<p>vue 使用的 patching 算法基于 Snabbdom，VNode的 children / text 二选一，不可共存 。</p>
-<p>patch 将新老 VNode 节点进行比对（diff 算法），然后根据比较结果进行最小量的 DOM 操作，而不是将整个视图根据新的 VNode 重绘。</p>
-<p>那么 patch 是怎么工作的呢？</p>
-<p>首先说一下 patch 的核心 —— diff 算法：通过<strong>同层的树节点进行比较</strong>（一般的 web 开发不会出现跨层的 DOM 变化），而非对树进行逐层搜索遍历的方式，所以时间复杂度只有 O(n)，而不是 O(n^3)，是一种相当高效的算法。</p>
-<p>同层级只做三件事：增删改。new VNode 不存在就删；old VNode 不存在就增；都存在就比较（标签）类型和 key，有一项不同就直接整体替换，都相同执行更新（递归）。</p>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584040706895.png" alt="" loading="lazy"></figure>
-<h3 id="1-createpatchfunction">1. createPatchFunction</h3>
-<p>这是一个工厂函数，在 700 行左右返回了浏览器中使用的 patch 方法</p>
-<pre><code class="language-js">  return function patch (oldVnode, vnode, hydrating, removeOnly) {
-    // 如果没有新的 vnode：删
-    if (isUndef(vnode)) {
-      if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
-      return
-    }
-
-    let isInitialPatch = false
-    const insertedVnodeQueue = []
-
-    if (isUndef(oldVnode)) {
-      // 如果老节点不存在：增
-      // empty mount (likely as component), create new root element
-      isInitialPatch = true
-      createElm(vnode, insertedVnodeQueue)
-    } else {
-      // oldVnode，vnode 都存在，有三种情况
-      // 1. oldVnode 不是 DOM，并且新老 VNode 是 &quot;sameVnode&quot;，就调用 patchVnode
-      // 2. oldVnode 不是 DOM，但是新老 VNode 不是 &quot;sameVnode&quot;，就整体替换
-      // 3. oldVnode 是真实 DOM，初始化过程（或者是 SSR 相关，还没看），就整体替换
-      
-      // 如果 oldVnode 存在nodeType，说明传进来的是一个真实 DOM
-      const isRealElement = isDef(oldVnode.nodeType)
-      if (!isRealElement &amp;&amp; sameVnode(oldVnode, vnode)) {
-        // 自定义组件的补丁操作
-        // patch existing root node
-        patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
-      } else {
-        if (isRealElement) {
-          // mounting to a real element
-          // check if this is server-rendered content and if we can perform
-          // a successful hydration.
-          if (oldVnode.nodeType === 1 &amp;&amp; oldVnode.hasAttribute(SSR_ATTR)) {
-            oldVnode.removeAttribute(SSR_ATTR)
-            hydrating = true
-          }
-          if (isTrue(hydrating)) {
-            if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
-              invokeInsertHook(vnode, insertedVnodeQueue, true)
-              return oldVnode
-            } else if (process.env.NODE_ENV !== 'production') {
-              warn(
-                'The client-side rendered virtual DOM tree is not matching ' +
-                'server-rendered content. This is likely caused by incorrect ' +
-                'HTML markup, for example nesting block-level elements inside ' +
-                '&lt;p&gt;, or missing &lt;tbody&gt;. Bailing hydration and performing ' +
-                'full client-side render.'
-              )
-            }
-          }
-          // either not server-rendered, or hydration failed.
-          // create an empty node and replace it
-          oldVnode = emptyNodeAt(oldVnode)
-        }
-
-        // replacing existing element
-        // 下面是替换操作，可以打断点看看
-        const oldElm = oldVnode.elm
-        const parentElm = nodeOps.parentNode(oldElm)
-
-        // create new node
-        // 以老节点为模板，新建了一个节点（其中值已经更新）
-        createElm(
-          vnode,
-          insertedVnodeQueue,
-          // extremely rare edge case: do not insert if old element is in a
-          // leaving transition. Only happens when combining transition +
-          // keep-alive + HOCs. (#4590)
-          oldElm._leaveCb ? null : parentElm,
-          nodeOps.nextSibling(oldElm)
-        )
-
-        // update parent placeholder node element, recursively
-        // 这时 parent 中存在着 新老两个节点
-        if (isDef(vnode.parent)) {
-          let ancestor = vnode.parent
-          const patchable = isPatchable(vnode)
-          while (ancestor) {
-            for (let i = 0; i &lt; cbs.destroy.length; ++i) {
-              cbs.destroy[i](ancestor)
-            }
-            ancestor.elm = vnode.elm
-            if (patchable) {
-              for (let i = 0; i &lt; cbs.create.length; ++i) {
-                cbs.create[i](emptyNode, ancestor)
-              }
-              // #6513
-              // invoke insert hooks that may have been merged by create hooks.
-              // e.g. for directives that uses the &quot;inserted&quot; hook.
-              const insert = ancestor.data.hook.insert
-              if (insert.merged) {
-                // start at index 1 to avoid re-invoking component mounted hook
-                for (let i = 1; i &lt; insert.fns.length; i++) {
-                  insert.fns[i]()
-                }
-              }
-            } else {
-              registerRef(ancestor)
-            }
-            ancestor = ancestor.parent
-          }
-        }
-
-        // destroy old node
-        // 直到这里，老节点被销毁
-        if (isDef(parentElm)) {
-          removeVnodes([oldVnode], 0, 0) // 这里 remove 了老节点，parent 中只剩新节点
-        } else if (isDef(oldVnode.tag)) {
-          invokeDestroyHook(oldVnode)
-        }
-      }
-    }
-
-    invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
-    return vnode.elm
-  }
-</code></pre>
-<h3 id="2-samevnode">2. sameVnode</h3>
-<pre><code class="language-js">function sameVnode (a, b) {
-  return (
-    a.key === b.key &amp;&amp; (
-      (
-        a.tag === b.tag &amp;&amp;
-        a.isComment === b.isComment &amp;&amp;
-        isDef(a.data) === isDef(b.data) &amp;&amp;
-        sameInputType(a, b)
-      ) || (
-        isTrue(a.isAsyncPlaceholder) &amp;&amp;
-        a.asyncFactory === b.asyncFactory &amp;&amp;
-        isUndef(b.asyncFactory.error)
-      )
-    )
-  )
-}
-</code></pre>
-<h3 id="2-patchvnode">2. patchVnode</h3>
-<p>两个 VNode 是 “sameVnode”，就执行更新操作，包括：<strong>属性更新 props</strong>、<strong>文本更新 text</strong>、<strong>子节点更新 如reorder</strong>。（VNode 的 children / text 二者只能存在一个）</p>
-<p>patchVNode 具体规则如下：</p>
-<ol>
-<li>
-<p>如果新旧 VNode 都是<strong>静态的</strong>（不会改变），同时它们的 key 相同（代表同一节点），并且新的 VNode 是 clone 或者标记了 v-once，那么只需要替换 elm 以及 <code>componentInstance</code> 即可；</p>
-</li>
-<li>
-<p>如果新老节点都有 <code>children</code> 子节点，则对子节点进行 diff 操作，调用 updateChildren，它是 diff 的核心之一；</p>
-</li>
-<li>
-<p>如果老节点没有子节点，而新节点存在子节点，则先清空老节点 DOM 的文本内容，然后为当前 DOM 节点加入子节点；</p>
-</li>
-<li>
-<p>当新节点没有子节点，而老节点存在子节点时，则移除该 DOM 节点的所有子节点；</p>
-</li>
-<li>
-<p>当新老节点都无子节点时，就只是文本的替换。</p>
-</li>
-</ol>
-<pre><code class="language-js">  function patchVnode (
-    oldVnode,
-    vnode,
-    insertedVnodeQueue,
-    ownerArray,
-    index,
-    removeOnly
-  ) {
-    // 新旧 VNode 相同就直接返回
-    if (oldVnode === vnode) {
-      return
-    }
-
-    if (isDef(vnode.elm) &amp;&amp; isDef(ownerArray)) {
-      // clone reused vnode
-      vnode = ownerArray[index] = cloneVNode(vnode)
-    }
-
-    // elm 保存着对应的 DOM，这里新的从老的那里获取到 elm
-    const elm = vnode.elm = oldVnode.elm
-
-    // 异步组件的特殊处理
-    if (isTrue(oldVnode.isAsyncPlaceholder)) {
-      if (isDef(vnode.asyncFactory.resolved)) {
-        hydrate(oldVnode.elm, vnode, insertedVnodeQueue)
-      } else {
-        vnode.isAsyncPlaceholder = true
-      }
-      return
-    }
-
-    // reuse element for static trees.
-    // note we only do this if the vnode is cloned -
-    // if the new node is not cloned it means the render functions have been
-    // reset by the hot-reload-api and we need to do a proper re-render.
-    // 静态节点可复用，更新 componentIstance ，然后跳过
-    if (isTrue(vnode.isStatic) &amp;&amp;
-      isTrue(oldVnode.isStatic) &amp;&amp;
-      vnode.key === oldVnode.key &amp;&amp;
-      (isTrue(vnode.isCloned) || isTrue(vnode.isOnce))
-    ) {
-      vnode.componentInstance = oldVnode.componentInstance
-      return
-    }
-
-    let i
-    const data = vnode.data
-    if (isDef(data) &amp;&amp; isDef(i = data.hook) &amp;&amp; isDef(i = i.prepatch)) {
-      i(oldVnode, vnode)
-    }
-
-    const oldCh = oldVnode.children
-    const ch = vnode.children
-
-    // 更新属性？
-    if (isDef(data) &amp;&amp; isPatchable(vnode)) {
-      for (i = 0; i &lt; cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
-      if (isDef(i = data.hook) &amp;&amp; isDef(i = i.update)) i(oldVnode, vnode)
-    }
-
-    // 前提：vnode 的 children / text 只能存在一个
-    if (isUndef(vnode.text)) {
-      // 新的 没有 text（即只可能存在 children）时：
-      if (isDef(oldCh) &amp;&amp; isDef(ch)) {
-        // 如果新老 都有子节点
-        if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
-      } else if (isDef(ch)) {
-        // 如果老的没有子节点，新的有子节点：
-        if (process.env.NODE_ENV !== 'production') {
-          checkDuplicateKeys(ch)
-        }
-        if (isDef(oldVnode.text)){
-          // 如果老的有 text：清空
-          nodeOps.setTextContent(elm, '')
-        }
-        // 往 elm 中加东西
-        addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
-      } else if (isDef(oldCh)) {
-        // 如果老的有子节点，新的没有子节点：删掉
-        removeVnodes(oldCh, 0, oldCh.length - 1)
-      } else if (isDef(oldVnode.text)) {
-        // 如果老的没有子节点，有 text；新的没有子节点也没有 text：清空
-        nodeOps.setTextContent(elm, '')
-      }
-    } else if (oldVnode.text !== vnode.text) {
-      // 新节点有text，新老 text 不同（如果相同就不改了）时：
-      nodeOps.setTextContent(elm, vnode.text)
-    }
-
-    // 钩子，暂时不看了
-    if (isDef(data)) {
-      if (isDef(i = data.hook) &amp;&amp; isDef(i = i.postpatch)) i(oldVnode, vnode)
-    }
-  }
-</code></pre>
-<ul>
-<li>updateChildren</li>
-</ul>
-<h3 id="31-updatechildren">3.1 updateChildren</h3>
-<p>updateChildren 的主要作用是用一种较高效的方式比对新旧两个 VNode 的 children，得出最小操作。</p>
-<p>传统方式是执行一个双循环，Vue 中针对 web  场景特点做了特别的算法优化：</p>
-<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1584051570854.png" alt="" loading="lazy"></figure>
-<p>新老两组 VNode 节点的左右头尾两侧都有一个变量标记，在遍历过程中这几个变量都会向中间靠拢。当 oldStartIdx &gt; oldEndIdx 或者 newStartIdx &gt; newEndIdx 时，结束循环（不需要再 updateChildren，而是做其他操作）。</p>
-<p>下面是遍历规则：</p>
-<p>首先，oldStartVNode、oldEndVNode 与 newStartVNode、newEndVNode <strong>两两交叉比较</strong>，共有 4 种比较方法。其中当 oldStartVNode 和 newStartVNode 或者 oldEndVNode 和 newEndVNode 满足 sameVNode，直接将该 VNode 节点进行 patchVNode 即可，不需要再遍历就完成了一次循环（之后对后面的元素进行下一次循环）：</p>
-<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1584051578325.png" alt="" loading="lazy"></figure>
-<p>如果 oldStartVNode 与 newEndVNode 满足 sameVNode，说明 oldStartVNode 已经被移动到 oldEndVNode 后面了，进行patchVNode 的同时还要将真实 DOM 节点移动到 oldEndVNode 的后面（之后对后面的元素进行下一次循环）：</p>
-<figure data-type="image" tabindex="4"><img src="https://yuufen.com/blog/post-images/1584051582834.png" alt="" loading="lazy"></figure>
-<p>如果 oldEndVNode 与 oldEndVNode newStartVNode 满足 sameVNode，说明 oldEndVNode 已经被移动到 newStartVNode 前面了，进行patchVNode 的同时还要将真实 DOM 节点移动到 newStartVNode 的前面（之后对后面的元素进行下一次循环）：</p>
-<figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1584051587249.png" alt="" loading="lazy"></figure>
-<p>如果以上情况都不符合，则在 old VNode 中找与 newStartVNode 满足 sameVNode 的 VNode（标记为 vnodeToMove），若存在，则执行 patchVNode，同时将 vnodeToMove 对应 DOM 移动到 oldStartVNode 对应 DOM 的前面（然后将 new VNode 中游标后移一个，进入下一次循环）：</p>
-<figure data-type="image" tabindex="6"><img src="https://yuufen.com/blog/post-images/1584051592284.png" alt="" loading="lazy"></figure>
-<p>也有可能 newStartVNode 在 old VNode 中找不到 sameVNode，这是会调用 createElm 创建一个新的 DOM 节点：</p>
-<figure data-type="image" tabindex="7"><img src="https://yuufen.com/blog/post-images/1584051596648.png" alt="" loading="lazy"></figure>
-<p>直到循环结束，但是我们还需要处理剩下的节点：</p>
-<ol>
-<li>如果结束时 oldStartIdx &gt; oldEndIdx，说明这个时候旧的 VNode 节点已经遍历完了，但是新的节点还没有；说明新的 VNode 节点实际上比老的 VNode 节点多，需要将剩下的 VNode 对应的 DOM 插入到真实 DOM 中，此时调用 addVNodes（其中批量调用 createE lm 接口）：</li>
-</ol>
-<figure data-type="image" tabindex="8"><img src="https://yuufen.com/blog/post-images/1584051601336.png" alt="" loading="lazy"></figure>
-<ol start="2">
-<li>如果 newStart &gt; newEndIdx，说明新的 VNode 节点已经遍历完了，但是老的节点还有多，需要执行 remove 操作</li>
-</ol>
-<figure data-type="image" tabindex="9"><img src="https://yuufen.com/blog/post-images/1584051605554.png" alt="" loading="lazy"></figure>
-<pre><code class="language-js">  function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
-    let oldStartIdx = 0
-    let newStartIdx = 0
-    let oldEndIdx = oldCh.length - 1
-    let oldStartVnode = oldCh[0]
-    let oldEndVnode = oldCh[oldEndIdx]
-    let newEndIdx = newCh.length - 1
-    let newStartVnode = newCh[0]
-    let newEndVnode = newCh[newEndIdx]
-    let oldKeyToIdx, idxInOld, vnodeToMove, refElm
-
-    // removeOnly is a special flag used only by &lt;transition-group&gt;
-    // to ensure removed elements stay in correct relative positions
-    // during leaving transitions
-    const canMove = !removeOnly
-
-    if (process.env.NODE_ENV !== 'production') {
-      checkDuplicateKeys(newCh)
-    }
-
-    while (oldStartIdx &lt;= oldEndIdx &amp;&amp; newStartIdx &lt;= newEndIdx) {
-      if (isUndef(oldStartVnode)) {
-        oldStartVnode = oldCh[++oldStartIdx] // Vnode has been moved left
-      } else if (isUndef(oldEndVnode)) {
-        oldEndVnode = oldCh[--oldEndIdx]
-      } else if (sameVnode(oldStartVnode, newStartVnode)) {
-        patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
-        oldStartVnode = oldCh[++oldStartIdx]
-        newStartVnode = newCh[++newStartIdx]
-      } else if (sameVnode(oldEndVnode, newEndVnode)) {
-        patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
-        oldEndVnode = oldCh[--oldEndIdx]
-        newEndVnode = newCh[--newEndIdx]
-      } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
-        patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
-        canMove &amp;&amp; nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm))
-        oldStartVnode = oldCh[++oldStartIdx]
-        newEndVnode = newCh[--newEndIdx]
-      } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
-        patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
-        canMove &amp;&amp; nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm)
-        oldEndVnode = oldCh[--oldEndIdx]
-        newStartVnode = newCh[++newStartIdx]
-      } else {
-        // 新老首尾两两不同，开始遍历 
-        if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
-        idxInOld = isDef(newStartVnode.key)
-          ? oldKeyToIdx[newStartVnode.key]
-          : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx)
-        if (isUndef(idxInOld)) { // New element
-          // 新元素在老的里面不存在
-          createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx)
-        } else {
-          vnodeToMove = oldCh[idxInOld]
-          if (sameVnode(vnodeToMove, newStartVnode)) {
-            // 找到了相同的
-            patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
-            oldCh[idxInOld] = undefined
-            canMove &amp;&amp; nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm)
-          } else {
-            // same key but different element. treat as new element
-            createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx)
-          }
-        }
-        newStartVnode = newCh[++newStartIdx]
-      }
-    }
-    // 循环结束之后，新老 VNode 可能有还有一个的孩子节点没有处理完
-    if (oldStartIdx &gt; oldEndIdx) {
-      // 新的还剩，批量新增
-      refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
-      addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
-    } else if (newStartIdx &gt; newEndIdx) {
-      //老的还剩，批量删除
-      removeVnodes(oldCh, oldStartIdx, oldEndIdx)
-    }
-  }
-</code></pre>
-<h3 id="32-属性更新">3.2 属性更新</h3>
-<pre><code class="language-js">// patch.js
-const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
-export function createPatchFunction (backend) {
-  let i, j
-  const cbs = {}
-
-  // 传进来的扩展模块和节点操作对象
-  const { modules, nodeOps } = backend
-
-  for (i = 0; i &lt; hooks.length; ++i) {
-    // cbs['update'] = []
-    cbs[hooks[i]] = []
-    //modules: [ attrs, klass, events, domProps, style, transition]
-    for (j = 0; j &lt; modules.length; ++j) {
-      // modules[0]['update'] 是创建属性执⾏行行函数，其他hook以此类推
-      if (isDef(modules[j][hooks[i]])) {
-        cbs[hooks[i]].push(modules[j][hooks[i]])
-      }
-    }
-    // cbs['update']: [fn,fn,fn....]
-  }
-  // ...
-    
-  function patchVnode (...) {
-    // 更新属性
-    if (isDef(data) &amp;&amp; isPatchable(vnode)) {
-      // 每次 patch 先更新属性
-      for (i = 0; i &lt; cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
-      if (isDef(i = data.hook) &amp;&amp; isDef(i = i.update)) i(oldVnode, vnode)
-    }
-    // ...
-  }
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Vue 源码解析：数据响应式]]></title>
-        <id>https://yuufen.com/blog/post/LGEsZIcVg/</id>
-        <link href="https://yuufen.com/blog/post/LGEsZIcVg/">
-        </link>
-        <updated>2020-03-05T21:21:33.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="按引用顺序-概览">按引用顺序 概览</h2>
-<h3 id="srccoreinstancestatejs-initdata">src\core\instance\state.js &gt; initData</h3>
-<pre><code class="language-js">function initData (vm: Component) {
-  let data = vm.$options.data
-  data = vm._data = typeof data === 'function'
-    ? getData(data, vm)
-    : data || {}
-  if (!isPlainObject(data)) {
-	// data functions should return an object
-    data = {}
-  }
-  // proxy data on instance
-  const keys = Object.keys(data)
-  const props = vm.$options.props
-  const methods = vm.$options.methods
-  let i = keys.length
-  while (i--) {
-    const key = keys[i]
-    if ( /* key 是可以使用的（没有被占用也不是保留名） */ ) {
-      // 设置代理，把 key 直接挂载实例 this 上
-      proxy(vm, `_data`, key)
-    }
-  }
-  // observe data
-  // 核心：设置响应式
-  observe(data, true /* asRootData */)
-}
-</code></pre>
-<ul>
-<li>proxy</li>
-<li>observe</li>
-</ul>
-<h3 id="srccoreobserverindexjs-observe">src\core\observer\index.js &gt; observe</h3>
-<pre><code class="language-js">/**
- * 尝试创建观察者实例
- * returns the new observer if successfully observed,
- * or the existing observer if the value already has one.
- */
-export function observe (value: any, asRootData: ?boolean): Observer | void {
-  // 如果不是 object，直接 return 了（数组也算是 objcet）
-  if (!isObject(value) || value instanceof VNode) {
-    return
-  }
-  let ob: Observer | void
-  if (hasOwn(value, '__ob__') &amp;&amp; value.__ob__ instanceof Observer) {
-    ob = value.__ob__
-  } else if (
-    shouldObserve &amp;&amp;
-    !isServerRendering() &amp;&amp;
-    (Array.isArray(value) || isPlainObject(value)) &amp;&amp;
-    Object.isExtensible(value) &amp;&amp;
-    !value._isVue
-  ) {
-    ob = new Observer(value)
-  }
-  if (asRootData &amp;&amp; ob) {
-    ob.vmCount++
-  }
-  return ob
-}
-</code></pre>
-<ul>
-<li>Observer</li>
-</ul>
-<h3 id="srccoreobserverindexjs-observer">src\core\observer\index.js &gt; observer</h3>
-<pre><code class="language-js">/**
- * Observer class that is attached to each observed
- * object. Once attached, the observer converts the target
- * object's property keys into getter/setters that
- * collect dependencies and dispatch updates.
- */
-export class Observer {
-  value: any;
-  dep: Dep;
-  vmCount: number; // number of vms that have this object as root $data
-
-  constructor (value: any) {
-    this.value = value
-    this.dep = new Dep()
-    this.vmCount = 0
-    def(value, '__ob__', this)
-
-    // 判断当前的value是数组 / Object
-    if (Array.isArray(value)) {
-      // 如果是数组
-      // 就把数组的 7 个可以改变数据的方法全拦截了
-      if (hasProto) {
-        // 兼容性处理，如果浏览器有原型
-        protoAugment(value, arrayMethods)
-      } else {
-        // 如果浏览器没有原型
-        copyAugment(value, arrayMethods, arrayKeys)
-      }
-      // 然后循环一遍
-      this.observeArray(value)
-    } else {
-      // 如果是对象
-      this.walk(value)
-    }
-  }
-
-  /**
-   * Walk through all properties and convert them into
-   * getter/setters. This method should only be called when
-   * value type is Object.
-   */
-  walk (obj: Object) {
-    const keys = Object.keys(obj)
-    for (let i = 0; i &lt; keys.length; i++) {
-      // 每一项都走一遍
-      defineReactive(obj, keys[i])
-    }
-  }
-
-  /**
-   * Observe a list of Array items.
-   */
-  // 如果是对象列表，则每一项都走一遍 observe
-  observeArray (items: Array&lt;any&gt;) {
-    for (let i = 0, l = items.length; i &lt; l; i++) {
-      // 直接传入数组元素，省略在键上设置 getter/setter 的步骤
-      observe(items[i]) // 引用变量，传入的是指向的值
-    }
-  }
-}
-</code></pre>
-<ul>
-<li>arrayMethods</li>
-<li>defineReactive</li>
-</ul>
-<h3 id="srccoreobserverindexjs-definereactive">src\core\observer\index.js &gt; defineReactive</h3>
-<pre><code class="language-js">export function defineReactive (
-  obj: Object,
-  key: string,
-  val: any,
-  customSetter?: ?Function,
-  shallow?: boolean
-) {
-  const dep = new Dep()
-
-  const property = Object.getOwnPropertyDescriptor(obj, key)
-  if (property &amp;&amp; property.configurable === false) {
-    return
-  }
-
-  // 如果用户自己设置了getter和setter的处理
-  const getter = property &amp;&amp; property.get
-  const setter = property &amp;&amp; property.set
-  if ((!getter || setter) &amp;&amp; arguments.length === 2) {
-    // 原理和我们实现的一样
-    val = obj[key]
-  }
-
-  // 如果还是对象，递归，先执行
-  let childOb = !shallow &amp;&amp; observe(val)
-  // 子对象处理完之后：
-  Object.defineProperty(obj, key, {
-    enumerable: true,
-    configurable: true,
-    get: function reactiveGetter () {
-      // 如果用户自己设置了getter
-      const value = getter ? getter.call(obj) : val
-      if (Dep.target) {
-        // Dep.target 是一个 watcher 实例
-        // 原理和我们实现的一样，如果存在 target，就添加到 Dep 实例上
-        // 但是这里同时会把 dep 的 id 保存在 watcher 上，是多对多的关系
-        // 还有一点：这里的 watcher 是组件级的（如果不使用$watcher）
-        // 如果不使用$watcher，一个组件只有一个watcher实例（创建组件时会 new 一个）
-        // 它会把更新消息传递给组件，然后组件在进行虚拟 DOM 等操作
-        // （$watcher 还没有看到）
-        dep.depend()
-        if (childOb) {
-          // 父对象更新时子对象要更新，同时
-          // 子对象更新之后，父对象也要更新
-          // 比如从 &quot;{foo: 'foo'}&quot; 变成 &quot;{doo: 'doo'}&quot;
-          // 所以要把这个 watcher 添加给 childOb 的 dep
-          childOb.dep.depend()
-          if (Array.isArray(value)) {
-            // 如果是数组，还需要循环
-            dependArray(value)
-          }
-        }
-      }
-      return value
-    },
-    set: function reactiveSetter (newVal) {
-      const value = getter ? getter.call(obj) : val
-      /* eslint-disable no-self-compare */
-      if (newVal === value || (newVal !== newVal &amp;&amp; value !== value)) {
-        return
-      }
-      /* eslint-enable no-self-compare */
-      if (process.env.NODE_ENV !== 'production' &amp;&amp; customSetter) {
-        customSetter()
-      }
-      // #7981: for accessor properties without setter
-      if (getter &amp;&amp; !setter) return
-      if (setter) {
-        setter.call(obj, newVal)
-      } else {
-        val = newVal
-      }
-      // 比如本来是 'str'，用户改成了 {foo: 'str}
-      // 所以要递归
-      childOb = !shallow &amp;&amp; observe(newVal)
-      dep.notify()
-    }
-  })
-}
-</code></pre>
-<ul>
-<li>Dep.target （未理清）</li>
-<li>Dep</li>
-<li>Watcher</li>
-</ul>
-<h3 id="srccoreobserverwatcherjs">src\core\observer\watcher.js</h3>
-<pre><code class="language-js">  constructor (
-    vm: Component,
-    expOrFn: string | Function, // $watcher('foo.bar') / 组件的的 updateComponent
-    cb: Function,
-    options?: ?Object,
-    isRenderWatcher?: boolean
-  ) {
-    this.vm = vm
-    // 如果是render watcher，单独保存
-    if (isRenderWatcher) {
-      vm._watcher = this
-    }
-    vm._watchers.push(this)
-    // options
- 	// 一些细节
-    // 。。。
-      
-    // parse expression for getter
-    if (typeof expOrFn === 'function') {
-      // 如果是组件创建时创建的 watcher 实例（render watcher）
-      // getter 就是更新 DOM 的方法
-      // 当然也可能是watch，原理一样，都是调用方法
-      this.getter = expOrFn
-    } else {
-      // 如果是如 $watcher('foo.bar') 创建的 watcher实例
-      // getter 就是获取 vm[foo][bar] 的方法（就是我之前写的处理嵌套的方法）
-      this.getter = parsePath(expOrFn)
-      if (!this.getter) {
-        this.getter = noop
-        process.env.NODE_ENV !== 'production' &amp;&amp; warn(
-          `Failed watching path: &quot;${expOrFn}&quot; ` +
-          'Watcher only accepts simple dot-delimited paths. ' +
-          'For full control, use a function instead.',
-          vm
-        )
-      }
-    }
-    this.value = this.lazy
-      ? undefined
-      : this.get() // 这里调用了get，get中调用了上面的getter
-  }
-  /**
-   * Subscriber interface.
-   * Will be called when a dependency changes.
-   */
-  update () {
-    /* istanbul ignore else */
-    if (this.lazy) {
-      this.dirty = true
-    } else if (this.sync) {
-      this.run()
-    } else {
-      // watcher 队列，批量执行，使用 nextTick 减少 DOM 操作
-      queueWatcher(this)
-    }
-  }
-</code></pre>
-<ul>
-<li>
-<p>queueWatcher</p>
-<ul>
-<li>
-<p>nextTick</p>
-<ul>
-<li>timerFunc</li>
-</ul>
-<blockquote>
-<p>各种兼容回退，首选微任务。</p>
-<p>一次宏任务执行完之后浏览器会刷新一次画面，所以首选先在微任务中添加 DOM 操作，在一次宏任务中批量操作。</p>
-</blockquote>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="细节">细节</h2>
-<h3 id="数组的响应式-arraymethods">数组的响应式 arrayMethods</h3>
-<pre><code class="language-js">/*
- * not type checking this file because flow doesn't play well with
- * dynamically accessing methods on Array prototype
- */
-
-import { def } from '../util/index'
-
-const arrayProto = Array.prototype
-export const arrayMethods = Object.create(arrayProto)
-
-// 7 个可以改变数组的方法
-const methodsToPatc h = [
-  'push',
-  'pop',
-  'shift',
-  'unshift',
-  'splice',
-  'sort',
-  'reverse'
-]
-
-/**
- * Intercept mutating methods and emit events
- */
-methodsToPatch.forEach(function (method) {
-  // cache original method
-  const original = arrayProto[method]
-  // 添加额外的功能：通知更新
-  def(arrayMethods, method, function mutator (...args) {
-    const result = original.apply(this, args)
-    const ob = this.__ob__
-
-    let inserted
-    switch (method) {
-      case 'push':
-      case 'unshift':
-        inserted = args
-        break
-      case 'splice':
-        inserted = args.slice(2)
-        break
-    }
-    // 如果是插入操作，新增元素，则需要额外做响应式
-    if (inserted) ob.observeArray(inserted)
-    
-    // notify change
-    ob.dep.notify()
-    return result
-  })
-})
-</code></pre>
-<blockquote>
-<h2 id="数组小坑">数组小坑</h2>
-<pre><code class="language-js">// Observer 中
-observeArray (items: Array&lt;any&gt;) {
-  for (let i = 0, l = items.length; i &lt; l; i++) {
-    // 直接传入数组元素，省略在键上设置 getter/setter 的步骤
-    observe(items[i]) // 引用变量，传入的是指向的值
-  }
-}
-</code></pre>
-<p>所以数组的键没有配置 getter / setter，所以 Vue 中数组有响应式的操作只有这七种，直接通过索引赋值也不行（只能通过$set）。</p>
-<pre><code class="language-js">this.arr[0] = '123434312122' // 改的是键（地址），指向的值没有变，无响应式更新
-this.arr[0] = { doo: 'doo' } // 改的是键（地址），指向的值没有变，无响应式更新
-this.arr[0].foo = 'doo' // 有更新
-this.$set(this.arr, 0, { doo: 'doo' }) // 有更新
-</code></pre>
-<p>因为 js 操作数组很容易改变key，如果使用getter / setter，很容易失效。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Vue 源码解析：从入口文件到 Vue 声明，create]]></title>
-        <id>https://yuufen.com/blog/post/sW2ztpxVO/</id>
-        <link href="https://yuufen.com/blog/post/sW2ztpxVO/">
-        </link>
-        <updated>2020-03-05T08:46:02.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="经历了什么">经历了什么</h2>
-<p>src/platforms/web/entry-runtime-with-compiler.js</p>
-<pre><code class="language-js">import Vue from './runtime/index'
-
-const mount = Vue.prototype.$mount
-</code></pre>
-<p>src/platforms/web/runtime.js</p>
-<pre><code class="language-js">import Vue from 'core/index'
-
-// ...
-
-// 补丁算法，VNode diff -&gt; DOM
-Vue.prototype.__patch__ = inBrowser ? patch : noop
-
-// public mount method
-Vue.prototype.$mount = function (
-  el?: string | Element,
-  hydrating?: boolean
-): Component {
-  el = el &amp;&amp; inBrowser ? query(el) : undefined
-  return mountComponent(this, el, hydrating)
-}
-</code></pre>
-<ul>
-<li>mountComponent
-<ul>
-<li>虚拟 DOM</li>
-<li>diff</li>
-<li>patch</li>
-<li>......</li>
-</ul>
-</li>
-<li>_<em>patch</em>_</li>
-</ul>
-<p>src/core/index.js</p>
-<pre><code class="language-js">import Vue from './instance/index'
-
-initGlobalAPI(Vue)
-</code></pre>
-<ul>
-<li>initGlobalAPI
-<ul>
-<li>set</li>
-<li>delete</li>
-<li>nextTick</li>
-<li>......</li>
-</ul>
-</li>
-</ul>
-<p>src/core/instance/index.js 总算到站了</p>
-<pre><code class="language-js">function Vue (options) {
-  this._init(options)
-}
-
-// 合并参数、初始化 $parent 等属性、初始化事件中心、挂载 h 函数（$createElement）
-// 调用生命周期钩子 beforeCreate
-// 获取注入的数据、初始化 props、methods、data、computed、watch
-// 注入数据处理
-// 调用生命周期钩子 created
-initMixin(Vue) 
-// 实现 $set、$delete、$watch
-stateMixin(Vue)
-// 实现 $on、$once、$off、$emit
-eventsMixin(Vue)
-// 实现 _update（调用补丁算法）、$forceUpdate、$destroy
-lifecycleMixin(Vue)
-// installRenderHelpers
-// 实现了 $nextTick、_render(这里调用 $options 上的渲染函数)
-renderMixin(Vue)
-</code></pre>
-<ul>
-<li>initMixin
-<ul>
-<li>initLifecycle</li>
-<li>initEvents</li>
-<li>initRender</li>
-<li>callHook(vm, 'beforeCreate')</li>
-<li>initInjections</li>
-<li>initState (<a href="https://yuufen.com/blog/post/LGEsZIcVg/">数据响应式细节</a>)</li>
-<li>initProvide</li>
-<li>callHook(vm, 'created')</li>
-</ul>
-</li>
-<li>stateMixin
-<ul>
-<li>$set</li>
-<li>$delete</li>
-<li>$watch</li>
-</ul>
-</li>
-<li>eventsMixin
-<ul>
-<li>$on</li>
-<li>$once</li>
-<li>$off</li>
-<li>$emit</li>
-</ul>
-</li>
-<li>lifecycleMixin
-<ul>
-<li>_update（调用补丁算法）</li>
-<li>$forceUpdate</li>
-<li>$destroy</li>
-</ul>
-</li>
-<li>renderMixin
-<ul>
-<li>installRenderHelpers</li>
-<li>$nextTick</li>
-<li>_render(这里调用init挂载的渲染函数)</li>
-</ul>
-</li>
-</ul>
-<h2 id="initmixin">initMixin</h2>
-<pre><code class="language-js">export function initMixin (Vue: Class&lt;Component&gt;) {
-  Vue.prototype._init = function (options?: Object) {
-    const vm: Component = this
-    // a uid
-    vm._uid = uid++
-
-    let startTag, endTag
-    /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' &amp;&amp; config.performance &amp;&amp; mark) {
-      startTag = `vue-perf-start:${vm._uid}`
-      endTag = `vue-perf-end:${vm._uid}`
-      mark(startTag)
-    }
-
-    // a flag to avoid this being observed
-    vm._isVue = true
-    // 合并参数
-    if (options &amp;&amp; options._isComponent) {
-      // optimize internal component instantiation
-      // since dynamic options merging is pretty slow, and none of the
-      // internal component options needs special treatment.
-      initInternalComponent(vm, options)
-    } else {
-      vm.$options = mergeOptions(
-        resolveConstructorOptions(vm.constructor),
-        options || {},
-        vm
-      )
-    }
-    /* istanbul ignore else */
-    if (process.env.NODE_ENV !== 'production') { 
-      initProxy(vm) // 设置上下文
-    } else {
-      vm._renderProxy = vm
-    }
-    // expose real self
-    vm._self = vm
-    initLifecycle(vm) // 初始化与当前组件相关的属性（$parent等等）（这时parent已经存在了）
-    initEvents(vm) // 初始化事件中心
-    initRender(vm) // 定义了 vm.$createElement （render 函数里的 h 函数）
-    callHook(vm, 'beforeCreate') // 调用生命周期钩子 beforeCreate
-    initInjections(vm) // 获取注入的数据（是响应式的），在 initState 之前
-    initState(vm) // 初始化 props、methods、data、computed、watch
-    initProvide(vm) // 注入数据处理，在 initState 之后
-    callHook(vm, 'created') // 调用生命周期钩子 created
-
-    /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' &amp;&amp; config.performance &amp;&amp; mark) {
-      vm._name = formatComponentName(vm, false)
-      mark(endTag)
-      measure(`vue ${vm._name} init`, startTag, endTag)
-    }
-
-    if (vm.$options.el) {
-      vm.$mount(vm.$options.el)
-    }
-  }
-}
-</code></pre>
-<h3 id="initevents">initEvents</h3>
-<pre><code class="language-js">
-export function initEvents (vm: Component) {
-  vm._events = Object.create(null)
-  vm._hasHookEvent = false
-  // init parent attached events
-  const listeners = vm.$options._parentListeners
-  if (listeners) {
-    updateComponentListeners(vm, listeners)
-  }
-}
-</code></pre>
-<ul>
-<li>updateComponentListeners</li>
-</ul>
-<h3 id="initstate">initState</h3>
-<pre><code class="language-js">export function initState (vm: Component) {
-  vm._watchers = []
-  const opts = vm.$options
-  if (opts.props) initProps(vm, opts.props)
-  if (opts.methods) initMethods(vm, opts.methods)
-  if (opts.data) {
-    initData(vm)
-  } else {
-    observe(vm._data = {}, true /* asRootData */)
-  }
-  if (opts.computed) initComputed(vm, opts.computed)
-  if (opts.watch &amp;&amp; opts.watch !== nativeWatch) {
-    initWatch(vm, opts.watch)
-  }
-}
-</code></pre>
-<ul>
-<li>initProps</li>
-<li>initMethods</li>
-<li>initData</li>
-<li>initComputed</li>
-<li>watch</li>
-</ul>
-<h2 id="statemixin">stateMixin</h2>
-<pre><code class="language-js">export function stateMixin (Vue: Class&lt;Component&gt;) {
-  // flow somehow has problems with directly declared definition object
-  // when using Object.defineProperty, so we have to procedurally build up
-  // the object here.
-  const dataDef = {}
-  dataDef.get = function () { return this._data }
-  const propsDef = {}
-  propsDef.get = function () { return this._props }
-  if (process.env.NODE_ENV !== 'production') {
-    dataDef.set = function () {
-      warn(
-        'Avoid replacing instance root $data. ' +
-        'Use nested data properties instead.',
-        this
-      )
-    }
-    propsDef.set = function () {
-      warn(`$props is readonly.`, this)
-    }
-  }
-  // 挂载只读属性
-  Object.defineProperty(Vue.prototype, '$data', dataDef)
-  Object.defineProperty(Vue.prototype, '$props', propsDef)
-  // 挂载了 $set、$delete、$watch
-  Vue.prototype.$set = set
-  Vue.prototype.$delete = del
-
-  Vue.prototype.$watch = function (...
-  }
-}
-</code></pre>
-<h2 id="eventsmixin未完成">eventsMixin（未完成）</h2>
-<pre><code class="language-js">export function eventsMixin (Vue: Class&lt;Component&gt;) {
-  const hookRE = /^hook:/
-  Vue.prototype.$on = function (event: string | Array&lt;string&gt;, fn: Function): Component {
-    const vm: Component = this
-    if (Array.isArray(event)) {
-      for (let i = 0, l = event.length; i &lt; l; i++) {
-        vm.$on(event[i], fn)
-      }
-    } else {
-      (vm._events[event] || (vm._events[event] = [])).push(fn)
-      // optimize hook:event cost by using a boolean flag marked at registration
-      // instead of a hash lookup
-      if (hookRE.test(event)) {
-        vm._hasHookEvent = true
-      }
-    }
-    return vm
-  }
-
-  Vue.prototype.$once = function (event: string, fn: Function): Component {
-    const vm: Component = this
-    function on () {
-      vm.$off(event, on)
-      fn.apply(vm, arguments)
-    }
-    on.fn = fn
-    vm.$on(event, on)
-    return vm
-  }
-
-  Vue.prototype.$off = function (event?: string | Array&lt;string&gt;, fn?: Function): Component {
-    const vm: Component = this
-    // all
-    if (!arguments.length) {
-      vm._events = Object.create(null)
-      return vm
-    }
-    // array of events
-    if (Array.isArray(event)) {
-      for (let i = 0, l = event.length; i &lt; l; i++) {
-        vm.$off(event[i], fn)
-      }
-      return vm
-    }
-    // specific event
-    const cbs = vm._events[event]
-    if (!cbs) {
-      return vm
-    }
-    if (!fn) {
-      vm._events[event] = null
-      return vm
-    }
-    // specific handler
-    let cb
-    let i = cbs.length
-    while (i--) {
-      cb = cbs[i]
-      if (cb === fn || cb.fn === fn) {
-        cbs.splice(i, 1)
-        break
-      }
-    }
-    return vm
-  }
-
-  Vue.prototype.$emit = function (event: string): Component {
-    const vm: Component = this
-    if (process.env.NODE_ENV !== 'production') {
-      const lowerCaseEvent = event.toLowerCase()
-      if (lowerCaseEvent !== event &amp;&amp; vm._events[lowerCaseEvent]) {
-        tip(
-          `Event &quot;${lowerCaseEvent}&quot; is emitted in component ` +
-          `${formatComponentName(vm)} but the handler is registered for &quot;${event}&quot;. ` +
-          `Note that HTML attributes are case-insensitive and you cannot use ` +
-          `v-on to listen to camelCase events when using in-DOM templates. ` +
-          `You should probably use &quot;${hyphenate(event)}&quot; instead of &quot;${event}&quot;.`
-        )
-      }
-    }
-    let cbs = vm._events[event]
-    if (cbs) {
-      cbs = cbs.length &gt; 1 ? toArray(cbs) : cbs
-      const args = toArray(arguments, 1)
-      const info = `event handler for &quot;${event}&quot;`
-      for (let i = 0, l = cbs.length; i &lt; l; i++) {
-        invokeWithErrorHandling(cbs[i], vm, args, vm, info)
-      }
-    }
-    return vm
-  }
-}
-</code></pre>
-<h2 id="lifecyclemixin未完成">lifecycleMixin（未完成）</h2>
-<pre><code class="language-js">export function lifecycleMixin (Vue: Class&lt;Component&gt;) {
-  Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
-    const vm: Component = this
-    const prevEl = vm.$el
-    const prevVnode = vm._vnode
-    const restoreActiveInstance = setActiveInstance(vm)
-    vm._vnode = vnode
-    // Vue.prototype.__patch__ is injected in entry points
-    // based on the rendering backend used.
-    if (!prevVnode) {
-      // initial render
-      vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
-    } else {
-      // updates
-      vm.$el = vm.__patch__(prevVnode, vnode)
-    }
-    restoreActiveInstance()
-    // update __vue__ reference
-    if (prevEl) {
-      prevEl.__vue__ = null
-    }
-    if (vm.$el) {
-      vm.$el.__vue__ = vm
-    }
-    // if parent is an HOC, update its $el as well
-    if (vm.$vnode &amp;&amp; vm.$parent &amp;&amp; vm.$vnode === vm.$parent._vnode) {
-      vm.$parent.$el = vm.$el
-    }
-    // updated hook is called by the scheduler to ensure that children are
-    // updated in a parent's updated hook.
-  }
-
-  Vue.prototype.$forceUpdate = function () {
-    const vm: Component = this
-    if (vm._watcher) {
-      vm._watcher.update()
-    }
-  }
-
-  Vue.prototype.$destroy = function () {
-    const vm: Component = this
-    if (vm._isBeingDestroyed) {
-      return
-    }
-    callHook(vm, 'beforeDestroy')
-    vm._isBeingDestroyed = true
-    // remove self from parent
-    const parent = vm.$parent
-    if (parent &amp;&amp; !parent._isBeingDestroyed &amp;&amp; !vm.$options.abstract) {
-      remove(parent.$children, vm)
-    }
-    // teardown watchers
-    if (vm._watcher) {
-      vm._watcher.teardown()
-    }
-    let i = vm._watchers.length
-    while (i--) {
-      vm._watchers[i].teardown()
-    }
-    // remove reference from data ob
-    // frozen object may not have observer.
-    if (vm._data.__ob__) {
-      vm._data.__ob__.vmCount--
-    }
-    // call the last hook...
-    vm._isDestroyed = true
-    // invoke destroy hooks on current rendered tree
-    vm.__patch__(vm._vnode, null)
-    // fire destroyed hook
-    callHook(vm, 'destroyed')
-    // turn off all instance listeners.
-    vm.$off()
-    // remove __vue__ reference
-    if (vm.$el) {
-      vm.$el.__vue__ = null
-    }
-    // release circular reference (#6759)
-    if (vm.$vnode) {
-      vm.$vnode.parent = null
-    }
-  }
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Vue 源码解析：启动项目与入口文件分析]]></title>
-        <id>https://yuufen.com/blog/post/28tbvr2E1/</id>
-        <link href="https://yuufen.com/blog/post/28tbvr2E1/">
-        </link>
-        <updated>2020-03-04T10:40:42.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="启动项目">启动项目</h2>
-<h3 id="获取-vue-项目">获取 Vue 项目</h3>
-<p>项目地址：https://github.com/vuejs/vue</p>
-<p>当前版本：2.6.11</p>
-<h3 id="调试方式">调试方式</h3>
-<ol>
-<li>浏览器调试（我们选择这一项）</li>
-<li>使用拦截器或其他工具</li>
-</ol>
-<h3 id="调试环境搭建">调试环境搭建</h3>
-<ul>
-<li>
-<p>安装依赖：<code>npm i</code></p>
-</li>
-<li>
-<p>安装 rollup：<code>npm i -g rollup</code></p>
-</li>
-</ul>
-<blockquote>
-<p>rollup 是打包工具，用于打包纯代码项目，vue 使用了 rollup 打包</p>
-</blockquote>
-<ul>
-<li>package.json 中修改 dev 脚本，添加 sourcemap，方便调试</li>
-</ul>
-<pre><code>&quot;dev&quot;: &quot;rollup -w -c scripts/config.js --sourcemap --environment TARGET:web-full-dev&quot;,
-</code></pre>
-<ul>
-<li>运行开发版本打包命令：<code>npm run dev</code></li>
-<li>在测试用例中引入打包生成的新的 vue.js</li>
-</ul>
-<blockquote>
-<p>然后就可以愉快的打断点调试了</p>
-</blockquote>
-<h2 id="入口文件分析">入口文件分析</h2>
-<h3 id="目录结构">目录结构</h3>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583685102033.png" alt="" loading="lazy"></figure>
-<blockquote>
-<p>Vue 源码使用 flow 编写，所以还要额外维护 TypeScript 类型定义，加上 flow 目前已停止维护，所以 vue 3 使用 TypeScript 重写。</p>
-</blockquote>
-<h3 id="找到入口">找到入口</h3>
-<p>package.json 中，main 是 require 的入口，module 是 import 的入口</p>
-<pre><code>&quot;main&quot;: &quot;dist/vue.runtime.common.js&quot;,
-&quot;module&quot;: &quot;dist/vue.runtime.esm.js&quot;,
-</code></pre>
-<p>dist 是执行构建脚本<code>&quot;build&quot;: &quot;node scripts/build.js&quot;</code>创建的，所以<code>npm run build</code>执行的是 scripts/build.js。</p>
-<pre><code class="language-js">// 获取所有打包配置
-let builds = require('./config').getAllBuilds()
-
-// 根据参数过滤掉不需要的
-if (process.argv[2]) {
-  const filters = process.argv[2].split(',')
-  builds = builds.filter(b =&gt; {
-    return filters.some(f =&gt; b.output.file.indexOf(f) &gt; -1 || b._name.indexOf(f) &gt; -1)
-  })
-} else {
-  // 过滤掉包含 weex 的配置
-  builds = builds.filter(b =&gt; {
-    return b.output.file.indexOf('weex') === -1
-  })
-}
-
-build(builds)
-</code></pre>
-<p>build.js 中引入了 script/config.js，在里面可以找到各个版本的打包配置。</p>
-<blockquote>
-<h3 id="术语解释">术语解释</h3>
-<p>runtime：仅包含运行时的版本，包含 vue 运行的核心代码，但没有模板编译器，如 vue.runtime.js</p>
-<p>umd：Universal Module Definition 规范，用于浏览器的 script 标签，默认包含运行时和编译器，如 vue.js</p>
-<p>commonjs：cjs 规范，用于旧版打包器，如 browserify、webpack 1，如 vue.runtime.common.js</p>
-<p>esm：ES module 规范，用于现代打包器，如 webpack 2 及以上版本，如 vue.runtime.esm.js</p>
-<h3 id="compile-vs-runtime">Compile vs Runtime</h3>
-<p>带 compiler 版本支持 template 选项，可以实时编译模板</p>
-<p>仅 runtime 版不支持 template，体积小，需要借助 webpack 把 template 解析成 render 函数</p>
-</blockquote>
-<p>因为我们希望在浏览器中调试，所以查看umd格式的版本。</p>
-<pre><code class="language-js">  // Runtime+compiler development build (Browser)
-  'web-full-dev': {
-    entry: resolve('web/entry-runtime-with-compiler.js'),
-    dest: resolve('dist/vue.js'),
-    format: 'umd',
-    env: 'development',
-    alias: { he: './entity-decoder' },
-    banner
-  },
-</code></pre>
-<p>结合script/alias.js中的别名可以找到入口文件 src/platforms/web/entry-runtime-with-compiler.js</p>
-<pre><code class="language-js">// 核心代码在这里
-// 扩展默认的 $mount 方法，能够编译 template 或 el 指定的模板
-const mount = Vue.prototype.$mount
-Vue.prototype.$mount = function (
-  el?: string | Element,
-  hydrating?: boolean
-): Component {
-  el = el &amp;&amp; query(el)
-
-  // 不能挂载到 body 或者 html 上
-  if (el === document.body || el === document.documentElement) {
-    process.env.NODE_ENV !== 'production' &amp;&amp; warn(
-      `Do not mount Vue to &lt;html&gt; or &lt;body&gt; - mount to normal elements instead.`
-    )
-    return this
-  }
-  
-  // 获取选项
-  const options = this.$options
-  // 如果 options 上不存在 render 选项，则将 template/el 转化为 render 函数，挂载到 options 上
-  // 如果 options 上存在 render，直接渲染
-  if (!options.render) {
-    let template = options.template
-    if (template) {
-      // 如果有 template，解析 template 选项
-      if (typeof template === 'string') {
-        // 如果是字符串 / 模板字符串
-        if (template.charAt(0) === '#') {
-          // 如果是 '#app' 等 id 选择器，转化为模板字符串
-          template = idToTemplate(template)
-        }
-      } else if (template.nodeType) {
-        // 如果是 DOM 元素
-        template = template.innerHTML
-      }
-    } else if (el) {
-      //否则解析 el
-      template = getOuterHTML(el)
-    }
-    if (template) {
-      // 如果有模板字符串，需要用编译器编译，得到 render 函数
-      const { render, staticRenderFns } = compileToFunctions(template, {
-        outputSourceRange: process.env.NODE_ENV !== 'production',
-        shouldDecodeNewlines,
-        shouldDecodeNewlinesForHref,
-        delimiters: options.delimiters,
-        comments: options.comments
-      }, this)
-      options.render = render
-      options.staticRenderFns = staticRenderFns
-    }
-  }
-  // 渲染
-  return mount.call(this, el, hydrating)
-}
-</code></pre>
-]]></content>
     </entry>
 </feed>

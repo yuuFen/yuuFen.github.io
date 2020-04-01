@@ -1,0 +1,530 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态导航菜单组件 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1585738318143">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="动态导航菜单组件 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="简单实现
+
+也可以使用 name，但是容易造成冲突，并且 name 属性不必要
+
+
+路由数据模板：
+
+export const constRoutes = [
+  {
+    path: '/login',
+    component: (..." />
+    <meta name="keywords" content="Vue" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1585738318143" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态导航菜单组件
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-03-14
+              </span>
+              <span>
+                7 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="简单实现">简单实现</h2>
+<blockquote>
+<p>也可以使用 name，但是容易造成冲突，并且 name 属性不必要</p>
+</blockquote>
+<ul>
+<li>路由数据模板：</li>
+</ul>
+<pre><code class="language-js">export const constRoutes = [
+  {
+    path: '/login',
+    component: () =&gt; import('@/views/Login'),
+    hidden: true,
+  },
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/home',
+    meta: {
+      title: '主页',
+    },
+    children: [
+      {
+        path: 'home',
+        component: () =&gt; import(/* webpackChunkName: &quot;home&quot; */ '@/views/Home'),
+        name: 'Home',
+        meta: {
+          title: 'Home', // 导航菜单项标题
+          icon: 'msg', // 导航菜单项图标
+        },
+      },
+    ],
+  },
+]
+</code></pre>
+<ul>
+<li>src/components/SideMenu/index.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;ul&gt;
+      &lt;item
+        class=&quot;item&quot;
+        v-for=&quot;route in permission_routes&quot;
+        :key=&quot;route.path&quot;
+        :model=&quot;route&quot;
+        :base-path=&quot;route.path&quot;
+      &gt;&lt;/item&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Item from './Item'
+import { mapGetters } from 'vuex'
+
+export default {
+  name: 'SideMenu',
+  components: { Item },
+  computed: {
+    ...mapGetters(['permission_routes']),
+  },
+  mounted() {
+    console.log(this.permission_routes)
+  },
+}
+&lt;/script&gt;
+</code></pre>
+<ul>
+<li>src/components/SideMenu/Item.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;!-- hidden 选项存在则不显示 --&gt;
+  &lt;li v-if=&quot;!model.hidden&quot;&gt;
+    &lt;div @click=&quot;toggle&quot;&gt;
+      &lt;!-- 图标 --&gt;
+      &lt;Icon v-if=&quot;model.meta &amp;&amp; model.meta.icon&quot; :icon-class=&quot;model.meta.icon&quot;&gt;&lt;/Icon&gt;
+      &lt;!-- 标题 --&gt;
+      &lt;span v-if=&quot;isFolder&quot;&gt;
+        &lt;!-- 如果是父节点 --&gt;
+        &lt;span v-if=&quot;model.meta &amp;&amp; model.meta.title&quot;&gt;
+          {{ model.meta.title }}
+        &lt;/span&gt;
+        &lt;span&gt;{{ open ? '-' : '+' }}&lt;/span&gt;
+      &lt;/span&gt;
+      &lt;template v-else&gt;
+        &lt;!-- 如果是叶子节点，渲染链接 --&gt;
+        &lt;router-link v-if=&quot;model.meta &amp;&amp; model.meta.title&quot; :to=&quot;resolvePath(model.path)&quot;&gt;
+          {{ model.meta.title }}
+        &lt;/router-link&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+
+    &lt;!-- 子树，递归组件 --&gt;
+    &lt;ul v-show=&quot;open&quot; v-if=&quot;isFolder&quot;&gt;
+      &lt;Item
+        class=&quot;item&quot;
+        v-for=&quot;route in model.children&quot;
+        :key=&quot;route.path&quot;
+        :model=&quot;route&quot;
+        :base-path=&quot;resolvePath(model.path)&quot;
+      &gt;&lt;/Item&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import path from 'path'
+
+export default {
+  name: 'Item',
+  props: {
+    model: Object,
+    basePath: {
+      tpye: String,
+      default: '',
+    },
+  },
+  data() {
+    return {
+      open: false,
+    }
+  },
+  computed: {
+    // 判断是否有子树
+    isFolder: function() {
+      return this.model.children &amp;&amp; this.model.children.length
+    },
+  },
+  methods: {
+    // 考虑跨平台，拼接父 path 和子 path 为完整 path
+    resolvePath(routePath) {
+      return path.resolve(this.basePath, routePath)
+    },
+    toggle() {
+      if (this.isFolder) {
+        this.open = !this.open
+      }
+    },
+  },
+}
+&lt;/script&gt;
+</code></pre>
+<ul>
+<li>src/layout/index.js</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div class=&quot;app-wrapper&quot;&gt;
+    &lt;!-- &lt;sidebar class=&quot;sidebar-container&quot; /&gt; --&gt;
+    &lt;SideMenu&gt;&lt;/SideMenu&gt;
+    &lt;div class=&quot;main-container&quot;&gt;
+      &lt;router-view /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import SideMenu from '@/components/SideMenu'
+export default {
+  components: { SideMenu },
+}
+&lt;/script&gt;
+</code></pre>
+<ul>
+<li>src/store/index.js</li>
+</ul>
+<pre><code class="language-js">  getters: {
+    roles: (state) =&gt; state.user.roles,
++   permission_routes: (state) =&gt; state.permission.routes,
+  },
+</code></pre>
+<h2 id="扩展">扩展</h2>
+<ul>
+<li>components/Sidebar/index.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div&gt;
+    &lt;el-scrollbar wrap-class=&quot;scrollbar-wrapper&quot;&gt;
+      &lt;el-menu
+        :default-active=&quot;activeMenu&quot;
+        :background-color=&quot;variables.menuBg&quot;
+        :text-color=&quot;variables.menuText&quot;
+        :unique-opened=&quot;false&quot;
+        :active-text-color=&quot;variables.menuActiveText&quot;
+        :collapse-transition=&quot;false&quot;
+        mode=&quot;vertical&quot;
+      &gt;
+        &lt;sidebar-item v-for=&quot;route in permission_routes&quot; :key=&quot;route.path&quot; :item=&quot;route&quot; :base-path=&quot;route.path&quot; /&gt;
+      &lt;/el-menu&gt;
+    &lt;/el-scrollbar&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+import { mapGetters } from 'vuex'
+import SidebarItem from './SidebarItem'
+export default {
+  components: { SidebarItem },
+  computed: {
+    ...mapGetters(['permission_routes']),
+    activeMenu() {
+      const route = this.$route
+      const { meta, path } = route
+      // 默认激活项
+      if (meta.activeMenu) {
+        return meta.activeMenu
+      }
+      return path
+    },
+    variables() {
+      return { menuText: '#bfcbd9', menuActiveText: '#409EFF', menuBg: '#304156' }
+    },
+  },
+}
+&lt;/script&gt;
+</code></pre>
+<ul>
+<li>layout/components/Sidebar/SidebarItem.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;div v-if=&quot;!item.hidden&quot; class=&quot;menu-wrapper&quot;&gt;
+    &lt;template
+      v-if=&quot;
+        hasOneShowingChild(item.children, item) &amp;&amp;
+          (!onlyOneChild.children || onlyOneChild.noShowingChildren) &amp;&amp;
+          !item.alwaysShow
+      &quot;
+    &gt;
+      &lt;router-link v-if=&quot;onlyOneChild.meta&quot; :to=&quot;resolvePath(onlyOneChild.path)&quot;&gt;
+        &lt;el-menu-item :index=&quot;resolvePath(onlyOneChild.path)&quot; :class=&quot;{ 'submenu-title-noDropdown': !isNest }&quot;&gt;
+          &lt;item :icon=&quot;onlyOneChild.meta.icon || (item.meta &amp;&amp; item.meta.icon)&quot; :title=&quot;onlyOneChild.meta.title&quot; /&gt;
+        &lt;/el-menu-item&gt;
+      &lt;/router-link&gt;
+    &lt;/template&gt;
+    &lt;el-submenu v-else ref=&quot;subMenu&quot; :index=&quot;resolvePath(item.path)&quot; popperappend-to-body&gt;
+      &lt;template v-slot:title&gt;
+        &lt;item v-if=&quot;item.meta&quot; :icon=&quot;item.meta &amp;&amp; item.meta.icon&quot; :title=&quot;item.meta.title&quot; /&gt;
+      &lt;/template&gt;
+      &lt;sidebar-item
+        v-for=&quot;child in item.children&quot;
+        :key=&quot;child.path&quot;
+        :is-nest=&quot;true&quot;
+        :item=&quot;child&quot;
+        :base-path=&quot;resolvePath(child.path)&quot;
+        class=&quot;nest-menu&quot;
+      /&gt;
+    &lt;/el-submenu&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+import path from 'path'
+import Item from './Item'
+export default {
+  name: 'SidebarItem',
+  components: { Item },
+  props: {
+    item: { type: Object, required: true },
+    isNest: { type: Boolean, default: false },
+    basePath: { type: String, default: '' },
+  },
+  data() {
+    this.onlyOneChild = null
+    return {}
+  },
+  methods: {
+    hasOneShowingChild(children = [], parent) {
+      const showingChildren = children.filter((item) =&gt; {
+        if (item.hidden) {
+          return false
+        } else {
+          // 如果只有一个子菜单
+          this.onlyOneChild = item
+          return true
+        }
+      })
+      // 如果只有一个子路由，则不显示父级
+      if (showingChildren.length === 1) {
+        return true
+      }
+      // 否则显示父级
+      if (showingChildren.length === 0) {
+        this.onlyOneChild = { ...parent, path: '', noShowingChildren: true }
+        return true
+      }
+      return false
+    },
+    resolvePath(routePath) {
+      return path.resolve(this.basePath, routePath)
+    },
+  },
+}
+&lt;/script&gt;
+
+</code></pre>
+<ul>
+<li>layout/components/Sidebar/Item.vue</li>
+</ul>
+<pre><code class="language-vue">&lt;script&gt;
+export default {
+  name: 'MenuItem',
+  functional: true,
+  props: {
+    icon: {
+      type: String,
+      default: '',
+    },
+    title: {
+      type: String,
+      default: '',
+    },
+  },
+  render(h, context) {
+    const { icon, title } = context.props
+    const vnodes = []
+    if (icon) {
+      vnodes.push(&lt;Icon icon-class={icon} /&gt;)
+    }
+    if (title) {
+      vnodes.push(&lt;span slot=&quot;title&quot;&gt;{title}&lt;/span&gt;)
+    }
+    return vnodes
+  },
+}
+&lt;/script&gt;
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0">简单实现</a></li>
+<li><a href="#%E6%89%A9%E5%B1%95">扩展</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/Xoj8uZb5R/">
+              <h3 class="post-title">
+                Vue 中的权限控制
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

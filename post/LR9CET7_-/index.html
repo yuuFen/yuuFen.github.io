@@ -1,0 +1,474 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vue 中的数据交互 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1585738318143">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Vue 中的数据交互 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="封装 request / api
+api service =&gt; request =&gt; local mock / easy-mock / service api
+
+主要问题分析：
+
+有时需要请求头、响应，进行统一预处理
+请求不同数..." />
+    <meta name="keywords" content="Vue" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1585738318143" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Vue 中的数据交互
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-03-15
+              </span>
+              <span>
+                5 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="封装-request-api">封装 request / api</h2>
+<p>api service =&gt; request =&gt; local mock / easy-mock / service api</p>
+<blockquote>
+<p>主要问题分析：</p>
+<ol>
+<li>有时需要请求头、响应，进行统一预处理</li>
+<li>请求不同数据源时 url 会变化，需要能根据环境自动修改url</li>
+<li>可能出现的跨域问题</li>
+</ol>
+</blockquote>
+<h3 id="srcutilsrequestjs">src/utils/request.js</h3>
+<pre><code class="language-js">import axios from 'axios'
+import { MessageBox, Message } from 'element-ui'
+import store from '@/store'
+import { getToken } from '@/utils/auth'
+
+// 创建 axios 实例
+const service = axios.create({
+  baseURL: process.env.VUE_APP_BASE_API, // url 基础地址，解决不同数据源 url 变化问题
+  // withCredentials: true, // 跨域时若要发送 cookie 需设置该项
+  timeout: 5000, // 超时
+})
+
+// 请求拦截
+service.interceptors.request.use(
+  (config) =&gt; {
+    // do something
+
+    if (store.getters.token) {
+      // 设置令牌请求头
+      // 后端采用默认配置（规范: http://www.rfcreader.com/#rfc6750_line188）：
+      config.headers['Authorization'] = 'Bearer' + getToken()
+      // // 后端自定义如：
+      // config.headers['x-token'] = getToken()
+    }
+    return config
+  },
+  (error) =&gt; {
+    // 请求错误预处理
+    // console.log(error) // for debug
+    return Promise.reject(error)
+  },
+)
+
+// 响应拦截
+service.interceptors.response.use(
+  // 通过自定义 code 判断响应状态，也可以通过 HTTP 状态码判定
+  (response) =&gt; {
+    // 仅返回数据部分
+    const res = response.data
+    // 使用自定义状态码判断错误：
+    // code 不为 1 则判定为错误
+    if (res.code !== 1) {
+      Message({
+        message: res.message || 'Error',
+        type: 'error',
+        duration: 5 * 1000,
+      })
+
+      // 假设：10008-非法令牌；10012-其他客户端已登录；10014-令牌过期
+      if (res.code === 10008 || res.code === 10012 || res.code === 10014) {
+        MessageBox.confirm('登陆状态异常，请重新登录', '确认登录信息', {
+          confirmButtonText: '重新登陆',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }).then(() =&gt; {
+          store.dispatch('user/resetToken').then(() =&gt; {
+            location.reload()
+          })
+        })
+      }
+      return Promise.reject(new Error(res.message || 'Error'))
+    } else {
+      return res
+    }
+  },
+  (error) =&gt; {
+    // 使用错误码：
+    Message({
+      message: error.message,
+      type: 'error',
+      duration: 5 * 1000,
+    })
+  },
+)
+
+export default service
+</code></pre>
+<h3 id="srcapiuserjs">src/api/user.js</h3>
+<pre><code class="language-js">import request from '@/utils/request'
+
+export function login(data) {
+  return request({
+    url: '/user/login',
+    methods: 'post',
+    data,
+  })
+}
+
+export function getInfo() {
+  return request({
+    url: '/user/info',
+    methods: 'get',
+  })
+}
+</code></pre>
+<h3 id="srcstoreuserjs">src/store/user.js</h3>
+<pre><code class="language-js">  getters: {
+    roles: (state) =&gt; state.user.roles,
++   token: (state) =&gt; state.user.token,
+    permission_routes: (state) =&gt; state.permission.routes,
+  },
+</code></pre>
+<h3 id="srcstoreuserjs-2">src/store/user.js</h3>
+<pre><code class="language-js">import { login, getInfo } from '@/api/user'
+
+const actions = {
+  // user login
+  login({ commit }, userInfo) {
+    // 调用接口，并处理结果，错误处理已拦截所以无需处理
+    return login(userInfo).then((res) =&gt; {
+      commit('SET_TOKEN', res.data)
+      setToken(res.data)
+    })
+  },
+  // get user info
+  getInfo({ commit, state }) {
+    return getInfo().then(({ data: roles }) =&gt; {
+      commit('SET_ROLES', roles)
+      return { roles }
+    })
+  },
+</code></pre>
+<h2 id="mock">mock</h2>
+<h3 id="本地-mock">本地 mock</h3>
+<p>vue.config.js</p>
+<pre><code class="language-js">// 处理 post 请求参数
+const bodyParser = require('body-parser')
+
+// ...
+
+module.exports = {
+  publicPath: '/practice',
+  devServer: {
+    port,
+    // 配置 mock 接口
+    // app 是 express 的实例
+    before: (app) =&gt; {
+      // 注册中间件，处理 post 参数
+      app.use(bodyParser.json())
+
+      app.post('/dev-api/user/login', (req, res) =&gt; {
+        const { username } = req.body
+
+        if (username === 'admin' || username === 'jerry') {
+          res.json({
+            code: 1,
+            data: username,
+          })
+        } else {
+          res.json({
+            code: 10204,
+            message: '用户名或密码错误',
+          })
+        }
+      })
+
+      // get 之前需要一个中间件来判断 token 合法性，这里没写
+      app.get('/dev-api/user/info', (req, res) =&gt; {
+        const auth = req.headers['authorization']
+        const roles = auth.split(' ')[1] === 'admin' ? ['admin'] : ['editor']
+        res.json({
+          code: 1,
+          data: roles,
+        })
+      })
+    },
+  },
+    
+  // ...
+</code></pre>
+<h3 id="easy-mock">easy-mock</h3>
+<p><a href="easy-mock.com">项目地址</a></p>
+<h2 id="解决跨域">解决跨域</h2>
+<blockquote>
+<p>如果请求的接口在另一台服务器上，开发时则需要在本地设置代理服务器，避免跨域问题</p>
+</blockquote>
+<h3 id="配置代理-vueconfigjs">配置代理 vue.config.js</h3>
+<pre><code class="language-js">const port = 7070
+const title = 'Vue Learning Record'
+
+const path = require('path')
+// 将传入的相对路径转换为绝对路径，跨平台
+function resolve(dir) {
+  return path.join(__dirname, dir)
+}
+
+module.exports = {
+  publicPath: '/practice',
+  devServer: {
+    port,
+    // 如果请求的接口在另一台服务器上，开发时则需要设置代理避免跨域问题
+    proxy: {
+      // 代理 /dev-api/user/login 到 http://127.0.0.1:3000/user/login
+      // 请求的还是 http://localhost:7070/..，之后的代理转发浏览器不可知
+      // 代理转发发生在 before 之后，所以会被 before 拦截，所以这俩互斥 
+      // 当使用绝对路径时，代理不生效
+      [process.env.VUE_APP_BASE_API]: {
+        target: `http://127.0.0.1:3000/`,
+        changeOrigin: true,  
+        pathRewrite: { // dev-api/user/login =&gt; /user/login
+          ['^' + process.env.VUE_APP_BASE_API]: ''
+        }
+        
+      }
+    },
+      
+    // ..
+</code></pre>
+<h3 id="创建一个独立接口服务器~serverindexjs">创建一个独立接口服务器，~/server/index.js</h3>
+<pre><code class="language-js">const express = require('express')
+const app = express()
+const bodyParser = require('body-parser')
+
+app.use(bodyParser.json())
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  }),
+)
+
+app.post('/user/login', (req, res) =&gt; {
+  const { username } = req.body
+  if (username === 'admin' || username === 'jerry') {
+    res.json({
+      code: 1,
+      data: username,
+    })
+  } else {
+    res.json({
+      code: 10204,
+      message: '⽤用户名或密码错误',
+    })
+  }
+})
+
+app.get('/user/info', (req, res) =&gt; {
+  const roles = req.headers['authorization'].split(' ')[1] ? ['admin'] : ['editor']
+  res.json({ code: 1, data: roles })
+})
+
+app.listen(3000)
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%B0%81%E8%A3%85-request-api">封装 request / api</a>
+<ul>
+<li><a href="#srcutilsrequestjs">src/utils/request.js</a></li>
+<li><a href="#srcapiuserjs">src/api/user.js</a></li>
+<li><a href="#srcstoreuserjs">src/store/user.js</a></li>
+<li><a href="#srcstoreuserjs-2">src/store/user.js</a></li>
+</ul>
+</li>
+<li><a href="#mock">mock</a>
+<ul>
+<li><a href="#%E6%9C%AC%E5%9C%B0-mock">本地 mock</a></li>
+<li><a href="#easy-mock">easy-mock</a></li>
+</ul>
+</li>
+<li><a href="#%E8%A7%A3%E5%86%B3%E8%B7%A8%E5%9F%9F">解决跨域</a>
+<ul>
+<li><a href="#%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%90%86-vueconfigjs">配置代理 vue.config.js</a></li>
+<li><a href="#%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%8B%AC%E7%AB%8B%E6%8E%A5%E5%8F%A3%E6%9C%8D%E5%8A%A1%E5%99%A8~serverindexjs">创建一个独立接口服务器，~/server/index.js</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/SZ8FawuZz/">
+              <h3 class="post-title">
+                动态导航菜单组件
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
