@@ -2,11 +2,11 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Nuxt / SSR 再实现 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1585738318143">
+<title>Nuxt 概览 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1585960733364">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="Nuxt / SSR 再实现 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="Nuxt 概览 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -20,8 +20,17 @@
 </script>
 
 
-    <meta name="description" content="1
-" />
+    <meta name="description" content="nuxt 渲染流程
+
+安装
+npx create-nuxt-app &lt;项目名&gt;
+
+路由自动生成
+详见用例与文档
+动态路由
+以下划线作为前缀的 .vue文件或目录会被定义为动态路由，如下面文件结构
+pages/ 
+--| deta..." />
     <meta name="keywords" content="Vue,JS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
@@ -31,7 +40,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1585738318143" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1585960733364" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -96,14 +105,14 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              Nuxt / SSR 再实现
+              Nuxt 概览
             </h2>
             <div class="post-info">
               <span>
                 2020-03-21
               </span>
               <span>
-                1 min read
+                7 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
@@ -118,11 +127,352 @@
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <p>1</p>
+                <h2 id="nuxt-渲染流程">nuxt 渲染流程</h2>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1585740512408.png" alt="" loading="lazy"></figure>
+<h2 id="安装">安装</h2>
+<pre><code>npx create-nuxt-app &lt;项目名&gt;
+</code></pre>
+<h2 id="路由自动生成">路由自动生成</h2>
+<p>详见用例与文档</p>
+<h3 id="动态路由">动态路由</h3>
+<p>以下划线作为前缀的 .vue文件或目录会被定义为动态路由，如下面文件结构</p>
+<pre><code>pages/ 
+--| detail/ 
+----| _id.vue
+</code></pre>
+<h3 id="嵌套路由">嵌套路由</h3>
+<p>创建内嵌子路由，你需要添加一个 .vue 文件，同时添加一个与该文件同名的目录用来存放子视图组件。</p>
+<p>构造文件结构如下：</p>
+<pre><code>pages/ 
+--| index/ 
+----| _id.vue 
+--| index.vue
+</code></pre>
+<h3 id="默认布局">默认布局</h3>
+<p>添加路由导航，layouts/default.vue</p>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;nav&gt;
+    &lt;nuxt-link to=&quot;/&quot;&gt;首页&lt;/nuxt-link&gt;
+    &lt;!--别名：n-link，NLink，NuxtLink--&gt;   
+    &lt;!-- no-prefetch 取消预加载的默认行为 --&gt;
+    &lt;n-link to=&quot;/admin&quot; no-prefetch&gt;管理&lt;/n-link&gt;
+    &lt;NLink to=&quot;/cart&quot;&gt;购物车&lt;/NLink&gt;
+    &lt;nuxt /&gt;
+  &lt;/nav&gt;
+&lt;/template&gt;
+</code></pre>
+<p>禁用预加载： <code>&lt;n-link no-prefetch&gt;page not pre-fetched&lt;/n-link&gt;</code></p>
+<h3 id="自定义布局">自定义布局</h3>
+<p>创建空白布局页面 layouts/blank.vue ，用于login.vue</p>
+<pre><code>&lt;template&gt;  
+	&lt;div&gt;    
+		&lt;nuxt /&gt;  
+	&lt;/div&gt; 
+&lt;/template&gt;
+</code></pre>
+<p>页面 pages/login.vue 使用自定义布局：</p>
+<pre><code>export default {
+	layout: 'blank'
+}
+</code></pre>
+<h3 id="自定义错误页面">自定义错误页面</h3>
+<p>创建layouts/error.vue</p>
+<pre><code class="language-vue">&lt;template&gt;
+  &lt;!-- 错误页 --&gt;
+  &lt;div&gt;
+    &lt;h1 v-if=&quot;error.statusCode === 404&quot;&gt;页面不存在&lt;/h1&gt;
+    &lt;h1 v-else&gt;应用发生错误异常&lt;/h1&gt;
+    &lt;p&gt;{{ error }}&lt;/p&gt;
+    &lt;nuxt-link to=&quot;/&quot;&gt;首 页&lt;/nuxt-link&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  // 服务器会传递一个 error 对象
+  props: [&quot;error&quot;],
+  layout: &quot;blank&quot;
+};
+&lt;/script&gt;
+</code></pre>
+<h2 id="配置">配置</h2>
+<p>页面组件就是 Vue 组件，只不过 Nuxt.js 为这些组件添加了一些特殊的配置项</p>
+<h3 id="head">head</h3>
+<p>给首页添加标题和 meta，index.vue</p>
+<pre><code class="language-js">export default {
+    head() {  
+        return {   
+            title: &quot;课程列列表&quot;,  
+            meta: [{
+                name: &quot;description&quot;, 
+                hid: &quot;description&quot;, 
+                content: &quot;set page meta&quot; 
+            }], 
+            link: [{ 
+                rel: &quot;favicon&quot;, 
+                href: &quot;favicon.ico&quot; 
+            }],  
+        }; 
+    },
+};
+</code></pre>
+<h3 id="异步数据获取">异步数据获取</h3>
+<p><code>asyncData</code> 方法使得我们可以在设置组件数据之前异步获取和处理数据。</p>
+<p>范例：获取商品数据</p>
+<h4 id="接口准备">接口准备</h4>
+<ul>
+<li>
+<p>安装依赖：<code>npm i koa-router koa-bodyparser -S</code></p>
+</li>
+<li>
+<p>创建接口文件，server/api.js</p>
+<pre><code class="language-js">const Koa = require('koa')
+const app = new Koa()
+const bodyparser = require('koa-bodyparser')
+const router = require('koa-router'({ prefix: '/api' }))
+
+// 设置 cookie 加密密钥
+app.keys = ['some secret', 'another secret']
+
+const goods = [
+  { id: 1, text: '商品Ⅰ', price: 1000 },
+  { id: 2, text: '商品2', price: 2000 },
+]
+
+router.get('/goods', (ctx) =&gt; {
+  ctx.body = {
+    ok: 1,
+    goods,
+  }
+})
+
+router.get('/detail', (ctx) =&gt; {
+  ctx.body = {
+    ok: 1,
+    data: goods.find(good.id == ctx.query.id),
+  }
+})
+
+router.post('/login', (ctx) =&gt; {
+  const user = ctx.request.body
+  if (user.username === 'jerry' &amp;&amp; user.password === '123') {
+    // 将 token 存入 cookie
+    const token = 'a mock token'
+    ctx.cookies.set('token', token)
+    ctx.body = { ok: 1, token }
+  } else {
+    ctx.body = { ok: 0 }
+  }
+})
+
+// 解析 post 数据并注册路由
+app.use(bodyparser())
+app.user(router.routes())
+
+app.listen(8080, () =&gt; console.log('api 服务器已启动'))
+</code></pre>
+</li>
+</ul>
+<h4 id="引入-axios">引入 axios</h4>
+<p>安装 @nuxt/axios 模块：<code>npm install @nuxtjs/axios -S</code></p>
+<p>配置 nuxt.config.js</p>
+<pre><code class="language-js">modules: [   
+    '@nuxtjs/axios', 
+], 
+
+axios: {    
+    proxy: true
+}, 
+    
+proxy: {    
+    &quot;/api&quot;: &quot;http://localhost:8080&quot; 
+}
+</code></pre>
+<h4 id="测试代码">测试代码</h4>
+<p>index.vue</p>
+<pre><code class="language-vue">&lt;script&gt; 
+    export default {   
+        async asyncData({ $axios, error }) {   
+            const {ok, goods} = await $axios.$get(&quot;/api/goods&quot;); 
+            if (ok) {          
+                return { goods };     
+            }        
+            // 错误处理理      
+            error({ statusCode: 400, message: &quot;数据查询失败&quot; }); 
+        }, 
+    } 
+&lt;/script&gt;
+</code></pre>
+<h2 id="中间件">中间件</h2>
+<p>中间件会在一个页面或一组页面渲染之前运行我们定义的函数，常用于权限控制、校验等任务。</p>
+<h3 id="管理员保护页面">管理员保护页面</h3>
+<ul>
+<li>
+<p>创建middleware/auth.js</p>
+<pre><code class="language-js">export default function({ route, redirect, store }) {
+  // 如果没有 token，则重定向到 login
+  // vuex 存在浏览器的内存中，刷新后清空
+  // 所以刷新时需要在服务端重新将 token 填充到 vuex 中（如果存在token）
+  // 适合在 nuxtServerInit 钩子中完成上面这一步
+  if (!store.state.user.token) {
+    redirect(&quot;/login?redirect=&quot; + route.path);
+  }
+}
+</code></pre>
+</li>
+<li>
+<p>注册中间件，admin.vue</p>
+<pre><code class="language-vue">&lt;script&gt;    
+    export default { 
+        middleware: ['auth'] 
+    }
+&lt;/script&gt;
+</code></pre>
+</li>
+</ul>
+<h2 id="状态管理-vuex">状态管理 vuex</h2>
+<p>应用根目录下如果存在 <code>store</code> 目录，Nuxt.js 将启用 vuex 状态数</p>
+<h3 id="用户登录以及登录状态保存">用户登录以及登录状态保存</h3>
+<ul>
+<li>
+<p>创建 store/user.js</p>
+<pre><code class="language-js">export const state = () =&gt; ({
+    token: '' 
+});
+
+export const mutations = {  
+    init(state, token) { 
+        state.token = token; 
+    }
+};
+
+export const getters = { 
+    isLogin(state) {  
+        return !!state.token; 
+    } 
+};
+
+export const actions = { 
+    login({ commit, getters }, u) {  
+        return this.$login(u).then(({ token }) =&gt; {  
+            if (token) {     
+                commit(&quot;SET_TOKEN&quot;, token);  
+            }   
+            return getters.isLogin; 
+        });
+    } 
+};
+</code></pre>
+</li>
+<li>
+<p>使用</p>
+</li>
+</ul>
+<pre><code class="language-ts">@state 
+</code></pre>
+<h3 id="nuxtserverinit-钩子">nuxtServerInit 钩子</h3>
+<p>通过在 store 的根模块中定义 <code>nuxtServerInit</code> 方法，将服务端的一些数据传到客户端。</p>
+<ul>
+<li>安装依赖模块：<code>npm i cookie-universal-nuxt</code></li>
+<li>注册：<code>modules: [&quot;cookie-universal-nuxt&quot;]</code></li>
+</ul>
+<p>登录状态初始化：store/index.js</p>
+<pre><code class="language-js">export const actions = {  
+    nuxtServerInit({ commit }, { app }) {   
+        const token = app.$cookies.get(&quot;token&quot;); 
+        if (token) {      
+            console.log(&quot;nuxtServerInit: token:&quot;+token); 
+            commit(&quot;user/SET_TOKEN&quot;, token);  
+        }
+    } 
+};
+</code></pre>
+<h2 id="插件">插件</h2>
+<p>Nuxt.js 会在运行应用之前执行插件函数，需要引入或设置 Vue 插件、自定义模块和第三方模块时特别有用。</p>
+<h3 id="添加请求拦截器附加token">添加请求拦截器附加token</h3>
+<ul>
+<li>
+<p>创建 plugins/interceptor.js</p>
+<pre><code class="language-js">export default function({ $axios, store }) {  
+    $axios.onRequest(config =&gt; {   
+        if (store.state.user.token) {  
+            config.headers.Authorization = &quot;Bearer &quot; + store.state.user.token;
+        }    
+        return config; 
+    }); 
+}
+</code></pre>
+</li>
+<li>
+<p>注册插件 nuxt.config.js</p>
+<pre><code class="language-js">plugins: [&quot;@/plugins/interceptor&quot;]
+</code></pre>
+</li>
+</ul>
+<h2 id="部署">部署</h2>
+<h3 id="服务端渲染应用部署">服务端渲染应用部署</h3>
+<pre><code>npm run build
+npm start
+</code></pre>
+<h3 id="静态应用部署">静态应用部署</h3>
+<p>Nuxt.js 可依据路由配置将应用静态化，使得我们可以将应用部署至任意一个静态站点主机服务商。</p>
+<pre><code>npm run generate
+</code></pre>
 
               </div>
               <div class="toc-container">
-                
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#nuxt-%E6%B8%B2%E6%9F%93%E6%B5%81%E7%A8%8B">nuxt 渲染流程</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85">安装</a></li>
+<li><a href="#%E8%B7%AF%E7%94%B1%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90">路由自动生成</a>
+<ul>
+<li><a href="#%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1">动态路由</a></li>
+<li><a href="#%E5%B5%8C%E5%A5%97%E8%B7%AF%E7%94%B1">嵌套路由</a></li>
+<li><a href="#%E9%BB%98%E8%AE%A4%E5%B8%83%E5%B1%80">默认布局</a></li>
+<li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B8%83%E5%B1%80">自定义布局</a></li>
+<li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E9%94%99%E8%AF%AF%E9%A1%B5%E9%9D%A2">自定义错误页面</a></li>
+</ul>
+</li>
+<li><a href="#%E9%85%8D%E7%BD%AE">配置</a>
+<ul>
+<li><a href="#head">head</a></li>
+<li><a href="#%E5%BC%82%E6%AD%A5%E6%95%B0%E6%8D%AE%E8%8E%B7%E5%8F%96">异步数据获取</a>
+<ul>
+<li><a href="#%E6%8E%A5%E5%8F%A3%E5%87%86%E5%A4%87">接口准备</a></li>
+<li><a href="#%E5%BC%95%E5%85%A5-axios">引入 axios</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95%E4%BB%A3%E7%A0%81">测试代码</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E4%B8%AD%E9%97%B4%E4%BB%B6">中间件</a>
+<ul>
+<li><a href="#%E7%AE%A1%E7%90%86%E5%91%98%E4%BF%9D%E6%8A%A4%E9%A1%B5%E9%9D%A2">管理员保护页面</a></li>
+</ul>
+</li>
+<li><a href="#%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86-vuex">状态管理 vuex</a>
+<ul>
+<li><a href="#%E7%94%A8%E6%88%B7%E7%99%BB%E5%BD%95%E4%BB%A5%E5%8F%8A%E7%99%BB%E5%BD%95%E7%8A%B6%E6%80%81%E4%BF%9D%E5%AD%98">用户登录以及登录状态保存</a></li>
+<li><a href="#nuxtserverinit-%E9%92%A9%E5%AD%90">nuxtServerInit 钩子</a></li>
+</ul>
+</li>
+<li><a href="#%E6%8F%92%E4%BB%B6">插件</a>
+<ul>
+<li><a href="#%E6%B7%BB%E5%8A%A0%E8%AF%B7%E6%B1%82%E6%8B%A6%E6%88%AA%E5%99%A8%E9%99%84%E5%8A%A0token">添加请求拦截器附加token</a></li>
+</ul>
+</li>
+<li><a href="#%E9%83%A8%E7%BD%B2">部署</a>
+<ul>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B8%B2%E6%9F%93%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2">服务端渲染应用部署</a></li>
+<li><a href="#%E9%9D%99%E6%80%81%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2">静态应用部署</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
               </div>
             </div>
           </article>
