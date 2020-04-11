@@ -1,0 +1,634 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vue + TS | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1586608289039">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Vue + TS | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="开始
+文档
+TypeScript参考
+引入 ts
+如果已存在项目，使用vue add @vue/typescript引入（注意：会造成破坏性更改） ，
+否则直接使用 vue create 即可。
+特性
+类型注解和类型检查
+let name ..." />
+    <meta name="keywords" content="Vue" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1586608289039" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Vue + TS
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-03-23
+              </span>
+              <span>
+                9 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="开始">开始</h2>
+<h3 id="文档">文档</h3>
+<p><a href="https://www.tslang.cn/docs/home.html">TypeScript参考</a></p>
+<h3 id="引入-ts">引入 ts</h3>
+<p>如果已存在项目，使用<code>vue add @vue/typescript</code>引入（注意：会造成破坏性更改） ，</p>
+<p>否则直接使用 vue create 即可。</p>
+<h2 id="特性">特性</h2>
+<h3 id="类型注解和类型检查">类型注解和类型检查</h3>
+<pre><code class="language-ts">let name = &quot;xx&quot;; // 类型推论
+let title: string = &quot;xx&quot;; // 类型注解 
+name = 2;// 错误
+title = 4;// 错误
+
+//数组使用类型
+let names: string[]; names = ['Tom'];//或 Array&lt;string&gt;
+let foo:any = 'xx' foo = 3
+
+// any类型也可用于数组
+let list: any[] = [1, true, &quot;free&quot;]; 
+list[1] = 100;
+
+// 函数中使用类型注解
+function greeting(person: string): string {
+    return 'Hello, ' + person;
+}
+function warnUser(): void {
+    alert(&quot;This is my warning message&quot;);
+}
+</code></pre>
+<p>Vue 组件中应用：</p>
+<pre><code class="language-VUE">&lt;template&gt; 
+	&lt;div&gt;  
+		&lt;ul&gt;     
+        	&lt;li v-for=&quot;feature in features&quot; :key=&quot;feature&quot;&gt;{{feature}}&lt;/li&gt;   
+    	&lt;/ul&gt;  
+    &lt;/div&gt; 
+&lt;/template&gt;
+&lt;script lang='ts'&gt; 
+    import { Component, Prop, Vue } from &quot;vue-property-decorator&quot;;
+    
+	@Component 
+    export default class Hello extends Vue {  
+        features: string[];
+    	constructor() {   
+        	super();  
+            this.features = [&quot;类型注解&quot;, &quot;编译型语⾔言&quot;]; 
+        }
+    }
+&lt;/script&gt;
+</code></pre>
+<h2 id="函数">函数</h2>
+<pre><code class="language-ts">// 此处 name 和 age 是必填参数 
+// 如果要变为可选参数，加上？ 
+function sayHello(name: string, age: number = 20, addr?: string): string {  
+    return '你好：' + name + ' ' + age; 
+}
+// 重载 
+// 参数数量或者类型
+// 或返回类型不同
+// 先声明，在实现 
+function info(a: { name: string }): string;
+function info(a: string): object;
+function info(a: { name: string } | string): any {
+    if (typeof a === &quot;object&quot;) { 
+        return a.name; 
+    } else {   
+        return { name: a };    
+    }
+} 
+
+console.log(info({ name: &quot;tom&quot; })); 
+console.log(info(&quot;tom&quot;));
+</code></pre>
+<p>Vue 组件中应用：</p>
+<pre><code class="language-vue">&lt;div&gt;  
+    &lt;input type=&quot;text&quot; placeholder=&quot;输⼊入新特性&quot; @keyup.enter=&quot;addFeature&quot;&gt; 
+&lt;/div&gt;
+</code></pre>
+<pre><code class="language-ts">// ⽣生命周期钩⼦子 
+created(){}
+
+// 普通⽅方法 
+private addFeature(event: any) {
+    console.log(event);   
+    this.features.push(event.target.value);   
+    event.target.value = ''; 
+}
+</code></pre>
+<h2 id="类">类</h2>
+<pre><code class="language-ts">class MyComp {
+	private _foo: string  // 私有属性
+    protected bar: string // 保护属性
+    readonly baz = 'baz'  // 只读属性必须在声明时或构造函数里初始化
+    
+    // 构造函数：初始化成员变量
+    // 参数加上修饰符，能够定义并初始化一个成员变量
+    constructor(private tua = 'tua') {
+        this._foo = 'foo'
+        this.bar = 'bar'
+    }
+	
+    private someMethod() {}
+	
+    // 存取器：存取数据时可添加额外逻辑，在 vue 中用作计算属性
+    get foo() { return this._foo }
+    set foo(val) {
+        this._foo = val
+    }
+}
+</code></pre>
+<p>vue 组件中应用：声明自定义类型，约束数据结构</p>
+<pre><code class="language-ts">// 定义一个特性类，拥有更多属性
+class Feature {
+    constructor(public id: number, public name: string) {}
+}
+
+// 可以对获取的数据类型做约束
+@Component
+export default class HelloWorld extends Vue {
+    private features: Featurre[]
+    
+    constructor() {
+        super()
+        this.features = [
+            { id: 1, name: '类型注解' },
+            { id: 2, name: '编译型语言' },
+        ]
+    }
+}
+</code></pre>
+<p>vue 组件中应用：利用 getter 设置计算属性</p>
+<pre><code class="language-ts">get count() {
+	return this.features.length
+}
+</code></pre>
+<h3 id="class-是语法糖它指向的就是构造函数">class 是语法糖，它指向的就是构造函数</h3>
+<pre><code class="language-ts">class Person { // 类指向构造函数
+    constructor(name, age) { // constructor 是默认方法，new 实例时自动调用
+        this.name = name // 属性声明在实例上，this 指向实例
+        this.age = age
+    }
+    say() { // 方法会声明在原型上
+        return this.name + &quot;，&quot; + this.age
+    }
+}
+
+console.log(typeof Person) // function
+console.log(Person === Person.prototype.constructor) // true
+</code></pre>
+<p>等效于：</p>
+<pre><code class="language-ts">function Person(name, age) {
+    this.name = name
+    this.age = age
+}
+
+Person.prototype.say = function() {
+    return this.name + &quot;，&quot; + this.age
+}
+</code></pre>
+<h2 id="接口-interface">接口 interface</h2>
+<p>仅定义结构，不负责实现</p>
+<pre><code class="language-ts">interface Person {
+    firstName: string;
+    lastName: string;
+    sayHello(): string; // 要求实现方法
+}
+
+// 实现接口
+class Greeter implements Person {
+    constructor(public firstName = '', public lastName = '') {}
+    
+    sayHello() {
+        return 'Hello,' + this.firstName + this.lastName
+    }
+}
+
+// 面向接口编程
+function greeting(person: Person) {
+    return person.sayHello()
+}
+
+// const user = {firstName: 'Jan', lastName = 'User'}
+const user = new Greeter('Jane',User)
+console.log(user)
+console.log(greeting(user))
+</code></pre>
+<p>修改 Feature 为接口形式：</p>
+<pre><code class="language-vue">&lt;script lang='ts'&gt;
+interface Feature {
+    id:number;
+    name: string;
+}
+&lt;/script&gt;
+</code></pre>
+<h2 id="泛型-generics">泛型 Generics</h2>
+<p>Generics 是指在定义函数、接口或类时，不预先指定 具体的类型，而是在使用的时候再指定类型的一种特性。</p>
+<pre><code class="language-ts">// 定义泛型接口
+interface Result&lt;T&gt; {
+    ok: 0 | 1;
+    data: T[];
+}
+
+// 定义泛型函数
+function getData&lt;T&gt;(): Result&lt;T&gt; {
+    const data: any[] = [
+        { id: 1, name: '类型注解', version: '2.0' },
+        { id: 2, name: '编译型语言'}
+    ];
+    return { ok: 1, data }
+}
+
+// 使用
+this.features = getData&lt;Feature&gt;().data
+</code></pre>
+<p>Promise：</p>
+<pre><code class="language-ts">// 泛型，返回 Promise
+function getData&lt;T&gt;(): Promise&lt;Result&lt;T&gt;&gt; {
+    const data: any[] = [
+        { id: 1, name: '类型注解', version: '2.0' },
+        { id: 2, name: '编译型语言'}
+    ];
+    return Promise.resolve&lt;Result&lt;T&gt;&gt;({ ok: 1, data })
+}
+
+// 使用
+async created() {
+	this.features = (await getData&lt;Feature&gt;()).data
+}
+</code></pre>
+<h2 id="装饰器">装饰器</h2>
+<p>装饰器实际上是<strong>工厂函数</strong>，通过定义劫持，能够对类及其方法、属性提供额外的扩展功能，传入一个对象，输出处理后的新对象。</p>
+<h3 id="使用">使用</h3>
+<pre><code class="language-ts">// 类装饰器
+@Component
+export default class Hello extends Vue {
+    // 属性装饰器
+    // !表示该属性一定会被赋值
+    @Prop({required: true, type: String}) private msg!: string;
+	
+	// 函数装饰器
+	// 如果 @Emit 不传参，被装饰函数名即事件名
+	@Emit('add')
+	private addFeature(event: any) {
+        const feature = {
+            name: event.target.value,
+            id: this.features.length + 1,
+            version: '1.0'
+        }
+        this.features.push(feature)
+        event.target.value = feature
+        
+        return event.target.value
+    }
+}
+</code></pre>
+<h3 id="原理">原理</h3>
+<p>装饰器为我们在类的声明及其成员上通过<strong>元编程语法添加标注</strong>提供了一种方式。</p>
+<p>装饰器是一种特殊类型的声明，它能够被附加到类声明、方法、访问符（getter、setter）、属性或参数上。装饰器使用<code>@expression</code>形式，<code>expression</code>求值后必须是一个函数，它会在运行时被调用，被装饰的声明信息作为参数传入。</p>
+<h4 id="类装饰器">类装饰器</h4>
+<p>类装饰器在类声明之前被声明（紧靠着类声明）。类装饰器应用于类构造函数，可以用来监视、修改或替换类定义。</p>
+<pre><code class="language-ts">// 类装饰器表达式会在运行时当作函数被调用，类的构造函数作为其唯一的参数。
+function log(target: Function) {
+  // target 是构造函数
+  console.log(target === Foo); // true
+
+  target.prototype.log = function() {
+    console.log(this.bar)
+  }
+  // 如果装饰器返回一个值，它会使用提供的构造函数来替换类的声明
+}
+
+@log
+class Foo { 
+  bar = 'bar'
+}
+
+const foo = new Foo()
+foo.log()
+</code></pre>
+<h4 id="方法装饰器">方法装饰器</h4>
+<pre><code class="language-ts">// 方法装饰器   // 有bug？？？？？？？？？
+function log(target: any, name: string, descriptor: any) {
+  // target 是原型或构造函数，name 是方法名，descriptor 是属性描述符
+  // 方法的定义方式：Object.defineProperty(target, name, descrriptor)
+  console.log(target[name] === descriptor.value)
+  // 这里通过修改 descriptor.value 扩展了 baz 方法
+  const baz = descriptor.value // 保存原来的方法
+  descriptor.value = function (val: string) {
+    console.log('我被扩展了')
+    baz(val)
+  }
+  return target
+}
+
+class Foo {
+  @log
+  baz(val: string) {
+    console.log(val)
+  }
+}
+
+const foo = new Foo()
+foo.baz('bbb')
+</code></pre>
+<h4 id="属性装饰器">属性装饰器</h4>
+<pre><code class="language-ts">// 属性装饰器
+function mua(target, name) {
+    // target 是原型或构造函数，name 是属性名
+    console.log(target === Foo.prototype) // ture
+    target[name] = 'mua'
+}
+
+class Foo {
+    @mua mm!:string
+}
+
+const foo = new Foo()
+console.log(foo.mm)
+</code></pre>
+<h3 id="component">@Component</h3>
+<ul>
+<li>目标：解析得到options</li>
+</ul>
+<pre><code class="language-ts">@Component({
+	props: {
+        mag: {
+           type: String,
+            default: ''
+        }
+    }
+})
+export default calss Decor extends Vue {
+    // ...
+}
+</code></pre>
+<ul>
+<li>实现：工厂函数，生成装饰器</li>
+</ul>
+<pre><code class="language-ts">function Component(options: any) {
+    return function(target: Function) {
+		// 装饰的时候类还没有被实例化，只能访问类的原型对象和 description
+        // 具体就去看源码吧
+        
+        return Vue.extend(options)
+    }
+}
+</code></pre>
+<h2 id="vuex-支持vuex-class">vuex 支持：vuex-class</h2>
+<h3 id="安装">安装</h3>
+<pre><code>npm i vuex-class -S
+</code></pre>
+<h3 id="定义">定义</h3>
+<p>store.js</p>
+<pre><code class="language-ts">export default new Vuex.Store({
+    state: {
+        features: ['类型检测', '预编译']
+    },
+    mutations: {
+        addFeatureMutation(state: any, featureName: string) {
+            state.features.push({ 
+                id: state.features.length + 1, 
+                name: featureName
+            })
+        }
+    },
+    actions: {
+    	addFeatureAction({ commit }, featureName: string) {
+            commit('addFeatureMutation', featureName)
+        }
+	}
+})
+</code></pre>
+<h3 id="使用-2">使用</h3>
+<p>Hello.vue</p>
+<pre><code class="language-ts">import { State, Mutation, Action } from 'vuex-class'
+
+@Component
+export default Feature extends Vue {
+    @State features!: string[];
+    @Mutation addFeatureMutation;
+    @Action addFeatureAction;
+    
+    private addFeature(event) {
+        console.log(event);
+        this.addFeatureAction(event.target.value);
+        event.target.value = '';
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂用例：<a href="https://github.com/ktsn/vuex-class">vuex-class</a></p>
+</blockquote>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%BC%80%E5%A7%8B">开始</a>
+<ul>
+<li><a href="#%E6%96%87%E6%A1%A3">文档</a></li>
+<li><a href="#%E5%BC%95%E5%85%A5-ts">引入 ts</a></li>
+</ul>
+</li>
+<li><a href="#%E7%89%B9%E6%80%A7">特性</a>
+<ul>
+<li><a href="#%E7%B1%BB%E5%9E%8B%E6%B3%A8%E8%A7%A3%E5%92%8C%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5">类型注解和类型检查</a></li>
+</ul>
+</li>
+<li><a href="#%E5%87%BD%E6%95%B0">函数</a></li>
+<li><a href="#%E7%B1%BB">类</a>
+<ul>
+<li><a href="#class-%E6%98%AF%E8%AF%AD%E6%B3%95%E7%B3%96%E5%AE%83%E6%8C%87%E5%90%91%E7%9A%84%E5%B0%B1%E6%98%AF%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0">class 是语法糖，它指向的就是构造函数</a></li>
+</ul>
+</li>
+<li><a href="#%E6%8E%A5%E5%8F%A3-interface">接口 interface</a></li>
+<li><a href="#%E6%B3%9B%E5%9E%8B-generics">泛型 Generics</a></li>
+<li><a href="#%E8%A3%85%E9%A5%B0%E5%99%A8">装饰器</a>
+<ul>
+<li><a href="#%E4%BD%BF%E7%94%A8">使用</a></li>
+<li><a href="#%E5%8E%9F%E7%90%86">原理</a>
+<ul>
+<li><a href="#%E7%B1%BB%E8%A3%85%E9%A5%B0%E5%99%A8">类装饰器</a></li>
+<li><a href="#%E6%96%B9%E6%B3%95%E8%A3%85%E9%A5%B0%E5%99%A8">方法装饰器</a></li>
+<li><a href="#%E5%B1%9E%E6%80%A7%E8%A3%85%E9%A5%B0%E5%99%A8">属性装饰器</a></li>
+</ul>
+</li>
+<li><a href="#component">@Component</a></li>
+</ul>
+</li>
+<li><a href="#vuex-%E6%94%AF%E6%8C%81vuex-class">vuex 支持：vuex-class</a>
+<ul>
+<li><a href="#%E5%AE%89%E8%A3%85">安装</a></li>
+<li><a href="#%E5%AE%9A%E4%B9%89">定义</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8-2">使用</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/vY7s6sh95/">
+              <h3 class="post-title">
+                Nuxt 概览
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

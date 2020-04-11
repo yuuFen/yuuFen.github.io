@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>实现简单的 SSR | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1585960733364">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1586608289039">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="实现简单的 SSR | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
@@ -20,10 +20,13 @@
 </script>
 
 
-    <meta name="description" content="
+    <meta name="description" content="渲染服务器
+server/index.js
+const express = require('express')
+const Vue = require('vue')
+const fs = require('fs')
 
-
-" />
+// 创建 expr..." />
     <meta name="keywords" content="源码,Vue,JS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
@@ -33,7 +36,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1585960733364" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1586608289039" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -105,7 +108,7 @@
                 2020-03-25
               </span>
               <span>
-                0 min read
+                2 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/bkBOcErCL/" class="post-tag">
@@ -124,13 +127,130 @@
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <ul>
-<li></li>
-</ul>
+                <h2 id="渲染服务器">渲染服务器</h2>
+<p>server/index.js</p>
+<pre><code class="language-js">const express = require('express')
+const Vue = require('vue')
+const fs = require('fs')
+
+// 创建 express 实例
+const app = express()
+
+const { createBundleRenderer } = require('vue-server-renderer')
+
+const bundle = require('../dist/server/vue-ssr-server-bundle.json')
+const clientManifest = require('../dist/server/vue-ssr-client-bundle.json')
+const renderer = createBundleRenderer(bundle, {
+  runInNewContext: false,
+  template: fs.readFileSync('./src/index.temp.html'),
+  clientManifest: clientManifest,
+})
+
+function renderToString(context) {
+  return new Promise((resolve, reject) =&gt; {
+    renderer.renderToString(context, (err, html) =&gt; {
+      if (err) {
+        reject(err)
+        return
+      }
+      resolve(html)
+    })
+  })
+}
+
+// // 创建 vue 实例
+// const vm = new Vue({
+//   data: { cnt: 1 },
+//   template: `
+//     &lt;div&gt;{{cnt}}&lt;/div&gt;
+//   `,
+// })
+
+// 客户端部署静态文件
+app.use(express.static('../dist/client'))
+// 声明服务端路由
+app.get('*', async function (req, res) {
+  try {
+    const context = {
+      title: 'ssr test',
+      url: req.url,
+    }
+    const html = await renderToString(context)
+    res.send(html)
+  } catch (err) {
+    res.status(500).send('Internal Server Error')
+  }
+})
+
+app.listen(3000, () =&gt; {
+  console.log('渲染服务器启动成功')
+})
+</code></pre>
+<h2 id="打包入口文件">打包入口文件</h2>
+<h3 id="appjs">app.js</h3>
+<pre><code class="language-js">// 通用：创建 Vue 实例
+
+import Vue from 'vue'
+import App from './App.vue'
+import { createRouter } from './router'
+import { createStore } from './store'
+
+export function createApp(context) {
+  const router = createRouter()
+  const store = createStore()
+  const app = new Vue({
+    router,
+    store,
+    render: (h) =&gt; h(App),
+  })
+  return { app, router }
+}
+</code></pre>
+<h3 id="entry-clientjs">entry-client.js</h3>
+<pre><code class="language-js">import { createApp } from './app'
+
+const { app, router } = createApp()
+
+router.onReady(() =&gt; {
+  // 挂载
+  app.$mount('#app')
+})
+</code></pre>
+<h3 id="entry-serverjs">entry-server.js</h3>
+<pre><code class="language-js">import { createApp } from './app'
+
+export default (context) =&gt; {
+  // 返回 Promise，确保路由或组件准备就绪
+  return new Promise((resolve, reject) =&gt; {
+    // 创建 vue 实例
+    const { app, router } = createApp(context)
+    // 跳转首屏地址
+    router.push(context.url)
+    // 完成 promise
+    router.onReady(() =&gt; {
+      resolve(app)
+    }, reject)
+  })
+}
+</code></pre>
 
               </div>
               <div class="toc-container">
-                
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E6%B8%B2%E6%9F%93%E6%9C%8D%E5%8A%A1%E5%99%A8">渲染服务器</a></li>
+<li><a href="#%E6%89%93%E5%8C%85%E5%85%A5%E5%8F%A3%E6%96%87%E4%BB%B6">打包入口文件</a>
+<ul>
+<li><a href="#appjs">app.js</a></li>
+<li><a href="#entry-clientjs">entry-client.js</a></li>
+<li><a href="#entry-serverjs">entry-server.js</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
               </div>
             </div>
           </article>
@@ -139,9 +259,9 @@
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://yuufen.com/blog/post/vY7s6sh95/">
+            <a href="https://yuufen.com/blog/post/uhM7D6ItT/">
               <h3 class="post-title">
-                Nuxt 概览
+                Vue + TS
               </h3>
             </a>
           </div>
