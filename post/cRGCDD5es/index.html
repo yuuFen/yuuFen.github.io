@@ -3,10 +3,10 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vue 源码解析：模板编译 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1586973783151">
+<link rel="shortcut icon" href="http://localhost:4000/favicon.ico?v=1587065802140">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
-<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：模板编译 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="http://localhost:4000/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：模板编译 | YuuFen - Atom Feed" href="http://localhost:4000/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -31,8 +31,8 @@ Vue 2.0 需要用 VNode 描述视图以及各种交互，手写显然不切实�
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1586973783151" alt="">
+  <a href="http://localhost:4000">
+  <img class="avatar" src="http://localhost:4000/images/avatar.png?v=1587065802140" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -107,15 +107,15 @@ Vue 2.0 需要用 VNode 描述视图以及各种交互，手写显然不切实�
                 7 min read
               </span>
               
-                <a href="https://yuufen.com/blog/tag/bkBOcErCL/" class="post-tag">
+                <a href="http://localhost:4000/tag/bkBOcErCL/" class="post-tag">
                   # 源码
                 </a>
               
-                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                <a href="http://localhost:4000/tag/BChgVxiCO/" class="post-tag">
                   # Vue
                 </a>
               
-                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
+                <a href="http://localhost:4000/tag/clJDbkZpQ/" class="post-tag">
                   # JS
                 </a>
               
@@ -184,7 +184,7 @@ export const createCompiler = createCompilerCreator(function baseCompile (
 <h3 id="解析-parse">解析 - parse</h3>
 <p>解析器将模板解析为抽象语法树 AST，只有将模板解析成 AST 后，才能基于它做优化或者生成代码字符串。</p>
 <p>调试查看得到的 AST，结构如下：</p>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584314460429.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1584314460429.png" alt="" loading="lazy"></figure>
 <p>解析器内部分了 <strong>HTML 解析器</strong>、<strong>文本解析器</strong>和<strong>过滤器解析器</strong>，其中最主要的是 HTML 解析器，核心算法如下：</p>
 <pre><code class="language-js">// src\compiler\parser\index.js
 parseHTML(tempalte, {
@@ -214,7 +214,7 @@ export function optimize (root: ?ASTElement, options: CompilerOptions) {
 }
 </code></pre>
 <p>标记结束：</p>
-<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1584316301907.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="http://localhost:4000/post-images/1584316301907.png" alt="" loading="lazy"></figure>
 <h3 id="代码生成-generate">代码生成 -generate</h3>
 <p>将 AST 转换成渲染函数中的内容，即代码字符串。</p>
 <p>代码实现：</p>
@@ -296,7 +296,7 @@ function genIfConditions (
 }
 </code></pre>
 <p>解析结果：</p>
-<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1584320046441.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="http://localhost:4000/post-images/1584320046441.png" alt="" loading="lazy"></figure>
 <p>生成结果：</p>
 <pre><code class="language-js">&quot;with(this){return _c('div',{attrs:{&quot;id&quot;:&quot;demo&quot;}},[  
   (foo) ? _c('h1',[_v(_s(foo))]) : _c('h1',[_v(&quot;no title&quot;)]), 
@@ -386,7 +386,7 @@ function processSlotOutlet (el) {
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://yuufen.com/blog/post/xFIRxtfFh/">
+            <a href="http://localhost:4000/post/xFIRxtfFh/">
               <h3 class="post-title">
                 Vue 源码解析：从虚拟 DOM 到 DOM，mount
               </h3>
@@ -398,7 +398,7 @@ function processSlotOutlet (el) {
 
         <div class="site-footer">
   Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+  <a class="rss" href="http://localhost:4000/atom.xml" target="_blank">
     <i class="ri-rss-line"></i> RSS
   </a>
 </div>

@@ -3,10 +3,10 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>仿照 Vue1.0 实现简单的 MVVM 模式 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1586973783151">
+<link rel="shortcut icon" href="http://localhost:4000/favicon.ico?v=1587065802140">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
-<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="仿照 Vue1.0 实现简单的 MVVM 模式 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="http://localhost:4000/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="仿照 Vue1.0 实现简单的 MVVM 模式 | YuuFen - Atom Feed" href="http://localhost:4000/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -31,8 +31,8 @@ Vue 工作机制
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1586973783151" alt="">
+  <a href="http://localhost:4000">
+  <img class="avatar" src="http://localhost:4000/images/avatar.png?v=1587065802140" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -107,15 +107,15 @@ Vue 工作机制
                 15 min read
               </span>
               
-                <a href="https://yuufen.com/blog/tag/eQLRPEbGD/" class="post-tag">
+                <a href="http://localhost:4000/tag/eQLRPEbGD/" class="post-tag">
                   # MVVM
                 </a>
               
-                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                <a href="http://localhost:4000/tag/BChgVxiCO/" class="post-tag">
                   # Vue
                 </a>
               
-                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
+                <a href="http://localhost:4000/tag/clJDbkZpQ/" class="post-tag">
                   # JS
                 </a>
               
@@ -127,9 +127,9 @@ Vue 工作机制
 <h2 id="vue-工作机制">Vue 工作机制</h2>
 <p>在 <code>new Vue()</code> 时会调用 _init() 进行初始化，会初始化生命周期、事件、props、methods、data、computed 和 watch 等。其中最重要的是 <code>Object.defineProperty</code> 设置 <code>setter</code> 与 <code>getter</code> ，用来实现<strong>响应式</strong>以及<strong>依赖收集</strong>。</p>
 <p>初始化后调用 <code>$mount</code> 挂载组件：</p>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1583512098725.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1583512098725.png" alt="" loading="lazy"></figure>
 <p>化简版：</p>
-<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1583502362745.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="http://localhost:4000/post-images/1583502362745.png" alt="" loading="lazy"></figure>
 <h2 id="响应式">响应式</h2>
 <h3 id="实现">实现</h3>
 <pre><code class="language-js">class Vue {
@@ -212,9 +212,9 @@ Vue 工作机制
 </code></pre>
 <h2 id="依赖收集与追踪">依赖收集与追踪</h2>
 <p>流程：</p>
-<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1583577271564.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="http://localhost:4000/post-images/1583577271564.png" alt="" loading="lazy"></figure>
 <p>关系：</p>
-<figure data-type="image" tabindex="4"><img src="https://yuufen.com/blog/post-images/1583579033936.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="4"><img src="http://localhost:4000/post-images/1583579033936.png" alt="" loading="lazy"></figure>
 <h3 id="案例">案例</h3>
 <pre><code class="language-js">new Vue({
   template: `
@@ -341,7 +341,7 @@ class Watcher {
 }
 </code></pre>
 <h2 id="编译-compile">编译 compile</h2>
-<figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1583580639945.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="5"><img src="http://localhost:4000/post-images/1583580639945.png" alt="" loading="lazy"></figure>
 <ol>
 <li>获取并遍历 DOM 树</li>
 <li>文本节点：获取 <code>{{}}</code> 格式的内容并解析</li>
@@ -944,7 +944,7 @@ class Watcher {
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://yuufen.com/blog/post/_lKjmwEdd/">
+            <a href="http://localhost:4000/post/_lKjmwEdd/">
               <h3 class="post-title">
                 常见设计模式总结
               </h3>
@@ -956,7 +956,7 @@ class Watcher {
 
         <div class="site-footer">
   Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+  <a class="rss" href="http://localhost:4000/atom.xml" target="_blank">
     <i class="ri-rss-line"></i> RSS
   </a>
 </div>
