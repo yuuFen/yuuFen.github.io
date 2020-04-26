@@ -2,11 +2,11 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>动态导航菜单组件 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1587925697762">
+<title>Vue 基础：动态导航菜单组件 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1587926132520">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="动态导航菜单组件 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="Vue 基础：动态导航菜单组件 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -40,7 +40,7 @@ export const constRoutes = [
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1587925697762" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1587926132520" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -105,7 +105,7 @@ export const constRoutes = [
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              动态导航菜单组件
+              Vue 基础：动态导航菜单组件
             </h2>
             <div class="post-info">
               <span>
@@ -160,7 +160,7 @@ export const constRoutes = [
 <ul>
 <li>src/components/SideMenu/index.vue</li>
 </ul>
-<pre><code class="language-vue">&lt;template&gt;
+<pre><code class="language-js">&lt;template&gt;
   &lt;div id=&quot;app&quot;&gt;
     &lt;ul&gt;
       &lt;item
@@ -193,7 +193,7 @@ export default {
 <ul>
 <li>src/components/SideMenu/Item.vue</li>
 </ul>
-<pre><code class="language-vue">&lt;template&gt;
+<pre><code class="language-js">&lt;template&gt;
   &lt;!-- hidden 选项存在则不显示 --&gt;
   &lt;li v-if=&quot;!model.hidden&quot;&gt;
     &lt;div @click=&quot;toggle&quot;&gt;
@@ -268,7 +268,7 @@ export default {
 <ul>
 <li>src/layout/index.js</li>
 </ul>
-<pre><code class="language-vue">&lt;template&gt;
+<pre><code class="language-js">&lt;template&gt;
   &lt;div class=&quot;app-wrapper&quot;&gt;
     &lt;!-- &lt;sidebar class=&quot;sidebar-container&quot; /&gt; --&gt;
     &lt;SideMenu&gt;&lt;/SideMenu&gt;
@@ -297,7 +297,7 @@ export default {
 <ul>
 <li>components/Sidebar/index.vue</li>
 </ul>
-<pre><code class="language-vue">&lt;template&gt;
+<pre><code class="language-js">&lt;template&gt;
   &lt;div&gt;
     &lt;el-scrollbar wrap-class=&quot;scrollbar-wrapper&quot;&gt;
       &lt;el-menu
@@ -340,7 +340,7 @@ export default {
 <ul>
 <li>layout/components/Sidebar/SidebarItem.vue</li>
 </ul>
-<pre><code class="language-vue">&lt;template&gt;
+<pre><code class="language-js">&lt;template&gt;
   &lt;div v-if=&quot;!item.hidden&quot; class=&quot;menu-wrapper&quot;&gt;
     &lt;template
       v-if=&quot;
@@ -418,7 +418,7 @@ export default {
 <ul>
 <li>layout/components/Sidebar/Item.vue</li>
 </ul>
-<pre><code class="language-vue">&lt;script&gt;
+<pre><code class="language-js">&lt;script&gt;
 export default {
   name: 'MenuItem',
   functional: true,
@@ -468,7 +468,7 @@ export default {
             <div class="next">下一篇</div>
             <a href="https://yuufen.com/blog/post/Xoj8uZb5R/">
               <h3 class="post-title">
-                Vue 中的权限控制
+                Vue 基础：权限控制
               </h3>
             </a>
           </div>

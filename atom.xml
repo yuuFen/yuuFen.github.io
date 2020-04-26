@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-04-26T18:30:21.529Z</updated>
+    <updated>2020-04-26T18:35:58.495Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -801,7 +801,7 @@ export default (context) =&gt; {
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Vue + TS]]></title>
+        <title type="html"><![CDATA[Vue 基础：结合 TS]]></title>
         <id>https://yuufen.com/blog/post/uhM7D6ItT/</id>
         <link href="https://yuufen.com/blog/post/uhM7D6ItT/">
         </link>
@@ -1201,7 +1201,7 @@ export default Feature extends Vue {
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Nuxt 概览]]></title>
+        <title type="html"><![CDATA[Vue 基础：使用 Nuxt]]></title>
         <id>https://yuufen.com/blog/post/vY7s6sh95/</id>
         <link href="https://yuufen.com/blog/post/vY7s6sh95/">
         </link>
@@ -1500,7 +1500,7 @@ npm start
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Vue 测试]]></title>
+        <title type="html"><![CDATA[Vue 基础：测试]]></title>
         <id>https://yuufen.com/blog/post/VkzI4KJ9x/</id>
         <link href="https://yuufen.com/blog/post/VkzI4KJ9x/">
         </link>
@@ -1696,7 +1696,7 @@ export default {
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Vue 中的数据交互]]></title>
+        <title type="html"><![CDATA[Vue 基础：数据交互]]></title>
         <id>https://yuufen.com/blog/post/LR9CET7_-/</id>
         <link href="https://yuufen.com/blog/post/LR9CET7_-/">
         </link>
@@ -1957,7 +1957,7 @@ app.listen(3000)
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[动态导航菜单组件]]></title>
+        <title type="html"><![CDATA[Vue 基础：动态导航菜单组件]]></title>
         <id>https://yuufen.com/blog/post/SZ8FawuZz/</id>
         <link href="https://yuufen.com/blog/post/SZ8FawuZz/">
         </link>
@@ -1999,7 +1999,7 @@ app.listen(3000)
 <ul>
 <li>src/components/SideMenu/index.vue</li>
 </ul>
-<pre><code class="language-vue">&lt;template&gt;
+<pre><code class="language-js">&lt;template&gt;
   &lt;div id=&quot;app&quot;&gt;
     &lt;ul&gt;
       &lt;item
@@ -2032,7 +2032,7 @@ export default {
 <ul>
 <li>src/components/SideMenu/Item.vue</li>
 </ul>
-<pre><code class="language-vue">&lt;template&gt;
+<pre><code class="language-js">&lt;template&gt;
   &lt;!-- hidden 选项存在则不显示 --&gt;
   &lt;li v-if=&quot;!model.hidden&quot;&gt;
     &lt;div @click=&quot;toggle&quot;&gt;
@@ -2107,7 +2107,7 @@ export default {
 <ul>
 <li>src/layout/index.js</li>
 </ul>
-<pre><code class="language-vue">&lt;template&gt;
+<pre><code class="language-js">&lt;template&gt;
   &lt;div class=&quot;app-wrapper&quot;&gt;
     &lt;!-- &lt;sidebar class=&quot;sidebar-container&quot; /&gt; --&gt;
     &lt;SideMenu&gt;&lt;/SideMenu&gt;
@@ -2136,7 +2136,7 @@ export default {
 <ul>
 <li>components/Sidebar/index.vue</li>
 </ul>
-<pre><code class="language-vue">&lt;template&gt;
+<pre><code class="language-js">&lt;template&gt;
   &lt;div&gt;
     &lt;el-scrollbar wrap-class=&quot;scrollbar-wrapper&quot;&gt;
       &lt;el-menu
@@ -2179,7 +2179,7 @@ export default {
 <ul>
 <li>layout/components/Sidebar/SidebarItem.vue</li>
 </ul>
-<pre><code class="language-vue">&lt;template&gt;
+<pre><code class="language-js">&lt;template&gt;
   &lt;div v-if=&quot;!item.hidden&quot; class=&quot;menu-wrapper&quot;&gt;
     &lt;template
       v-if=&quot;
@@ -2257,7 +2257,7 @@ export default {
 <ul>
 <li>layout/components/Sidebar/Item.vue</li>
 </ul>
-<pre><code class="language-vue">&lt;script&gt;
+<pre><code class="language-js">&lt;script&gt;
 export default {
   name: 'MenuItem',
   functional: true,
@@ -2288,7 +2288,7 @@ export default {
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Vue 中的权限控制]]></title>
+        <title type="html"><![CDATA[Vue 基础：权限控制]]></title>
         <id>https://yuufen.com/blog/post/Xoj8uZb5R/</id>
         <link href="https://yuufen.com/blog/post/Xoj8uZb5R/">
         </link>
