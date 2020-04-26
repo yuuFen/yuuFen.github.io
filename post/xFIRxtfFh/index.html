@@ -3,10 +3,10 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vue 源码解析：从虚拟 DOM 到 DOM，mount | YuuFen</title>
-<link rel="shortcut icon" href="http://localhost:4000/favicon.ico?v=1587065802140">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1587925697762">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
-<link rel="stylesheet" href="http://localhost:4000/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：从虚拟 DOM 到 DOM，mount | YuuFen - Atom Feed" href="http://localhost:4000/atom.xml">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Vue 源码解析：从虚拟 DOM 到 DOM，mount | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -31,8 +31,8 @@
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="http://localhost:4000">
-  <img class="avatar" src="http://localhost:4000/images/avatar.png?v=1587065802140" alt="">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1587925697762" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -107,15 +107,15 @@
                 17 min read
               </span>
               
-                <a href="http://localhost:4000/tag/bkBOcErCL/" class="post-tag">
+                <a href="https://yuufen.com/blog/tag/bkBOcErCL/" class="post-tag">
                   # 源码
                 </a>
               
-                <a href="http://localhost:4000/tag/BChgVxiCO/" class="post-tag">
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
                   # Vue
                 </a>
               
-                <a href="http://localhost:4000/tag/clJDbkZpQ/" class="post-tag">
+                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
                   # JS
                 </a>
               
@@ -268,7 +268,7 @@ export const patch: Function = createPatchFunction({ nodeOps, modules })
 <p>那么 patch 是怎么工作的呢？</p>
 <p>首先说一下 patch 的核心 —— diff 算法：通过<strong>同层的树节点进行比较</strong>（一般的 web 开发不会出现跨层的 DOM 变化），而非对树进行逐层搜索遍历的方式，所以时间复杂度只有 O(n)，而不是 O(n^3)，是一种相当高效的算法。</p>
 <p>同层级只做三件事：增删改。new VNode 不存在就删；old VNode 不存在就增；都存在就比较（标签）类型和 key，有一项不同就直接整体替换，都相同执行更新（递归）。</p>
-<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1584040706895.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584040706895.png" alt="" loading="lazy"></figure>
 <h3 id="1-createpatchfunction">1. createPatchFunction</h3>
 <p>这是一个工厂函数，在 700 行左右返回了浏览器中使用的 patch 方法</p>
 <pre><code class="language-js">  return function patch (oldVnode, vnode, hydrating, removeOnly) {
@@ -527,28 +527,28 @@ export const patch: Function = createPatchFunction({ nodeOps, modules })
 <h3 id="31-updatechildren">3.1 updateChildren</h3>
 <p>updateChildren 的主要作用是用一种较高效的方式比对新旧两个 VNode 的 children，得出最小操作。</p>
 <p>传统方式是执行一个双循环，Vue 中针对 web  场景特点做了特别的算法优化：</p>
-<figure data-type="image" tabindex="2"><img src="http://localhost:4000/post-images/1584051570854.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1584051570854.png" alt="" loading="lazy"></figure>
 <p>新老两组 VNode 节点的左右头尾两侧都有一个变量标记，在遍历过程中这几个变量都会向中间靠拢。当 oldStartIdx &gt; oldEndIdx 或者 newStartIdx &gt; newEndIdx 时，结束循环（不需要再 updateChildren，而是做其他操作）。</p>
 <p>下面是遍历规则：</p>
 <p>首先，oldStartVNode、oldEndVNode 与 newStartVNode、newEndVNode <strong>两两交叉比较</strong>，共有 4 种比较方法。其中当 oldStartVNode 和 newStartVNode 或者 oldEndVNode 和 newEndVNode 满足 sameVNode，直接将该 VNode 节点进行 patchVNode 即可，不需要再遍历就完成了一次循环（之后对后面的元素进行下一次循环）：</p>
-<figure data-type="image" tabindex="3"><img src="http://localhost:4000/post-images/1584051578325.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1584051578325.png" alt="" loading="lazy"></figure>
 <p>如果 oldStartVNode 与 newEndVNode 满足 sameVNode，说明 oldStartVNode 已经被移动到 oldEndVNode 后面了，进行patchVNode 的同时还要将真实 DOM 节点移动到 oldEndVNode 的后面（之后对后面的元素进行下一次循环）：</p>
-<figure data-type="image" tabindex="4"><img src="http://localhost:4000/post-images/1584051582834.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="4"><img src="https://yuufen.com/blog/post-images/1584051582834.png" alt="" loading="lazy"></figure>
 <p>如果 oldEndVNode 与 oldEndVNode newStartVNode 满足 sameVNode，说明 oldEndVNode 已经被移动到 newStartVNode 前面了，进行patchVNode 的同时还要将真实 DOM 节点移动到 newStartVNode 的前面（之后对后面的元素进行下一次循环）：</p>
-<figure data-type="image" tabindex="5"><img src="http://localhost:4000/post-images/1584051587249.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1584051587249.png" alt="" loading="lazy"></figure>
 <p>如果以上情况都不符合，则在 old VNode 中找与 newStartVNode 满足 sameVNode 的 VNode（标记为 vnodeToMove），若存在，则执行 patchVNode，同时将 vnodeToMove 对应 DOM 移动到 oldStartVNode 对应 DOM 的前面（然后将 new VNode 中游标后移一个，进入下一次循环）：</p>
-<figure data-type="image" tabindex="6"><img src="http://localhost:4000/post-images/1584051592284.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="6"><img src="https://yuufen.com/blog/post-images/1584051592284.png" alt="" loading="lazy"></figure>
 <p>也有可能 newStartVNode 在 old VNode 中找不到 sameVNode，这是会调用 createElm 创建一个新的 DOM 节点：</p>
-<figure data-type="image" tabindex="7"><img src="http://localhost:4000/post-images/1584051596648.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="7"><img src="https://yuufen.com/blog/post-images/1584051596648.png" alt="" loading="lazy"></figure>
 <p>直到循环结束，但是我们还需要处理剩下的节点：</p>
 <ol>
 <li>如果结束时 oldStartIdx &gt; oldEndIdx，说明这个时候旧的 VNode 节点已经遍历完了，但是新的节点还没有；说明新的 VNode 节点实际上比老的 VNode 节点多，需要将剩下的 VNode 对应的 DOM 插入到真实 DOM 中，此时调用 addVNodes（其中批量调用 createE lm 接口）：</li>
 </ol>
-<figure data-type="image" tabindex="8"><img src="http://localhost:4000/post-images/1584051601336.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="8"><img src="https://yuufen.com/blog/post-images/1584051601336.png" alt="" loading="lazy"></figure>
 <ol start="2">
 <li>如果 newStart &gt; newEndIdx，说明新的 VNode 节点已经遍历完了，但是老的节点还有多，需要执行 remove 操作</li>
 </ol>
-<figure data-type="image" tabindex="9"><img src="http://localhost:4000/post-images/1584051605554.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="9"><img src="https://yuufen.com/blog/post-images/1584051605554.png" alt="" loading="lazy"></figure>
 <pre><code class="language-js">  function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
     let oldStartIdx = 0
     let newStartIdx = 0
@@ -703,7 +703,7 @@ export function createPatchFunction (backend) {
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="http://localhost:4000/post/LGEsZIcVg/">
+            <a href="https://yuufen.com/blog/post/LGEsZIcVg/">
               <h3 class="post-title">
                 Vue 源码解析：数据响应式
               </h3>
@@ -715,7 +715,7 @@ export function createPatchFunction (backend) {
 
         <div class="site-footer">
   Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="http://localhost:4000/atom.xml" target="_blank">
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
     <i class="ri-rss-line"></i> RSS
   </a>
 </div>

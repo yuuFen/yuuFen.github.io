@@ -1,0 +1,546 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>虚拟 DOM 简单实现 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1587925697762">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="虚拟 DOM 简单实现 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="项目地址
+https://github.com/yuuFen/Virtual-DOM
+为什么需要虚拟 DOM
+
+真实 DOM 非常复杂，拥有许多属性，所以 DOM 的操作开销巨大，需要尽可能的少操作 DOM。
+
+使用自定义的一个对象来描述 ..." />
+    <meta name="keywords" content="未完成,React,Vue,JS" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1587925697762" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              虚拟 DOM 简单实现
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-04-01
+              </span>
+              <span>
+                7 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/gx0HNoXwR/" class="post-tag">
+                  # 未完成
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/Ukk75LqlC/" class="post-tag">
+                  # React
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
+                  # Vue
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
+                  # JS
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="项目地址">项目地址</h2>
+<p>https://github.com/yuuFen/Virtual-DOM</p>
+<h2 id="为什么需要虚拟-dom">为什么需要虚拟 DOM</h2>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1586510765752.png" alt="" loading="lazy"></figure>
+<p>真实 DOM 非常复杂，拥有许多属性，所以 DOM 的操作开销巨大，需要尽可能的少操作 DOM。</p>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1586523343141.png" alt="" loading="lazy"></figure>
+<p>使用自定义的一个对象来描述 DOM，可以有效减少复杂度。</p>
+<h2 id="创建虚拟-dom">创建虚拟 DOM</h2>
+<pre><code class="language-js">let vnode = createElement('div', { id: 'test' }, [
+    createElement('p', {}, ['节点1'])
+])
+console.log(JSON.stringify(vnode, null, 2))
+</code></pre>
+<pre><code class="language-js">function createElement(tag, data, children) {
+  let flag
+  if (typeof tag == 'string') {
+    // 普通的 html 标签
+    flag = vnodeType.HTML
+  } else if (typeof tag == 'function') {
+    flag = vnodeType.COMPONENT
+  } else {
+    flag = vnodeType.TEXT
+  }
+
+  let childrenFlag
+  if (children == null) {
+    childrenFlag = childrenType.EMPTY
+  } else if (Array.isArray(children)) {
+    let length = children.length
+    if (length === 0) {
+      childrenFlag = childrenType.SINGLE
+    } else {
+      childrenFlag = childrenType.MULTIPLE
+    }
+  } else {
+    // 其他情况认为是文本
+    childrenFlag = childrenType.SINGLE
+    children = createTextVNode(children + '')
+  }
+
+  // 返回 vnode
+  return {
+    flag, // vnode 类型
+    tag, // 标签类型 / 文本没有 tag / 组件的 tag 是函数
+    data,
+    children,
+    childrenFlag,
+  }
+}
+
+function createTextVNode(text) {
+  return {
+    flag: vnodeType.TEXT,
+    tag: null,
+    data: null,
+    children: text,
+    childrenFlag: childrenType.EMPTY,
+  }
+}
+</code></pre>
+<h2 id="渲染">渲染</h2>
+<pre><code class="language-js">      let vnode = createElement('div', { id: 'test' }, [
+        createElement('p', { key: 'a',style: { color: 'blue' } }, ['节点1']),
+        createElement('p', { key: 'b', '@click': () =&gt; { alert('xx') } }, ['节点2']),
+        createElement('p', { key: 'c', 'class': 'item-header' }, ['节点3']),
+        createElement('p', { key: 'd' }, ['节点4']),
+      ])
+
+      render(vnode, document.getElementById('app'))
+</code></pre>
+<pre><code class="language-js">// 要渲染的 vnode、容器（父元素）
+function render(vnode, container) {
+  // 首次渲染
+  mount(vnode, container)
+}
+
+// 首次挂载元素
+function mount(vnode, container) {
+  let { flag } = vnode
+  if (flag == vnodeType.HTML) {
+    // (应该使用对象实现，不然依赖有点乱)
+    mountElement(vnode, container)
+  } else if (flag == vnodeType.TEXT) {
+    mountText(vnode, container)
+  }
+}
+
+function mountElement(vnode, container) {
+  let dom = document.createElement(vnode.tag)
+  vnode.el = dom
+  let { data, children, childrenFlag } = vnode
+
+  // 挂载 key
+  if (data) {
+    for (let key in data) {
+      patchData(dom, key, null, data[key])
+    }
+  }
+
+  if (childrenFlag !== childrenType.EMPTY) {
+    if (childrenFlag == childrenType.SINGLE) {
+      mount(children, dom)
+    } else if (childrenFlag == childrenType.MULTIPLE) {
+      for (let i = 0; i &lt; children.length; i++) {
+        mount(children[i], dom)
+      }
+    }
+  }
+
+  container.appendChild(dom)
+}
+
+function mountText(vnode, container) {
+  let dom = document.createTextNode(vnode.children)
+  vnode.el = dom
+  container.appendChild(dom)
+}
+
+function patchData(el, key, prv, next) {
+  switch (key) {
+    case 'style':
+      for (let key in next) {
+        el.style[key] = next[key]
+      }
+      break
+    case 'class':
+      el.className = next
+      break
+    default:
+      if (key[0] === '@') {
+        if (next) {
+          el.addEventListener(key.slice[1], next)
+        }
+      } else {
+        el.setAttribute(key, next)
+      }
+      break
+  }
+}
+</code></pre>
+<h2 id="补丁">补丁</h2>
+<pre><code class="language-js">function patch(prev, next, container) {
+  const nextFlag = next.flag
+  const prevFlag = prev.flag
+
+  // 如 element 变为 text, 直接替换, 不管 children
+  if (nextFlag !== prevFlag) {
+    replaceVNode(prev, next, container)
+  } else if (nextFlag == vnodeType.HTML) {
+    patchElement(prev, next, container)
+  } else if (nextFlag == vnodeType.TEXT) {
+    patchText(prev, next, container)
+  }
+}
+
+function patchElement(prev, next, container) {
+  if (prev.tag !== next.tag) {
+    replaceVNode(prev, next, container)
+    return
+  }
+  const el = (next.el = prev.el)
+
+  // patch data
+  const prevData = prev.data
+  const nextData = next.data
+  if (nextData) {
+    for (const key in nextData) {
+      const prevVal = prevData[key]
+      const nextVal = nextData[key]
+      patchData(el, key, prevVal, nextVal)
+    }
+  }
+  if (prevData) {
+    for (const key in prevData) {
+      const prevVal = prevData[key]
+      if (prevVal &amp;&amp; !nextData.hasOwnProperty(key)) {
+        patchData(el, key, prevVal, null)
+      }
+    }
+  }
+
+  // patch children
+  patchChildren(prev.childrenFlag, next.childrenFlag, prev.children, next.children, el)
+}
+
+function patchChildren(prevChildrenFlag, nextChildrenFlag, prevChildren, nextChildren, container) {
+  // 1. 老的是 单独的 / 空的 / 多个
+  // 2. 新的是 单独的 / 空的 / 多个
+  switch (prevChildrenFlag) {
+    case childrenType.SINGLE:
+      switch (nextChildrenFlag) {
+        case childrenType.SINGLE:
+          patch(prevChildren, nextChildren, container)
+          break
+        case childrenType.EMPTY:
+          container.removeChild(prevChildren.el)
+          break
+        case childrenType.MULTIPLE:
+          container.removeChild(prevChildren.el)
+          for (let i = 0; i &lt; nextChildren.length; i++) {
+            mount(nextChildren[i], container)
+          }
+          break
+      }
+      break
+
+    case childrenType.EMPTY:
+      switch (nextChildrenFlag) {
+        case childrenType.SINGLE:
+          mount(nextChildren, container)
+          break
+        case childrenType.EMPTY:
+          break
+        case childrenType.MULTIPLE:
+          for (let i = 0; i &lt; nextChildren.length; i++) {
+            mount(nextChildren[i], container)
+          }
+          break
+      }
+      break
+
+    case childrenType.MULTIPLE:
+      switch (nextChildrenFlag) {
+        case childrenType.SINGLE:
+          for (let i = 0; i &lt; prevChildren.length; i++) {
+            container.removeChild(prevChildren[i].el)
+          }
+          mount(nextChildren, container)
+          break
+        case childrenType.EMPTY:
+          for (let i = 0; i &lt; prevChildren.length; i++) {
+            container.removeChild(prevChildren[i].el)
+          }
+          break
+        case childrenType.MULTIPLE:
+          // 众多虚拟 DOM 就在这里产生分歧，每家的优化策略不一样
+          // 老：[abc] 新：[c**a**b**]
+          // ab 不需要更改，只需要在 ab 之间或之前插入元素，或在最后新建元素
+          let lastIndex = 0
+          for (let i = 0; i &lt; nextChildren.length; i++) {
+            let find = false
+            const nextVNode = nextChildren[i]
+            for (let j = 0; j &lt; prevChildren.length; j++) {
+              const prevVNode = prevChildren[j]
+              if (prevVNode.key === nextVNode.key) {
+                find = true
+                // 如果 key 相同，认为是同一个元素，补丁一下，不新建或销毁
+                patch(prevVNode, nextVNode, container)
+                if (j &lt; lastIndex) {
+                  // 需要移动的情况
+                  // lastIndex 指的是上一个找到的元素在 prevVNode 中的位置
+                  // j 就是最新找到的元素在 prevVNode 中的位置
+                  // 使用 insertBefore 移动元素
+                  const flagNode = nextChildren[i - 1].el.nextSibling
+                  container.insertBefore(prevVNode.el, flagNode)
+                } else {
+                  // 如果顺序正确，就更新末尾位置
+                  lastIndex = j
+                }
+              }
+            }
+            if (!find) {
+              // 需要新增
+              const flagNode = i == 0 ? prevChildren[0].el : nextChildren[i - 1].el.nextSibling
+              mount(nextVNode, container, flagNode)
+            }
+          }
+
+          // 移除不需要的元素
+          for (let i = 0; i &lt; prevChildren.length; i++) {
+            const prevVNode = prevChildren[i]
+            const has = nextChildren.find((next) =&gt; next.key === prevVNode.key)
+            if (!has) {
+              container.removeChild(prevVNode.el)
+            }
+          }
+          break
+      }
+      break
+  }
+}
+
+function patchText(prev, next, container) {
+  const el = (next.el = prev.el)
+  if (next.children !== prev.children) {
+    el.nodeValue = next.children
+  }
+}
+
+function patchData(el, key, prev, next) {
+  switch (key) {
+    case 'style':
+      for (let key in next) {
+        el.style[key] = next[key]
+      }
+      for (let key in prev) {
+        if (!next || !next.hasOwnProperty(key)) {
+          el.style[key] = ''
+        }
+      }
+
+      break
+    case 'class':
+      el.className = next
+      break
+    default:
+      if (key[0] === '@') {
+        if (prev) {
+          el.removeEventListener(key.slice(1), prev)
+        }
+        if (next) {
+          el.addEventListener(key.slice(1), next)
+        }
+      } else {
+        el.setAttribute(key, next)
+      }
+      break
+  }
+}
+
+function replaceVNode(prev, next, container) {
+  container.removeChild(prev.el)
+  mount(next, container)
+}
+</code></pre>
+<h2 id="vue-中的优化">Vue 中的优化</h2>
+<p>对常见的修改：新增、删除、倒序排列做了特定优化，详细见之前文章。</p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E9%A1%B9%E7%9B%AE%E5%9C%B0%E5%9D%80">项目地址</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E8%99%9A%E6%8B%9F-dom">为什么需要虚拟 DOM</a></li>
+<li><a href="#%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F-dom">创建虚拟 DOM</a></li>
+<li><a href="#%E6%B8%B2%E6%9F%93">渲染</a></li>
+<li><a href="#%E8%A1%A5%E4%B8%81">补丁</a></li>
+<li><a href="#vue-%E4%B8%AD%E7%9A%84%E4%BC%98%E5%8C%96">Vue 中的优化</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/s-05vytU3/">
+              <h3 class="post-title">
+                实现简单的 SSR
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

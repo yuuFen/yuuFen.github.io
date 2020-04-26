@@ -3,10 +3,10 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Node 基础 | YuuFen</title>
-<link rel="shortcut icon" href="http://localhost:4000/favicon.ico?v=1587065802140">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1587925697762">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
-<link rel="stylesheet" href="http://localhost:4000/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="Node 基础 | YuuFen - Atom Feed" href="http://localhost:4000/atom.xml">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Node 基础 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -37,8 +37,8 @@ C Runtime
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="http://localhost:4000">
-  <img class="avatar" src="http://localhost:4000/images/avatar.png?v=1587065802140" alt="">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1587925697762" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -110,14 +110,14 @@ C Runtime
                 2020-04-04
               </span>
               <span>
-                4 min read
+                8 min read
               </span>
               
-                <a href="http://localhost:4000/tag/uS3oa0DPJ/" class="post-tag">
+                <a href="https://yuufen.com/blog/tag/uS3oa0DPJ/" class="post-tag">
                   # NodeJS
                 </a>
               
-                <a href="http://localhost:4000/tag/_rDPxCqhS/" class="post-tag">
+                <a href="https://yuufen.com/blog/tag/_rDPxCqhS/" class="post-tag">
                   # 知识点汇总
                 </a>
               
@@ -151,10 +151,25 @@ C Runtime
 </blockquote>
 <h3 id="并发处理的更替">并发处理的更替</h3>
 <ul>
-<li>多进程 - Linux C / Apache</li>
-<li>多线程 - Java</li>
-<li>异步 I/O - JavaScript</li>
-<li>协程 - Lua / OpenResty / Go / deno (go + TS)</li>
+<li>
+<p>多进程 - Linux C / Apache</p>
+<blockquote>
+<p>进程的缺陷：</p>
+<ul>
+<li>创建和切换的时间和空间开销较大，且随着并发进程数量的提升，时间和空间的开销会逐渐增大，从而限制了系统的并发能力。</li>
+<li>进程间的资源共享不方便</li>
+</ul>
+</blockquote>
+</li>
+<li>
+<p>多线程 - Java</p>
+</li>
+<li>
+<p>异步 I/O - JavaScript</p>
+</li>
+<li>
+<p>协程 - Lua / OpenResty / Go / deno (go + TS)</p>
+</li>
 </ul>
 <blockquote>
 <p>deno</p>
@@ -201,7 +216,7 @@ const ora = require('ora')
 const process = ora('下载中...')
 process.start()
 
-download('github:yuuFen/vuex-reimplement', '../test', (err) =&gt; {
+download('github:yuuFen/vue-template-for-cli-demo', '../test', (err) =&gt; {
   // console.log(err ? 'Error' : 'Success')
   if (err) {
     process.fail()
@@ -214,9 +229,9 @@ download('github:yuuFen/vuex-reimplement', '../test', (err) =&gt; {
 <li>
 <p>promisefy</p>
 <blockquote>
-<p>让异步任务串行化</p>
+<p>让异步任务串行化（要符合规范）</p>
 </blockquote>
-<pre><code class="language-js">const repo = 'github:yuuFen/vuex-reimplement'
+<pre><code class="language-js">const repo = 'github:yuuFen/vue-template-for-cli-demo'
 const desc = '../test'
 clone(repo, desc)
 
@@ -255,13 +270,171 @@ module.exports.clone = async function clone(repo, desc) {
 
 // run
 const { clone } = require('./download')
-const repo = 'github:yuuFen/vuex-reimplement'
+const repo = 'github:yuuFen/vue-template-for-cli-demo'
 const desc = '../test'
 
 clone(repo, desc)
 </code></pre>
 </li>
 </ul>
+<h2 id="api">API</h2>
+<h3 id="fs">fs</h3>
+<pre><code class="language-js">const fs = require('fs')
+
+// 同步调用
+const data = fs.readFileSync('./download.js')
+// data 类型为 Buffer
+console.log(data.toString())
+
+// 异步
+fs.readFile('./download.js', (err, data) =&gt; {
+    if (err) throw err
+    console.log(data.toString())
+})
+
+// fs 常搭配 path api 使用
+const path = require('path')
+fs.readFile(path.resolve(path.resolve(__dirname, './download.js')), (err, data) =&gt; {
+    if (err) throw err
+    console.log(data.toString())
+})
+
+// prromisify
+const { promisify } = require('util')
+const readFile = promisify(fs.readFile)
+readFile('./download.js').then(data =&gt; console.log(data))
+
+// fs Promises API node v10
+const fsp = require('fs').promises
+fsp
+    .readFile('./download.js')
+    .then(data =&gt; console.log(data))
+	.catch(err =&gt; console.log(err))
+</code></pre>
+<h3 id="buffer">Buffer</h3>
+<blockquote>
+<p>用于在 TCP 流、文件系统操作、以及其他上下文中与八位字节流进行交互。 八位字节组成的数组，可以有效的在 JS 中存储二进制数据。</p>
+</blockquote>
+<pre><code class="language-js">// 创建一个长度为 10 字节以 0 填充的Buffer
+const buf1 = Buffer.alloc(10)
+console.log(buf1)
+
+// 创建一个 Buffer 包含 ascii
+const buf2 = Buffer.from('a')
+console.log(buf2, buf2.toString())
+
+// 创建 Buffer 包含 UTF-8 字节
+// UFT-8：一种变长的编码方案，使用 1 ~ 6 个字节来存储
+// UFT-32：一种固定长度的编码方案，不管字符编号大小，始终使用 4 个字节来存储
+// UTF-16：介于 UTF-8 和 UTF-32 之间，使用 2 个或者 4 个字节来存储，长度既固定又可变
+const buf3 = Buffer.from('Buffer 创建方法')
+console.log(buf3)
+
+// 写入Buffer数据
+buf1.write('hello')
+console.log(buf1)
+
+// 读取Buffer数据  
+console.log(buf3.toString())  
+
+// 合并Buffer  
+const buf4 = Buffer.concat([buf1, buf3])
+console.log(buf4.toString());
+</code></pre>
+<h3 id="http">http</h3>
+<blockquote>
+<p>用于创建 web 服务的模块</p>
+</blockquote>
+<ul>
+<li>创建一个http服务器</li>
+</ul>
+<pre><code class="language-js">const http = require('http')
+const server = http.createServer((request, response) =&gt; {
+    // 打印一下 response 的原型链
+    console.log(getPrototypeChain(response))
+    // response 是一个 Steam
+    response.end('a response from server')
+})
+
+server.listen(3000)
+
+
+function getPrototypeChain(obj) {
+    let prototypeChain = []
+    while (obj = Object.getPrototypeOf(obj)) {
+        prototypeChain.push(obj)
+    }
+    prototypeChain.push(null)
+    return prototypeChain
+}
+</code></pre>
+<p>显示首页 / 实现接口</p>
+<pre><code class="language-js">const http = require('http')
+const fs = require('fs')
+
+const server = http.createServer((request, response) =&gt; {
+  const { url, method } = request
+
+  if (url === '/' &amp;&amp; method === 'GET') {
+    fs.readFile('./index.html', (err, data) =&gt; {
+      if (err) {
+        response.writeHead(500, { 'Content-Type': 'text/plain;charset=utf-8' })
+        response.end('500 服务端错误')
+      }
+      response.statusCode = 200
+      response.setHeader('Content-Type', 'text/html')
+      response.end(data)
+    })
+  } else if (url === '/users' &amp;&amp; method === 'GET') {
+    response.setHeader('Content-Type', 'application/json')
+    response.end(JSON.stringify({ name: 'name' }))
+  } else {
+    response.statusCode = 404
+    response.setHeader('Content-Type', 'text/plain;charset=utf-8')
+    response.end('404 页面不存在')
+  }
+})
+
+server.listen(3000)
+</code></pre>
+<h3 id="stream">stream</h3>
+<blockquote>
+<p>用于与 node 中流数据交互的接口</p>
+</blockquote>
+<pre><code class="language-js">const fs = require('fs')
+
+const rs = fs.createReadStream('./img1.png')
+const ws = fs.createWriteStream('./img2.png')
+// 在内存中以字节流动，防止传输大文件时内存占用过高
+rs.pipe(ws)
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1587322423228.png" alt="" loading="lazy"></figure>
+<p>响应图片请求</p>
+<pre><code class="language-js">const http = require('http')
+const fs = require('fs')
+
+const server = http.createServer((request, response) =&gt; {
+  const { url, method, headers } = request
+
+  if (url === '/' &amp;&amp; method === 'GET') {
+    fs.readFile('./index.html', (err, data) =&gt; {
+      if (err) {
+        response.writeHead(500, { 'Content-Type': 'text/plain;charset=utf-8' })
+        response.end('500 服务端错误')
+      }
+      response.statusCode = 200
+      response.setHeader('Content-Type', 'text/html')
+      response.end(data)
+    })
+  } else if (method === 'GET' &amp;&amp; headers.accept.indexOf('image/*') !== -1) {
+    console.log(url) // '/img.png'
+	// response 是 Stream
+    fs.createReadStream('.' + url).pipe(response)
+  }
+})
+
+server.listen(3000)
+</code></pre>
 
               </div>
               <div class="toc-container">
@@ -284,6 +457,14 @@ clone(repo, desc)
 <li><a href="#%E4%BD%BF%E7%94%A8%E6%A8%A1%E5%9D%97">使用模块</a></li>
 </ul>
 </li>
+<li><a href="#api">API</a>
+<ul>
+<li><a href="#fs">fs</a></li>
+<li><a href="#buffer">Buffer</a></li>
+<li><a href="#http">http</a></li>
+<li><a href="#stream">stream</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -296,9 +477,9 @@ clone(repo, desc)
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="http://localhost:4000/post/s-05vytU3/">
+            <a href="https://yuufen.com/blog/post/M0Xa7RsWm/">
               <h3 class="post-title">
-                实现简单的 SSR
+                虚拟 DOM 简单实现
               </h3>
             </a>
           </div>
@@ -308,7 +489,7 @@ clone(repo, desc)
 
         <div class="site-footer">
   Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="http://localhost:4000/atom.xml" target="_blank">
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
     <i class="ri-rss-line"></i> RSS
   </a>
 </div>

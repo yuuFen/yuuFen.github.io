@@ -1,0 +1,534 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>《你不知道的JS》 笔记 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1587925697762">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="《你不知道的JS》 笔记 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="作用域
+查找
+LHS 左查，查址；
+RHS 右查，查值。
+function foo(a) {
+  console.log(a) // 对a进行RHS引用，对console进行RHS引用，在对log()的参数进行LHS引用
+}
+
+foo(2)..." />
+    <meta name="keywords" content="未完成,JS" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1587925697762" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              《你不知道的JS》 笔记
+            </h2>
+            <div class="post-info">
+              <span>
+                2019-12-20
+              </span>
+              <span>
+                7 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/gx0HNoXwR/" class="post-tag">
+                  # 未完成
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
+                  # JS
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="作用域">作用域</h2>
+<h3 id="查找">查找</h3>
+<p>LHS 左查，查址；<br>
+RHS 右查，查值。</p>
+<pre><code class="language-js">function foo(a) {
+  console.log(a) // 对a进行RHS引用，对console进行RHS引用，在对log()的参数进行LHS引用
+}
+
+foo(2)  // 对foo进行RHS引用，再对a进行LHS引用
+</code></pre>
+<blockquote>
+<p>引擎：作用域，我要对 foo 进行 RHS 引用，你见过它吗？</p>
+<p>作用域：见过，编译器刚声明了它，是个函数，给你。</p>
+<p>引擎：好，我来执行一下 foo。</p>
+<p>引擎：作用域，我要对 a 进行 LHS 引用，你见过它吗？</p>
+<p>作用域：见过，编译器把它声明成 foo 的一个形参了，拿去吧。</p>
+<p>引擎：大恩不言谢，现在我要把 2 赋值给 a。</p>
+<p>引擎：作用域，现在我要对 console 进行 RHS 引用，你见过它吗？</p>
+<p>作用域：console 是个内置对象，给你。</p>
+<p>引擎：么么哒。我看看里面有没有 log(..)。找到了，是个函数！</p>
+<p>引擎：作用域，再帮我找找 a 的 RHS 引用。</p>
+<p>作用域：是 2，拿走，不谢。</p>
+<p>引擎：真棒，我来把 2 传进 log(..)</p>
+<p>……</p>
+</blockquote>
+<p>非严格模式下，</p>
+<p>RHS 查询在所有作用域中都找不到变量，抛出 ReferenceError；</p>
+<p>LHS 则会在全局作用域下创建该变量，并返还给引擎（或抛出 ReferenceError，在严格模式下）。</p>
+<p>全局变量会自动成为全局对象（如浏览器中的 window 对象）的属性，所以可以通过 window.a 访问被遮蔽的全局变量。</p>
+<h3 id="欺骗词法作用域">欺骗词法作用域</h3>
+<p><strong>不要使用它们</strong>。带来的好处无法抵消性能上的损失，且会被严格模式影响。（还不安全）</p>
+<h4 id="eval-new-function">eval(..) / new Function(..)</h4>
+<p>可传入字符串动态生成代码。</p>
+<h4 id="with">with</h4>
+<p>创建了一个新的词法作用域</p>
+<pre><code class="language-js">var obj = {
+  a:1,
+  b:2
+}
+
+with(obj) {
+  a = 3
+  b = 4
+  c = 5 // 进行 LHS 查询
+}
+
+console.log(obj.c) // undefined
+console.log(c) // 5, c 泄漏到全局作用域了
+</code></pre>
+<h4 id="性能">性能</h4>
+<p>JS引擎会在编译阶段进行数项的性能优化，其中有些依赖于对代码词法的静态分析，并预先确定所有变量和函数的定义位置，才能在执行过程中快速找到标识符。</p>
+<p>如果发现 eval(..)或with，最悲观情况下所有的优化都是无意义的，此时最优做法是不做任何优化。</p>
+<h3 id="函数作用域">函数作用域</h3>
+<p>最小授权或最小暴露原则。</p>
+<p>使用函数将其包起来，再调用  =&gt;  函数名造成污染 / 必须指定函数名</p>
+<p>=&gt; 使用立即执行函数，将函数声明改为函数表达式：</p>
+<pre><code>(function foo(){ .. })()
+// 或
+(function foo(){ .. }())
+</code></pre>
+<p>foo 被绑定在函数表达式自身的函数{ .. }中，且此时是具名 / 匿名函数无影响。</p>
+<pre><code class="language-js">var a = 3
+(function IIFE(def) {
+  def(window)
+})(function (global) {
+  var a = 5
+  console.log(a)
+  console.log(global.a)  
+})
+</code></pre>
+<h3 id="块作用域">块作用域</h3>
+<p>使用var在块作用域中声明变量时，会绑定到外部作用域（最近的函数作用域）。</p>
+<h4 id="例外">例外</h4>
+<h5 id="with-2">with</h5>
+<h5 id="trycatch-的-catch">try/catch 的 catch</h5>
+<h5 id="使用-let-可以将变量绑定在任意作用域中通常是-内部">使用 let ，可以将变量绑定在任意作用域中（通常是 { .. } 内部）</h5>
+<p>但是使用let进行的声明不会提升，</p>
+<pre><code class="language-js">{
+  console.log(a) // ReferenceError 
+  let a = 2
+}
+</code></pre>
+<h4 id="好处">好处</h4>
+<h5 id="垃圾回收">垃圾回收</h5>
+<pre><code class="language-js">function process(data) {
+  // do something
+}
+
+let someReallyBigData = { .. }
+process(someReallyBigData) // 理论上执行完这里 someReallyBigData 就可以被回收了
+
+const btn = document.getElementById('btn')
+
+// 但是下面的回调函数形成了一个覆盖整个作用域的闭包，因此 js 引擎有可能会保留 someReallyBigData
+btn.addEventListener('click', () =&gt; {
+  console.log('click')
+})
+</code></pre>
+<p>使用块作用域就可以打消这个顾虑</p>
+<pre><code class="language-js">function process(data) {
+  // do something
+}
+
+{
+  let someReallyBigData = { .. }
+  process(someReallyBigData) // 执行完这里 someReallyBigData 就可以被回收了
+}
+
+const btn = document.getElementById('btn')
+
+// 虽然形成了闭包，但是不包含上面的块作用域
+btn.addEventListener('click', () =&gt; {
+  console.log('click')
+})
+</code></pre>
+<h5 id="let">let</h5>
+<pre><code class="language-js">for(let i; i&lt;10; i++) {
+  console.log(i)
+}
+// 即
+{
+  let j
+  for(j = 0; j &lt; 10; j++) {
+    let i = j // 每次迭代都重新声明绑定
+    console.log(i)
+  }
+}
+</code></pre>
+<h2 id="提升ao-active-object">提升（AO, active object）</h2>
+<p>函数执行前：申请内存空间，存放变量和函数（先找变量最后找函数（覆盖变量）（只声明））<br>
+AO = {<br>
+...<br>
+}<br>
+↓<br>
+AO = {<br>
+...<br>
+}</p>
+<pre><code class="language-js">foo() // TypeError
+bar() // ReferenceError
+
+var foo = function bar() {
+  // ...
+}
+</code></pre>
+<p>实际为：</p>
+<pre><code class="language-js">var foo
+foo()
+bar()
+foo = function bar() {
+  // ...
+}
+</code></pre>
+<pre><code class="language-js">foo() //2
+if(true) {
+  function foo() {
+    console.log(1)
+  }
+} else {
+  function foo() {
+    console.log(2)
+  }
+}
+</code></pre>
+<h2 id="闭包">闭包</h2>
+<p>当函数可以记住并访问所在的词法作用域，即使函数是在当前词法作用域外执行，这时就产生了闭包。</p>
+<h3 id="立即执行函数-iife">立即执行函数 IIFE</h3>
+<p>立即执行函数一般执行完之后即销毁，但是内部声明函数并可在函数作用域外调用的话，函数作用域并不会销毁，仍可以通过内部函数访问到，这样就形成了一个<strong>闭包</strong>。</p>
+<p>这里面就有5个闭包（在块作用域中）：</p>
+<pre><code class="language-js">for(let i = 0; i &lt; 6; i ++) { 
+  // 每次迭代都会重新声明一次 i，let 声明的变量绑定在了块作用域上，可以被块中的函数访问到
+  // （本质是将块转化为了可以被关闭的作用域）
+  setTimeout(() =&gt; {
+    console.log(i)
+  }, i * 1000)
+}
+</code></pre>
+<p>或者更加明显的（在函数作用域中）：</p>
+<pre><code class="language-js">for(var i = 0; i &lt; 6; i ++) {
+  (function (j) {
+    setTimeout(() =&gt; {
+      console.log(j)
+    }, j * 1000)
+  })(i)
+}
+</code></pre>
+<h3 id="模块利用闭包实现class">模块（利用闭包实现class）</h3>
+<pre><code class="language-js">var foo = (function CoolModule() {
+  var something = &quot;cool&quot;
+  var another = [1, 2, 3]
+  
+  function do1() {
+    console.log( something )
+  }
+  
+  function do2() {
+    console.log( another )
+  }
+    
+  function change() {
+    // 修改公共 API
+    publicAPI.doSomething = do2 
+  }
+    
+  var publicAPI = {
+    change: change,
+    doSomething: do1
+  }
+  
+  return publicAPI
+})()
+
+foo.doSomething()
+foo.change()
+foo.doSomething()
+</code></pre>
+<h4 id="es5-的模块机制">ES5 的模块机制</h4>
+<pre><code class="language-js">// 都处在 Manager 函数的作用域中
+var MyModules = (function Manager() {
+  var modules = {}
+  
+  // 这是包装函数，deps 依赖注入
+  function define(name, deps, impl) {
+    for(let i = 0; i &lt; deps.length; i ++) {
+      deps[i] = modules[deps[i]]
+    }
+    modules[name] = impl.apply(impl, deps) // 因为impl的参数不固定，所以使用 apply
+  }
+  
+  function get(name) {
+    return modules[name]
+  }
+    
+  return {
+    define: define,
+    get: get
+  }
+})()
+
+// 闭包
+MyModules.define('bar', [], function() {
+  function inBar(who) {
+    return 'I am ' + who
+  }
+    
+  return {
+    inBar: inBar
+  }
+})
+
+// 将 bar 注入 foo，闭包
+MyModules.define('foo', ['bar'], function(bar) {
+  function inFoo() {
+    console.log(bar.inBar('bar'))
+  }
+    
+  return {
+    inFoo: inFoo
+  }
+})
+
+const foo = MyModules.get('foo')
+foo.inFoo() // I am bar
+</code></pre>
+<h4 id="es6-的模块">ES6 的模块</h4>
+<p>class，export / import</p>
+<h3 id="附录">附录</h3>
+<h4 id="动态作用域">动态作用域</h4>
+<p>基于调用栈，而不是代码中的作用域嵌套。容易搞混，不说了。</p>
+<h4 id="let-在es6-之前的替代方案">let 在ES6 之前的替代方案</h4>
+<p>可以使用打包工具转换。IIFE会改变代码中的this / return / break / continue，不是普适方案。</p>
+<pre><code class="language-js">{
+  try {
+    throw undefined
+  } catch (a) {
+    a = 2
+    console.log(a)
+  }
+}
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E4%BD%9C%E7%94%A8%E5%9F%9F">作用域</a>
+<ul>
+<li><a href="#%E6%9F%A5%E6%89%BE">查找</a></li>
+<li><a href="#%E6%AC%BA%E9%AA%97%E8%AF%8D%E6%B3%95%E4%BD%9C%E7%94%A8%E5%9F%9F">欺骗词法作用域</a>
+<ul>
+<li><a href="#eval-new-function">eval(..) / new Function(..)</a></li>
+<li><a href="#with">with</a></li>
+<li><a href="#%E6%80%A7%E8%83%BD">性能</a></li>
+</ul>
+</li>
+<li><a href="#%E5%87%BD%E6%95%B0%E4%BD%9C%E7%94%A8%E5%9F%9F">函数作用域</a></li>
+<li><a href="#%E5%9D%97%E4%BD%9C%E7%94%A8%E5%9F%9F">块作用域</a>
+<ul>
+<li><a href="#%E4%BE%8B%E5%A4%96">例外</a>
+<ul>
+<li><a href="#with-2">with</a></li>
+<li><a href="#trycatch-%E7%9A%84-catch">try/catch 的 catch</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8-let-%E5%8F%AF%E4%BB%A5%E5%B0%86%E5%8F%98%E9%87%8F%E7%BB%91%E5%AE%9A%E5%9C%A8%E4%BB%BB%E6%84%8F%E4%BD%9C%E7%94%A8%E5%9F%9F%E4%B8%AD%E9%80%9A%E5%B8%B8%E6%98%AF-%E5%86%85%E9%83%A8">使用 let ，可以将变量绑定在任意作用域中（通常是 { .. } 内部）</a></li>
+</ul>
+</li>
+<li><a href="#%E5%A5%BD%E5%A4%84">好处</a>
+<ul>
+<li><a href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6">垃圾回收</a></li>
+<li><a href="#let">let</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E6%8F%90%E5%8D%87ao-active-object">提升（AO, active object）</a></li>
+<li><a href="#%E9%97%AD%E5%8C%85">闭包</a>
+<ul>
+<li><a href="#%E7%AB%8B%E5%8D%B3%E6%89%A7%E8%A1%8C%E5%87%BD%E6%95%B0-iife">立即执行函数 IIFE</a></li>
+<li><a href="#%E6%A8%A1%E5%9D%97%E5%88%A9%E7%94%A8%E9%97%AD%E5%8C%85%E5%AE%9E%E7%8E%B0class">模块（利用闭包实现class）</a>
+<ul>
+<li><a href="#es5-%E7%9A%84%E6%A8%A1%E5%9D%97%E6%9C%BA%E5%88%B6">ES5 的模块机制</a></li>
+<li><a href="#es6-%E7%9A%84%E6%A8%A1%E5%9D%97">ES6 的模块</a></li>
+</ul>
+</li>
+<li><a href="#%E9%99%84%E5%BD%95">附录</a>
+<ul>
+<li><a href="#%E5%8A%A8%E6%80%81%E4%BD%9C%E7%94%A8%E5%9F%9F">动态作用域</a></li>
+<li><a href="#let-%E5%9C%A8es6-%E4%B9%8B%E5%89%8D%E7%9A%84%E6%9B%BF%E4%BB%A3%E6%96%B9%E6%A1%88">let 在ES6 之前的替代方案</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/azDr69oSX/">
+              <h3 class="post-title">
+                做博客的目的与大致记录
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
