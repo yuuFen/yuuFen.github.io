@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-04-26T18:35:58.495Z</updated>
+    <updated>2020-04-27T15:43:47.809Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -31,6 +31,45 @@
 <p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://github.com/yuuFen" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
 <h2 id="兴趣爱好">🎨 兴趣爱好</h2>
 <p><strong>摄影</strong>、羽毛球、轮滑，and playing!</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[网络基础]]></title>
+        <id>https://yuufen.com/blog/post/ID3pXnTIC/</id>
+        <link href="https://yuufen.com/blog/post/ID3pXnTIC/">
+        </link>
+        <updated>2020-04-07T18:23:54.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="网络模型">网络模型</h2>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1587925618947.png" alt="" loading="lazy"></figure>
+<h2 id="tcp-协议">TCP 协议</h2>
+<p><strong>实现一个即时通讯 IM</strong></p>
+<p>原理：Net 模块提供一个异步 API，能够创建基于流的 TCP 服务器，客户端与服务器建立连接后，服务器可以获得一个全双工 Socket 对象，服务器可以保存 Socket 对象列表，在接受某客户端消息时，推送给其他客户端。</p>
+<pre><code class="language-js">const net = require('net')
+const chatServer = net.createServer()
+
+const clientList = []
+chatServer.on('connection', (client) =&gt; {
+  client.write('Hi \n')
+  clientList.push(client)
+  client.on('data', (data) =&gt; {
+    console.log('receive:', data.toString())
+    clientList.forEach((v) =&gt; {
+      v.write(data.toString)
+    })
+  })
+})
+
+chatServer.listen(9000)
+</code></pre>
+<p>通过 Telnet 连接服务器</p>
+<pre><code>telnet localhost 9000
+</code></pre>
+<h2 id="http-协议">HTTP 协议</h2>
+<h2 id="使用-http-服务">使用 HTTP 服务</h2>
+<h2 id="前后端通信-ajax-websocket-等">前后端通信 - ajax, websocket 等</h2>
+<h2 id="跨域">跨域</h2>
+<h2 id="https">HTTPS</h2>
+<h2 id="http2">HTTP2</h2>
 ]]></content>
     </entry>
     <entry>
@@ -2285,397 +2324,6 @@ export default {
 }
 &lt;/script&gt;
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Vue 基础：权限控制]]></title>
-        <id>https://yuufen.com/blog/post/Xoj8uZb5R/</id>
-        <link href="https://yuufen.com/blog/post/Xoj8uZb5R/">
-        </link>
-        <updated>2020-03-13T20:40:50.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="路由权限控制">路由权限控制</h2>
-<h3 id="1-架构">1. 架构</h3>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584603744487.png" alt="" loading="lazy"></figure>
-<h3 id="2-定义路由">2. 定义路由</h3>
-<pre><code class="language-js">// src/router/index.js
-import Vue from 'vue'
-import Router from 'vue-router'
-
-import Layout from '@/layout'
-
-Vue.use(Router)
-
-// 静态部分 通用部分
-export const constRoutes = [
-  {
-    path: '/login',
-    component: () =&gt; import('@/views/Login'),
-    hidden: true,
-  },
-  {
-    path: '/',
-    component: Layout,
-    redirect: '/home',
-    children: [
-      {
-        path: 'home',
-        component: () =&gt; import(/* webpackChunkName: &quot;home&quot; */ '@/views/Home'),
-        name: 'Home',
-        meta: {
-          title: 'Home', // 导航菜单项标题
-          icon: 'msg', // 导航菜单项图标
-        },
-      },
-    ],
-  },
-]
-
-export const asyncRoutes = [
-  {
-    path: '/about',
-    component: Layout,
-    redirect: '/about/index',
-    children: [
-      {
-        path: 'index',
-        component: () =&gt; import(/* webpackChunkName: &quot;home&quot; */ '@/views/About.vue'),
-        name: 'about',
-        meta: {
-          title: 'About',
-          icon: 'img',
-          // 角色
-          role: ['admin', 'editor'],
-        },
-      },
-    ],
-  },
-]
-
-export default new Router({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes: constRoutes,
-})
-</code></pre>
-<h3 id="3-路由守卫完成动态生成路由登录的逻辑">3. 路由守卫：完成动态生成路由（登录）的逻辑</h3>
-<pre><code class="language-js">// src/permission.js
-// 生成全局路由
-import router from './router'
-import store from './store'
-import { getToken } from '@/utils/auth' // 从 cookie 中获取 token
-
-const whiteList = ['/login']
-
-router.beforeEach(async (to, from, next) =&gt; {
-  const hasToken = getToken()
-  if (hasToken) {
-    if (to.path === '/login') {
-      next({ path: '/home' })
-    } else {
-      // 已登录，获取用户角色
-      const hasRoles = store.getters.roles &amp;&amp; store.getters.roles.length &gt; 0
-
-      if (hasRoles) {
-        next()
-      } else {
-        // 这样会阻塞配置里的重定向
-        // 先请求用户信息
-        const { roles } = await store.dispatch('user/getInfo')
-        // 根据角色生成动态路由
-        const accessedRoutes = await store.dispatch('permission/generateRoutes', roles)
-        // 添加至 router
-        router.addRoutes(accessedRoutes)
-        // 重定向
-        next()
-      }
-    }
-  } else {
-    if (whiteList.indexOf(to.path) !== -1) {
-      next()
-    } else {
-      next(`/login?redirect=${to.path}`)
-    }
-  }
-})
-
-</code></pre>
-<h3 id="4-具体实现">4. 具体实现</h3>
-<ul>
-<li>src/utils/auth</li>
-</ul>
-<pre><code class="language-js">import Cookies from 'js-cookie'
-
-const TOKEN = 'token'
-
-export function getToken() {
-  return Cookies.get(TOKEN)
-}
-
-export function setToken(token) {
-  return Cookies.set(TOKEN,token)
-}
-export function removeToken() {
-  return Cookies.remove(TOKEN)
-}
-</code></pre>
-<ul>
-<li>src/store/user.js</li>
-</ul>
-<pre><code class="language-js">// 用户信息
-import { getToken, setToken, removeToken } from '@/utils/auth'
-
-const state = {
-  token: getToken(),
-  roles: [],
-}
-
-const mutations = {
-  SET_TOKEN: (state, token) =&gt; {
-    state.token = token
-  },
-  SET_ROLES: (state, roles) =&gt; {
-    state.roles = roles
-  },
-}
-
-const actions = {
-  // user login
-  login({ commit }, userInfo) {
-    const { username } = userInfo
-    return new Promise((resolve, reject) =&gt; {
-      setTimeout(() =&gt; {
-        if (username === 'admin' || username === 'jerry') {
-          commit('SET_TOKEN', username)
-          setToken(username)
-          resolve()
-        } else {
-          reject('用户名不存在')
-        }
-      }, 1000)
-    })
-  },
-  // get user info
-  getInfo({ commit, state }) {
-    return new Promise((resolve) =&gt; {
-      setTimeout(() =&gt; {
-        const roles = state.token === 'admin' ? ['admin'] : ['editor']
-        commit('SET_ROLES', roles)
-        resolve({ roles })
-      }, 1000)
-    })
-  },
-
-  // remove token
-  resetToken({ commit }) {
-    return new Promise((resolve) =&gt; {
-      commit('SET_TOKEN', '')
-      commit('SET_ROLES', [])
-      removeToken()
-      resolve()
-    })
-  },
-}
-export default {
-  namespaced: true,
-  state,
-  mutations,
-  actions,
-}
-</code></pre>
-<ul>
-<li>src/store/permission.js</li>
-</ul>
-<pre><code class="language-js">// 路由配置信息、路由生成逻辑
-import { constRoutes, asyncRoutes } from '@/router'
-
-/**
- * 根据路由 meta.role 确定当前用户是否具有访问权限
- * @roles 用户的拥有角色
- * @route 待判断路由
- */
-function hasPermission(roles, route) {
-  if (route.meta &amp;&amp; route.meta.roles) {
-    // 如果当前路由有 roles 字段，则需要判断用户权限
-    return roles.some((role) =&gt; route.meta.roles.includes(role))
-  } else {
-    return true
-  }
-}
-
-/**
- * 递归过滤 AsyncRoutes 路由表
- * @roles 用户拥有的角色
- * @routes 待过滤路由表， 首次传入的就是 AsyncRoutes
- */
-export function filterAsyncRoutes(roles, routes) {
-  const res = []
-  routes.forEach((route) =&gt; {
-    // 复制一份
-    const tmp = { ...route }
-    // 如果用户有访问权限则加入结果路由表
-    if (hasPermission(roles, tmp)) {
-      // 如果存在子路由则递归过滤
-      if (tmp.children) {
-        tmp.children = filterAsyncRoutes(roles, tmp.children)
-      }
-      res.push(tmp)
-    }
-  })
-  return res
-}
-
-const state = {
-  // 完整路由
-  routes: [],
-  // 能够访问的动态路由
-  addRoutes: [],
-}
-
-const mutations = {
-  SET_ROUTES: (state, routes) =&gt; {
-    state.addRoutes = routes
-    state.routes = constRoutes.concat(routes)
-  },
-}
-
-const actions = {
-  // 生成路由，在得到用户角色后会第一时间调用
-  generateRoutes({ commit }, roles) {
-    return new Promise((resolve) =&gt; {
-      let accessedRoutes
-      if (roles.includes('admin')) {
-        // 如果是管理员，有全部权限
-        accessedRoutes = asyncRoutes || []
-      } else {
-        // 否则过滤
-        accessedRoutes = filterAsyncRoutes(roles, asyncRoutes)
-      }
-      commit('SET_ROUTES', accessedRoutes)
-      resolve(accessedRoutes)
-    })
-  },
-}
-
-export default {
-  namespaced: true,
-  state,
-  mutations,
-  actions,
-}
-</code></pre>
-<ul>
-<li>src/store/index.js</li>
-</ul>
-<pre><code class="language-js">import Vue from 'vue'
-import Vuex from 'vuex'
-
-import permission from './permission'
-import user from './user'
-
-Vue.use(Vuex)
-
-export default new Vuex.Store({
-  modules: {
-    permission, // 权限
-    user, // 用户信息
-  },
-  getters: {
-    roles: (state) =&gt; state.user.roles,  
-  },
-})
-</code></pre>
-<ul>
-<li>登录</li>
-</ul>
-<pre><code class="language-js">    login() {
-      this.$store
-        .dispatch('user/login', { username: this.username })
-        .then(() =&gt; {
-          this.$router.push({
-            path: this.$route.query.redirect || '/',
-          })
-        })
-        .catch((error) =&gt; {
-          alert(error)
-        })
-    },
-</code></pre>
-<blockquote>
-<p>如果路由来自后端：</p>
-<pre><code class="language-js">// 前端组件名和组件的映射表
-const map = {
-    // login: require('login/index').default // 同步
-    login: () =&gt; import('login/index')       // 异步
-}
-// 服务端返回的 map 类似于
-const serviceMap = [
-    {path: '/login', component: 'login', hidden: true},
-]
-// 遍历 serviceMap，将 component 替换为 map[component]，动态生成 asyncRoutes
-function mapComponent(route) {
-    route.component = map[route.component]
-    if(route.children) {
-		route.children = route.children.map(child =&gt; mapComponent(child))
-    }
-    return route
-}
-</code></pre>
-</blockquote>
-<h2 id="组件权限控制指令">组件权限控制：指令</h2>
-<ul>
-<li>使用</li>
-</ul>
-<pre><code class="language-html">    &lt;button v-permission=&quot;['admin', 'editor']&quot;&gt;editor button&lt;/button&gt;
-    &lt;button v-permission=&quot;['admin']&quot;&gt;admin button&lt;/button&gt;
-</code></pre>
-<ul>
-<li>src/directive/permission.js</li>
-</ul>
-<pre><code class="language-js">// v-permission=&quot;[]&quot;
-// 完成一个指令，通过传递进来的权限数组和当前用户的角色数组进行过滤
-// 如果用户拥有要求的角色，则可以看到
-
-import store from '@/store'
-
-// 否则删除指令挂钩 DOM 元素
-export default {
-  // el 挂载的dom
-  // binding 绑定的数组
-  inserted(el, binding) {
-    // 获取值
-    const { value: permissionRoles } = binding
-    console.log(binding)
-    // 获取用户角色
-    const roles = store.getters.roles
-    // 合法性判断
-    if (permissionRoles &amp;&amp; permissionRoles instanceof Array &amp;&amp; permissionRoles.length &gt; 0) {
-      // 判断用户角色中是否有符合要求的
-      const hasPermission = roles.some((role) =&gt; {
-        return permissionRoles.includes(role)
-      })
-      // 如果没有权限，则删除当前 DOM
-      if (!hasPermission) {
-        el.parentNode &amp;&amp; el.parentNode.removeChild(el)
-      }
-    } else {
-      throw new Error('v-permission 接收数组类型 value')
-    }
-  },
-}
-
-</code></pre>
-<ul>
-<li>main.js</li>
-</ul>
-<pre><code class="language-js">// 注册指令
-import permission from '@/directive/permission'
-Vue.directive('permission', permission)
-</code></pre>
-<blockquote>
-<p>该指令只能删除挂载指令的元素，其他的相关元素不能查找到，如 el-tabs&gt;el-tab-pane</p>
-<p>此时只能用 v-if 实现，如 <code>v-if=&quot;checkPermission(['admin'])&quot;</code></p>
-<p>v-if 在编译过程就会体现，所以如果没有权限根本不会被渲染，就用不着去删除了</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>

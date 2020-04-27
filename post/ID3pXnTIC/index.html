@@ -2,11 +2,11 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>你好呀，陌生人 | YuuFen</title>
+<title>网络基础 | YuuFen</title>
 <link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1588002223937">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="你好呀，陌生人 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="网络基础 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -20,16 +20,12 @@
 </script>
 
 
-    <meta name="description" content="
-欢迎来到我的小站呀，很高兴遇见你！🤝
+    <meta name="description" content="网络模型
 
-🏠 关于本站
-因为笔记太多太杂，决定定期写写博客整理整理笔记。
-然后因为各种原因失去了动力
-因此搞丢了好多笔记啊啊啊啊啊啊啊😭😭😭
-看了看一年前的博文发现自己真的变化了蛮多的（加油💪）
-..." />
-    <meta name="keywords" content="" />
+TCP 协议
+实现一个即时通讯 IM
+原理：Net 模块提供一个异步 API，能够创建基于流的 TCP 服务器，客户端与服务器建立连接后，服务器可以获得一个全双工 Socket 对象，服务器可以保存 Socket 对象列表，在接..." />
+    <meta name="keywords" content="网络,知识点汇总,未完成" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -103,44 +99,77 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              你好呀，陌生人
+              网络基础
             </h2>
             <div class="post-info">
               <span>
-                2024-02-29
+                2020-04-08
               </span>
               <span>
                 1 min read
               </span>
               
+                <a href="https://yuufen.com/blog/tag/yN7rifZ-m/" class="post-tag">
+                  # 网络
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/_rDPxCqhS/" class="post-tag">
+                  # 知识点汇总
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/gx0HNoXwR/" class="post-tag">
+                  # 未完成
+                </a>
+              
             </div>
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <blockquote>
-<p>欢迎来到我的小站呀，很高兴遇见你！🤝</p>
-</blockquote>
-<h2 id="关于本站">🏠 关于本站</h2>
-<p>因为笔记太多太杂，决定定期写写博客整理整理笔记。</p>
-<p><s>然后因为各种原因失去了动力</s></p>
-<p><s>因此搞丢了好多笔记啊啊啊啊啊啊啊😭😭😭</s></p>
-<p><s>看了看一年前的博文发现自己真的变化了蛮多的（加油💪）</s></p>
-<p>总之现在又开始了</p>
-<h2 id="关于我">🐟 关于我</h2>
-<p>我目前大二在读，我的职业规划是前端工程师，我的专业是电子信息，所以我还了解一些嵌入式开发（当然只是一些些），对Python和TensorFlow也有一定的涉猎。我正在努力寻找暑期实习！</p>
-<p>在以下位置找到有关我的更多信息：</p>
-<p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://github.com/yuuFen" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
-<h2 id="兴趣爱好">🎨 兴趣爱好</h2>
-<p><strong>摄影</strong>、羽毛球、轮滑，and playing!</p>
+                <h2 id="网络模型">网络模型</h2>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1587925618947.png" alt="" loading="lazy"></figure>
+<h2 id="tcp-协议">TCP 协议</h2>
+<p><strong>实现一个即时通讯 IM</strong></p>
+<p>原理：Net 模块提供一个异步 API，能够创建基于流的 TCP 服务器，客户端与服务器建立连接后，服务器可以获得一个全双工 Socket 对象，服务器可以保存 Socket 对象列表，在接受某客户端消息时，推送给其他客户端。</p>
+<pre><code class="language-js">const net = require('net')
+const chatServer = net.createServer()
+
+const clientList = []
+chatServer.on('connection', (client) =&gt; {
+  client.write('Hi \n')
+  clientList.push(client)
+  client.on('data', (data) =&gt; {
+    console.log('receive:', data.toString())
+    clientList.forEach((v) =&gt; {
+      v.write(data.toString)
+    })
+  })
+})
+
+chatServer.listen(9000)
+</code></pre>
+<p>通过 Telnet 连接服务器</p>
+<pre><code>telnet localhost 9000
+</code></pre>
+<h2 id="http-协议">HTTP 协议</h2>
+<h2 id="使用-http-服务">使用 HTTP 服务</h2>
+<h2 id="前后端通信-ajax-websocket-等">前后端通信 - ajax, websocket 等</h2>
+<h2 id="跨域">跨域</h2>
+<h2 id="https">HTTPS</h2>
+<h2 id="http2">HTTP2</h2>
 
               </div>
               <div class="toc-container">
                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E5%85%B3%E4%BA%8E%E6%9C%AC%E7%AB%99">🏠 关于本站</a></li>
-<li><a href="#%E5%85%B3%E4%BA%8E%E6%88%91">🐟 关于我</a></li>
-<li><a href="#%E5%85%B4%E8%B6%A3%E7%88%B1%E5%A5%BD">🎨 兴趣爱好</a></li>
+<li><a href="#%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B">网络模型</a></li>
+<li><a href="#tcp-%E5%8D%8F%E8%AE%AE">TCP 协议</a></li>
+<li><a href="#http-%E5%8D%8F%E8%AE%AE">HTTP 协议</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8-http-%E6%9C%8D%E5%8A%A1">使用 HTTP 服务</a></li>
+<li><a href="#%E5%89%8D%E5%90%8E%E7%AB%AF%E9%80%9A%E4%BF%A1-ajax-websocket-%E7%AD%89">前后端通信 - ajax, websocket 等</a></li>
+<li><a href="#%E8%B7%A8%E5%9F%9F">跨域</a></li>
+<li><a href="#https">HTTPS</a></li>
+<li><a href="#http2">HTTP2</a></li>
 </ul>
 </li>
 </ul>
@@ -153,9 +182,9 @@
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://yuufen.com/blog/post/ID3pXnTIC/">
+            <a href="https://yuufen.com/blog/post/jAmCPqVpt/">
               <h3 class="post-title">
-                网络基础
+                Node 基础
               </h3>
             </a>
           </div>
