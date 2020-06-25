@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-04-27T15:43:47.809Z</updated>
+    <updated>2020-06-25T09:53:26.386Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -31,6 +31,815 @@
 <p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://github.com/yuuFen" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
 <h2 id="兴趣爱好">🎨 兴趣爱好</h2>
 <p><strong>摄影</strong>、羽毛球、轮滑，and playing!</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[MongoDB数据库设计中6条重要的经验法则]]></title>
+        <id>https://yuufen.com/blog/post/fRNVUf6Jn/</id>
+        <link href="https://yuufen.com/blog/post/fRNVUf6Jn/">
+        </link>
+        <updated>2020-06-25T09:49:07.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="part-1">Part 1</h1>
+<p>原文：<a href="http://blog.mongodb.org/post/87200945828/6-rules-of-thumb-for-mongodb-schema-design-part-1">6 Rules of Thumb for MongoDB Schema Design: Part 1</a></p>
+<p><em>By William Zola, Lead Technical Support Engineer at MongoDB</em></p>
+<p>“我有丰富的sql使用经验，但是我是个MongoDB的初学者。我应该如何在MongoDB中针对一对多关系进行建模？”这是我被问及最多的问题之一。</p>
+<p>我没法简单的给出答案，因为这有很多方案去实现。接下来我会教导你如何针对一对多进行建模。</p>
+<p>这个话题有很多内容需要讨论，我会用三个部分进行说明。在第一部分，我会讨论针对一对多关系建模的三种基础方案。在第二部分我将会覆盖更多高级内容，包括反范式化和双向引用。在最后一部分，我将会回顾各种选择，并给出做决定时需要考虑的因素。</p>
+<p>很多初学者认为在MongoDB中针对一对多建模唯一的方案就是在父文档中内嵌一个数组子文档，但是这是不准确的。因为你可以在MongoDB内嵌一个文档不代表你就必须这么做。</p>
+<p>当你设计一个MongoDB数据库结构，你需要先问自己一个在使用关系型数据库时不会考虑的问题：这个关系中集合的大小是什么样的规模？你需要意识到一对很少，一对许多，一对非常多，这些细微的区别。不同的情况下你的建模也将不同。</p>
+<p><em>Basics: Modeling One-to-Few</em></p>
+<h3 id="一对很少">一对很少</h3>
+<p>针对个人需要保存多个地址进行建模的场景下使用内嵌文档是很合适，可以在person文档中嵌入addresses数组文档：</p>
+<figure data-type="image" tabindex="1"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229110634292-485259216.png" alt="img" loading="lazy"></figure>
+<p>这种设计具有内嵌文档设计中所有的优缺点。最主要的优点就是不需要单独执行一条语句去获取内嵌的内容。最主要的缺点是你无法把这些内嵌文档当做单独的实体去访问。</p>
+<p>例如，如果你是在对一个任务跟踪系统进行建模，每个用户将会被分配若干个任务。内嵌这些任务到用户文档在遇到“查询昨天所有的任务”这样的问题时将会非常困难。我会在下一篇文章针对这个用例提供一些适当的设计。</p>
+<p><em>Basics: One-to-Many</em></p>
+<h3 id="一对许多">一对许多</h3>
+<p>以产品零件订货系统为例。每个商品有数百个可替换的零件，但是不会超过数千个。这个用例很适合使用间接引用---将零件的objectid作为数组存放在商品文档中(在这个例子中的ObjectID我使用更加易读的2字节，现实世界中他们可能是由12个字节组成的)。</p>
+<p>每个零件都将有他们自己的文档对象</p>
+<figure data-type="image" tabindex="2"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229110759823-711319082.png" alt="img" loading="lazy"></figure>
+<p>每个产品的文档对象中parts数组中将会存放多个零件的ObjectID ：</p>
+<figure data-type="image" tabindex="3"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229110817167-843655174.png" alt="img" loading="lazy"></figure>
+<p>在获取特定产品中所有零件，需要一个应用层级别的join</p>
+<p>为了能快速的执行查询，必须确保products.catalog_number有索引。当然由于零件中parts._id一定是有索引的，所以这也会很高效。</p>
+<p>这种引用的方式是对内嵌优缺点的补充。每个零件是个单独的文档，可以很容易的独立去搜索和更新他们。需要一条单独的语句去获取零件的具体内容是使用这种建模方式需要考虑的一个问题（请仔细思考这个问题，在第二章反反范式化中，我们还会讨论这个问题）</p>
+<p>这种建模方式中的零件部分可以被多个产品使用，所以在多对多时不需要一张单独的连接表。</p>
+<p><em>Basics: One-to-Squillions</em></p>
+<h3 id="一对非常多">一对非常多</h3>
+<p>我们用一个收集各种机器日志的例子来讨论一对非常多的问题。由于每个mongodb的文档有16M的大小限制，所以即使你是存储ObjectID也是不够的。我们可以使用很经典的处理方法“父级引用”---用一个文档存储主机，在每个日志文档中保存这个主机的ObjectID。</p>
+<figure data-type="image" tabindex="4"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229111030651-395125605.png" alt="img" loading="lazy"></figure>
+<p>以下是个和第二中方案稍微不同的应用级别的join用来查找一台主机最近5000条的日志信息</p>
+<figure data-type="image" tabindex="5"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229111059635-1509238621.png" alt="img" loading="lazy"></figure>
+<p>所以，即使这种简单的讨论也有能察觉出mongobd的建模和关系模型建模的不同之处。你必须要注意一下两个因素：</p>
+<p><em>Will the entities on the “N” side of the One-to-N ever need to stand alone?</em></p>
+<p>一对多中的多是否需要一个单独的实体。</p>
+<p><em>What is the cardinality of the relationship: is it one-to-few; one-to-many; or one-to-squillions?</em></p>
+<p>这个关系中集合的规模是一对很少，很多，还是非常多。</p>
+<p><em>Based on these factors, you can pick one of the three basic One-to-N schema designs:</em></p>
+<p>基于以上因素来决定采取一下三种建模的方式</p>
+<p><em><strong>一对很少且不需要单独访问内嵌内容的情况下可以使用内嵌多的一方。</strong></em></p>
+<p><em><strong>一对多且多的一端内容因为各种理由需要单独存在的情况下可以通过数组的方式引用多的一方的。</strong></em></p>
+<p><em><strong>一对非常多的情况下，请将一的那端引用嵌入进多的一端对象中。</strong></em></p>
+<h1 id="part-2">Part 2</h1>
+<p><strong>原文：<a href="http://blog.mongodb.org/post/87892923503/6-rules-of-thumb-for-mongodb-schema-design-part-2">6 Rules of Thumb for MongoDB Schema Design: Part 2</a></strong></p>
+<p><em>By William Zola, Lead Technical Support Engineer at MongoDB</em></p>
+<p>在上一篇文章中我介绍了三种基本的设计方案：内嵌，子引用，父引用，同时说明了在选择方案时需要考虑的两个关键因素。</p>
+<p>一对多中的多是否需要一个单独的实体。</p>
+<p>这个关系中集合的规模是一对很少，很多，还是非常多。</p>
+<p>在掌握了以上基础技术后，我将会介绍更为高级的主题：<strong>双向关联</strong>和<strong>反范式化</strong>。</p>
+<h3 id="双向关联">双向关联</h3>
+<p>如果你想让你的设计更酷，你可以让引用的“one”端和“many”端同时保存对方的引用。</p>
+<p>以上一篇文章讨论过的任务跟踪系统为例。有person和task两个集合，one-to-n的关系是从person端到task端。在需要获取person所有的task这个场景下需要在person这个对象中保存有task的id数组，如下面代码所示。</p>
+<figure data-type="image" tabindex="6"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229111342276-1359236117.png" alt="img" loading="lazy"></figure>
+<p>在某些场景中这个应用需要显示任务的列表（例如显示一个多人协作项目中所有的任务），为了能够快速的获取某个用户负责的项目可以在task对象中嵌入附加的person引用关系。</p>
+<figure data-type="image" tabindex="7"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229111408260-7741794.png" alt="img" loading="lazy"></figure>
+<p>这个方案具有所有的一对多方案的优缺点，但是通过添加附加的引用关系。在task文档对象中添加额外的“owner”引用可以很快的找到某个task的所有者，但是如果想将一个task分配给其他person就需要更新引用中的person和task这两个对象（熟悉关系数据库的童鞋会发现这样就没法保证操作的原子性。当然，这对任务跟踪系统来说并没有什么问题，但是你必须考虑你的用例是否能够容忍）</p>
+<h3 id="在一对多关系中应用反范式">在一对多关系中应用反范式</h3>
+<p>在你的设计中加入反范式，可以使你避免应用层级别的join读取，当然，代价是这也会让你在更新是需要操作更多数据。下面我会举个例子来进行说明</p>
+<h4 id="反范式many-one">反范式Many -&lt; One</h4>
+<p>以产品和零件为例，你可以在parts数组中冗余存储零件的名字。以下是没有加入反范式设计的结构。</p>
+<figure data-type="image" tabindex="8"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229111528198-444946874.png" alt="img" loading="lazy"></figure>
+<p>反范式化意味着你不需要执行一个应用层级别的join去显示一个产品所有的零件名字，当然如果你同时还需要其他零件信息那这个应用层的join是避免不了的。</p>
+<figure data-type="image" tabindex="9"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229111545745-1028760979.png" alt="img" loading="lazy"></figure>
+<p>在使得获取零件名字简单的同时，执行一个应用层级别的join会和之前的代码有些区别，具体如下：</p>
+<figure data-type="image" tabindex="10"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229111606089-1707374442.png" alt="img" loading="lazy"></figure>
+<p>反范式化在节省你读的代价的同时会带来更新的代价：如果你将零件的名字冗余到产品的文档对象中，那么你想更改某个零件的名字你就必须同时更新所有包含这个零件的产品对象。</p>
+<p>在一个读比写频率高的多的系统里，反范式是有使用的意义的。如果你很经常的需要高效的读取冗余的数据，但是几乎不去变更他d话，那么付出更新上的代价还是值得的。更新的频率越高，这种设计方案的带来的好处越少。</p>
+<p>例如：假设零件的名字变化的频率很低，但是零件的库存变化很频繁，那么你可以冗余零件的名字到产品对象中，但是别冗余零件的库存。</p>
+<p>需要注意的是，一旦你冗余了一个字段，那么对于这个字段的更新将不在是原子的。和上面双向引用的例子一样，如果你在零件对象中更新了零件的名字，那么更新产品对象中保存的名字字段前将会存在短时间的不一致。</p>
+<h4 id="反范式one-many">反范式One -&lt; Many</h4>
+<p>你也可以冗余one端的数据到many端：</p>
+<figure data-type="image" tabindex="11"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229111806776-268124956.png" alt="img" loading="lazy"></figure>
+<p>如果你冗余产品的名字到零件表中，那么一旦更新产品的名字就必须更新所有和这个产品有关的零件，这比起只更新一个产品对象来说代价明显更大。这种情况下，更应该慎重的考虑读写频率。</p>
+<h3 id="在一对很多的关系中应用反范式">在一对很多的关系中应用反范式</h3>
+<p>在日志系统这个一对许多的例子中也可以应用反范式化的技术。你可以将one端（主机对象）冗余到日志对象中，或者反之。</p>
+<p>下面的例子将主机中的IP地址冗余到日志对象中。</p>
+<figure data-type="image" tabindex="12"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229112008651-1284597916.png" alt="img" loading="lazy"></figure>
+<p>如果想获取最近某个ip地址的日志信息就变的很简单，只需要一条语句而不是之前的两条就能完成。</p>
+<figure data-type="image" tabindex="13"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229112027260-1706832046.png" alt="img" loading="lazy"></figure>
+<p>事实上，如果one端只有少量的信息存储，你甚至可以全部冗余存储到多端上，合并两个对象。</p>
+<figure data-type="image" tabindex="14"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229112042307-1115685169.png" alt="img" loading="lazy"></figure>
+<p>另一方面，也可以冗余数据到one端。比如说你想在主机文档中保存最近的1000条日志，可以使用mongodb 2.4中新加入的<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>e</mi><mi>a</mi><mi>c</mi><mi>h</mi><mi>e</mi><mi mathvariant="normal">/</mi></mrow><annotation encoding="application/x-tex">eache/</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">e</span><span class="mord mathdefault">a</span><span class="mord mathdefault">c</span><span class="mord mathdefault">h</span><span class="mord mathdefault">e</span><span class="mord">/</span></span></span></span>slice功能来保证list有序而且只保存1000条。</p>
+<p>日志对象保存在logmsg集合中，同时冗余到hosts对象中。这样即使hosts对象中超过1000条的数据也不会导致日志对象丢失。</p>
+<figure data-type="image" tabindex="15"><img src="https://images2015.cnblogs.com/blog/298288/201512/298288-20151229112101370-2067503669.png" alt="img" loading="lazy"></figure>
+<p>通过在查询中使用投影参数 （类似{_id:1}）的方式在不需要使用logmsgs数组的情况下避免获取整个mongodb对象，1000个日志信息带来的网络开销是很大的。</p>
+<p>在一对多的情况下，需要慎重的考虑读和更新的频率。冗余日志信息到主机文档对象中只有在日志对象几乎不会发生更新的情况下才是个好的决定。</p>
+<h3 id="总结">总结</h3>
+<p>在这篇文章里，我介绍了对三种基础方案：内嵌文档，子引用，父引用的补充选择。</p>
+<p>使用双向引用来优化你的数据库架构，前提是你能接受无法原子更新的代价。</p>
+<p>可以在引用关系中冗余数据到one端或者N端。</p>
+<p>在决定是否采用反范式化时需要考虑下面的因素：</p>
+<p><strong>你将无法对冗余的数据进行原子更新。</strong></p>
+<p><strong>只有读写比较高的情况下才应该采取反范式化的设计。</strong></p>
+<h1 id="part-3">Part 3</h1>
+<p>*原文：<a href="http://blog.mongodb.org/post/88473035333/6-rules-of-thumb-for-mongodb-schema-design-part-3">6 Rules of Thumb for MongoDB Schema Design: Part 3</a><br>
+*</p>
+<p><em>By William Zola, Lead Technical Support Engineer at MongoDB</em></p>
+<p>这篇文章是系列的最后一篇。在第一篇文章里，我介绍了三种针对“一对多 ”关系建模的基础方案。在第二篇文章中，我介绍了对基础方案的扩展：双向关联和反范式化。</p>
+<p>反范式可以让你避免一些应用层级别的join，但是这也会让更新变的更复杂，开销更大。不过冗余那些读取频率远远大于更新频率的字段还是值得的。</p>
+<p>如果你还没有读过前两篇文章，欢迎一览。</p>
+<p>让我们回顾下这些方案</p>
+<p>你可以采取内嵌，或者建立one端或者N端的引用，也可以三者兼而有之。</p>
+<p>你可以在one端或者N端冗余多个字段</p>
+<p>下面这些是你需要谨记的：</p>
+<p>1、优先考虑内嵌，除非有什么迫不得已的原因。</p>
+<p>2、需要单独访问一个对象，那这个对象就不适合被内嵌到其他对象中。</p>
+<p>3、数组不应该无限制增长。如果many端有数百个文档对象就不要去内嵌他们可以采用引用ObjectID的方案；如果有数千个文档对象，那么就不要内嵌ObjectID的数组。该采取哪些方案取决于数组的大小。</p>
+<p>4、不要害怕应用层级别的join：如果索引建的正确并且通过投影条件（第二章提及）限制返回的结果，那么应用层级别的join并不会比关系数据库中join开销大多少。</p>
+<p>5、在进行反范式设计时请先确认读写比。一个几乎不更改只是读取的字段才适合冗余到其他对象中。</p>
+<p>6、在mongodb中如何对你的数据建模，取决于你的应用程序如何去访问它们。数据的结构要去适应你的程序的读写场景。</p>
+<h3 id="设计指南">设计指南</h3>
+<p>当你在MongoDB中对“一对多”关系进行建模，你有很多的方案可供选择，所以你必须很谨慎的去考虑数据的结构。下面这些问题是你必须认真思考的：</p>
+<p>关系中集合的规模有多大：是一对很少，很多，还是非常多？</p>
+<p>对于一对多中”多“的那一端，是否需要单独的访问它们，还是说它们只会在父对象的上下文中被访问。</p>
+<p>被冗余的字段的读写的比例是多少？</p>
+<h3 id="数据建模设计指南">数据建模设计指南</h3>
+<p>在一对很少的情况下，你可以在父文档中内嵌数组。</p>
+<p>在一对很多或者需要单独访问“N”端的数据时，你可以采用数组引用ObjectID的方式。如果可以加速你的访问也可以在“N”端使用父引用。</p>
+<p>在一对非常多的情况下，可以在“N”端使用父引用。</p>
+<p>如果你打算在你的设计中引入冗余等反范式设计，那么你必须确保那些冗余的数据读取的频率远远大于更新的频率。而且你也不需要很强的一致性。因为反范式化的设计会让你在更新冗余字段时付出一定的代价（更慢，非原子化）</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Node 数据持久化 - mongodb / ODM - mongoose]]></title>
+        <id>https://yuufen.com/blog/post/WrIu1P8Tl/</id>
+        <link href="https://yuufen.com/blog/post/WrIu1P8Tl/">
+        </link>
+        <updated>2020-06-24T15:09:59.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="mongodb-命令行操作"><a href="https://docs.mongodb.com/manual/reference/method/">mongodb 命令行操作</a></h2>
+<pre><code class="language-js">// 查询所有数据库
+show dbs
+// 切换/创建数据库,当创建一个集合(table)的时候会自动创建当前数据库 
+use test
+// 插入一条数据 
+db.fruits.save({name:'苹果',price:5})
+// 条件查询 
+db.fruits.find({price:5})
+// 得到当前db的所有聚集集合 
+db.getCollectionNames()
+// 查询
+db.fruits.find()
+</code></pre>
+<h2 id="mongodb-原生驱动"><a href="http://mongodb.github.io/node-mongodb-native/3.1/quick-start/quick-start/">mongodb 原生驱动</a></h2>
+<h3 id="demo">Demo</h3>
+<ul>
+<li>数据库配置 model/conf.js</li>
+</ul>
+<pre><code class="language-js">module.exports = {
+  url: 'mongodb://localhost:27017',
+  dbName: 'test',
+}
+</code></pre>
+<ul>
+<li>封装数据库连接 model/db.js</li>
+</ul>
+<pre><code class="language-js">const conf = require('./conf')
+const { MongoClient } = require('mongodb')
+const { EventEmitter } = require('events')
+
+class Mongo {
+  constructor(conf) {
+    this.conf = conf
+    this.emitter = new EventEmitter()
+    this.client = new MongoClient(conf.url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    // 连接 Server
+    this.client.connect((err) =&gt; {
+      if (err) throw err
+      console.log('连接成功')
+      this.emitter.emit('connect')
+    })
+  }
+
+  // 创建/获取集合
+  col(colName, dbName = this.conf.dbName) {
+    return this.client.db(dbName).collection(colName)
+  }
+
+  // 创建 once 事件监听
+  once(event, cb) {
+    this.emitter.once(event, cb)
+  }
+}
+
+// 创建并导出 Mongo 实例
+module.exports = new Mongo(conf)
+</code></pre>
+<ul>
+<li>添加测试数据 initData.js</li>
+</ul>
+<pre><code class="language-js">const mongo = require('./models/db')
+
+mongo.once('connect', async () =&gt; {
+  const col_fruits = mongo.col('fruits')
+  await col_fruits.deleteMany() // 清空集合
+
+  const data = new Array(100).fill().map((v, i) =&gt; {
+    return {
+      name: '水果' + i,
+      price: i,
+      category: Math.random() &gt; 0.5 ? '蔬菜' : '水果',
+    }
+  })
+
+  await col_fruits.insertMany(data)
+  console.log('初始化成功')
+})
+</code></pre>
+<ul>
+<li>接口编写 index.js</li>
+</ul>
+<pre><code class="language-js">const path = require('path')
+const mongo = require('./models/db')
+const express = require('express')
+
+const app = express()
+
+app.get('/', (req, res) =&gt; {
+  res.sendFile(path.resolve('./index.html'))
+})
+
+app.get('/api/list', async (req, res) =&gt; {
+  const col_fruits = mongo.col('fruits')
+  
+  // 查找条件
+  const { page, category, keyword } = req.query
+  const condition = {}
+  if (category) {
+    condition.category = category
+  }
+  if (keyword) {
+    condition.name = { $regex: new RegExp(keyword) }
+  }
+  
+  const total = await col_fruits.find(condition).count()
+  const fruits = await col_fruits
+  .find(condition)
+  .skip((page - 1) * 6)
+  .limit(6)
+  .toArray()
+  
+  res.json({
+    ok: 1,
+    data: {
+      fruits,
+      pagination: { total, page },
+    },
+  })
+})
+
+app.get('/api/category', async (req, res) =&gt; {
+  const col_fruits = mongo.col('fruits')
+  const data = await col_fruits.distinct('category')
+  res.json({ ok: 1, data })
+})
+
+app.listen(3000)
+</code></pre>
+<h3 id="操作符"><a href="https://docs.mongodb.com/manual/reference/operator/query/">操作符</a></h3>
+<h4 id="查询操作符">查询操作符</h4>
+<pre><code class="language-js">// 比较 $eq, $gt, $gte, $in 等
+await col.find({ price: { $gt: 10 } }).toArray()
+
+// 逻辑 $and, $not, $nor, $or
+// price &gt; 10 或 price &lt; 5
+await col.find({ $or: [{ price: { $gt: 10 } }, { price: { $lt: 5 } }] })
+// price 不大于 10 且 price 不小于 5
+await col.find({ $nor: [{ price: { $gt: 10 } }, { price: { $lt: 5 } }] })
+
+// 元素 $exists, $type
+await col.insertOne({ name: '芒果', price: 20.0, stack: true })
+await col.find({ stack: { $exists: true } })
+
+// 模拟 $regex, $text, $expr
+await col.find({ name: { $regex: /芒/ } })
+await col.createIndex({ name: 'text' }) // 验证文本搜索需首先对字段加索引
+await col.find({ $text: { $search: '芒果' } }) // 按词搜索，单独字查询不出结果
+
+// 数组 $all, $elemMatch, $size
+col.insertOne({ name: '芒果', tags: ['热带', '甜'] }) // 插入带标签数据
+// $all：查询指定字段包含所有指定内容的文档
+await col.find({ tags: { $all: ['热带', '甜'] } })
+// $elemMatch: 指定字段数组中⾄至少有一个元素满⾜足所有查询规则
+col.insertOne({ hisPrice: [20, 25, 30] }) // 数据准备
+col.find({ hisPrice: { $elemMatch: { $gt: 24, $lt: 26 } } }) // 历史价位 有没有出现在24~26之间
+
+// 地理空间 $geoIntersects, $geoWithin, $near, $nearSphere
+// 创建 stations 集合
+const stations = db.collection('stations') // 添加测试数据，执行一次即可
+await stations.insertMany([
+  { name: '天安⻔门东', loc: [116.407851, 39.91408] },
+  { name: '天安⻔门⻄西', loc: [116.398056, 39.913723] },
+  { name: '王府井', loc: [116.417809, 39.91435] },
+])
+await stations.createIndex({ loc: '2dsphere' })
+r = await stations
+  .find({
+    loc: {
+      $nearSphere: {
+        $geometry: {
+          type: 'Point',
+          coordinates: [116.403847, 39.915526],
+        },
+        $maxDistance: 1000,
+      },
+    },
+  })
+  .toArray()
+console.log('天安门附近地铁站', r)
+</code></pre>
+<h4 id="更新操作符">更新操作符</h4>
+<pre><code class="language-js">// 字段相关：$set,$unset,$setOnInsert,$rename,$inc,$min,$max,$mul
+// 更新多个字段
+await fruitsColl.updateOne({ name: '芒果' }, { $set: { price: 19.8, category: '热带⽔水果' } })
+// 更新内嵌字段
+{ $set: { area: { city: '三亚' } } }
+
+/* ------------- */
+
+// 数组相关：$,$[],$addToSet,$pull,$pop,$push,$pullAll
+// $push用于新增
+insertOne({ name: '芒果', tags: ['热带', '甜'] })
+//添加tags数组字段
+fruitsColl.updateMany({ name: '芒果' }, { $push: { tags: '上火' } })
+
+// $pull,$pullAll用于删除符合条件项，$pop删除首项-1或尾项1
+fruitsColl.updateMany({ name: '芒果' }, { $pop: { tags: 1 } })
+// $，$[]用于修改
+fruitsColl.updateMany({ name: '芒果', tags: '甜' }, { $set: { 'tags.$': '香甜' } })
+
+// 修改器，常结合数组操作符使用：$each,$position,$slice,$sort
+{ $push: { tags: { $each: [&quot;上火&quot;, &quot;真香&quot;], $slice: -3 } } }
+</code></pre>
+<h4 id="聚合操作符">聚合操作符</h4>
+<p>使用 aggregate 方法，使文档顺序通过管道阶段从而得到最终结果</p>
+<pre><code class="language-js">// 聚合管道阶段：$group,$count,$sort,$skip,$limit,$project等
+// 分页查询
+r = await fruitsColl
+  .aggregate([
+    {
+      $sort: { price: -1 },
+    },
+    { $skip: 0 },
+    { $limit: 2 },
+  ])
+  .toArray()
+
+// 投射:只选择name,price并排除_id
+fruitsColl
+  .aggregate([
+    {
+      $project: { name: 1, price: 1, _id: 0 },
+    },
+  ])
+  .toArray()
+
+// 聚合管道操作符：$add,$avg,$sum等
+// 按name字段分组，统计组内price总和
+fruitsColl
+  .aggregate([
+    {
+      $group: { _id: '$name', total: { $sum: '$price' } },
+    },
+  ])
+  .toArray()
+</code></pre>
+<h2 id="odm-mongoose">ODM - mongoose</h2>
+<h3 id="基本使用">基本使用</h3>
+<h4 id="mongoose">mongoose</h4>
+<pre><code class="language-js">const mongoose = require('mongoose')
+
+// 1.连接
+mongoose.connect('mongodb://localhost:27017/test', {
+  useNewUrlParser: true,
+})
+
+const conn = mongoose.connection
+
+conn.on('error', () =&gt; console.error('连接数据库失败'))
+conn.once('open', async () =&gt; {
+  // 2.定义一个Schema
+  const Schema = mongoose.Schema({ category: String, name: String })
+
+  // 3.编译一个Model
+  const Model = mongoose.model('fruit', Schema)
+
+  try {
+    // 4.创建，create返回Promise
+    let r = await Model.create({
+      category: '温带水果',
+      name: '苹果',
+      price: 5,
+    })
+    console.log('插入数据:', r)
+    
+    // 通过实例创建
+    const fruit = new Model({
+      category: '温带水果',
+      name: '苹果',
+      price: 5,
+    })
+    const r = await fruit.save()
+    console.log('新增fruit:', r)
+
+    // 5.查询，find返回Query，它实现了then和catch，可以当Promise使用
+    // 如果需要返回Promise，调用其exec()
+    r = await Model.find({ name: '苹果' })
+    console.log('查询结果:', r)
+
+    // 6.更新，updateOne返回Query
+    r = await Model.updateOne({ name: '苹果' }, { $set: { name: '芒果' } })
+    console.log('更新结果：', r)
+
+    // 7.删除，deleteOne返回Query
+    r = await Model.deleteOne({ name: '苹果' })
+    console.log('删除结果：', r)
+  } catch (error) {
+    console.log(error)
+  }
+})
+</code></pre>
+<h4 id="schema">Schema</h4>
+<h5 id="字段定义">字段定义</h5>
+<blockquote>
+<p>字段类型：String / Number / Date / Buﬀer / Boolean / Mixed / ObjectId / Array</p>
+<p>关联：categories: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Category' }]</p>
+</blockquote>
+<pre><code class="language-js">const blogSchema = mongoose.Schema({
+  title: { type: String, required: [true, '标题为必填项'] }, // 定义校验规则
+  author: String,
+  body: String,
+  comments: [{ body: String, date: Date }], // 定义对象数组
+  date: { type: Date, default: Date.now }, // 指定默认值
+  hidden: Boolean,
+  meta: {
+    // 定义对象
+    votes: Number,
+    favs: Number,
+  },
+})
+// 定义多个索引
+blogSchema.index({ title: 1, author: 1, date: -1 })
+</code></pre>
+<h5 id="定义实例方法">定义实例方法</h5>
+<pre><code class="language-js">// 定义实例方法
+blogSchema.methods.findByAuthor = function () {
+  return this.model('blog').find({ author: this.author }).exec()
+}
+// 获得模型实例
+const BlogModel = mongoose.model('blog', blogSchema)
+
+const blog = new BlogModel({
+  title: 'nodejs持久化',
+  author: 'jerry',
+  body: '....',
+})
+// 调用实例方法
+r = await blog.findByAuthor()
+console.log('findByAuthor', r)
+</code></pre>
+<h5 id="静态方法">静态方法</h5>
+<pre><code class="language-js">blogSchema.statics.findByAuthor = function (author) {
+  return this.model('blog').find({ author }).exec()
+}
+// ...
+r = await BlogModel.findByAuthor('jerry')
+console.log('findByAuthor', r)
+</code></pre>
+<h5 id="虚拟属性">虚拟属性</h5>
+<pre><code class="language-js">blogSchema.virtual('commentsCount'/*, { options } */).get(function () {
+  return this.comments.length
+})
+
+r = await BlogModel.findOne({ author: 'jerry' })
+console.log('blog留言数：', r.commentsCount)
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Node 数据持久化 - mysql / mysql2 / ORM - Sequelize]]></title>
+        <id>https://yuufen.com/blog/post/o2MKSF5LM/</id>
+        <link href="https://yuufen.com/blog/post/o2MKSF5LM/">
+        </link>
+        <updated>2020-06-19T17:27:18.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>实体驱动设计</p>
+</blockquote>
+<h2 id="原生驱动">原生驱动</h2>
+<h3 id="使用-mysql">使用 mysql</h3>
+<pre><code class="language-js">const mysql = require('mysql')
+// 连接配置
+const cfg = {
+  host: 'localhost',
+  user: 'root',
+  password: 'example',
+  database: 'test',
+}
+// 创建连接对象
+const conn = mysql.createConnection(cfg)
+
+// 连接
+conn.connect((err) =&gt; {
+  if (err) {
+    throw err
+  } else {
+    console.log('连接成功！')
+  }
+})
+
+// 定义 SQL 语句
+const CREATE_SQL = `CREATE TABLE IF NOT EXISTS demo(
+                      id INT NOT NULL AUTO_INCREMENT,
+                      message VARCHAR(45) NULL,
+                      PRIMARY KEY(id)
+                    )`
+const INSERT_SQL = `INSERT INTO demo(message) VALUE(?)`
+const SELECT_SQL = `SELECT * FROM demo`
+
+conn.query(CREATE_SQL, (err) =&gt; {
+  if (err) {
+    throw err
+  }
+  // 插入数据
+  conn.query(INSERT_SQL, (err, result) =&gt; {
+    if (err) {
+      throw err
+    }
+    console.log(result)
+    // 查找数据
+    conn.query(SELECT_SQL, (err, result) =&gt; {
+      console.log(result)
+      conn.end() // 如果 query 语句有嵌套，end 须在此执行
+    })
+  })
+})
+</code></pre>
+<h3 id="使用-mysql2-与-es8语法">使用 mysql2 与 ES8语法</h3>
+<pre><code class="language-js">(async () =&gt; {
+  const mysql = require('mysql2/promise')
+  const cfg = {
+    host: 'localhost',
+    user: 'root',
+    password: 'example',
+    database: 'test',
+  }
+  const conn = await mysql.createConnection(cfg)
+
+  const CREATE_SQL = `CREATE TABLE IF NOT EXISTS demo(
+                        id INT NOT NULL AUTO_INCREMENT,
+                        message VARCHAR(45) NULL,
+                        PRIMARY KEY(id)
+                      )`
+  const INSERT_SQL = `INSERT INTO demo(message) VALUE(?)`
+  const SELECT_SQL = `SELECT * FROM demo`
+
+  let ret = await conn.execute(CREATE_SQL)
+  console.log('create: ', ret)
+  
+  ret = await conn.execute(INSERT_SQL, ['hello world'])
+  console.log('insert: ', ret)
+
+  const [rows, fields] = await conn.execute(SELECT_SQL)
+  console.log('select: ', rows)
+})()
+</code></pre>
+<h2 id="使用-ormobject-relation-mapping-sequelize">使用 ORM(Object Relation Mapping) - Sequelize</h2>
+<h3 id="汇总-demo">汇总 Demo</h3>
+<pre><code class="language-js">(async () =&gt; {
+  const Sequelize = require('sequelie')
+
+  // 建立连接
+  const sequelie = new Sequelize('demo', 'root', 'example', {
+    host: 'localhost',
+    dialect: 'mysql',
+    operatorsAliases: false,
+  })
+
+  const Fruit = sequelie.define(
+    'Fruit',
+    {
+      name: {
+        type: Sequelize.STRING(20),
+        allowNull: false,
+        get() {
+          // 设置 Getter (在属性中)
+          const fname = this.getDataValue('name')
+          const price = this.getDataValue('price')
+          const stock = this.getDataValue('stock')
+          return `${fname}-价格${price}-库存${stock}kg`
+        },
+      },
+      price: { type: Sequelize.FLOAT, allowNull: false },
+      stock: { type: Sequelize.INTEGER, defaultValue: 0 },
+      id: {
+        type: Sequelize.DataTypes.UUID, // 使用 UUID，而非默认的 自增id
+        type: Sequelize.DataTypes.UUIDV1, // 设置默认 UUID
+        primaryKey: true, // 设为主键
+      },
+    },
+    {
+      timestamps: false, // 避免自动生成时间戳字段
+      tableName: 'fruits', // 指定表名
+      // underscored: true, // 蛇形命名，默认驼峰命名
+      getterMethods: {
+        // 设置 Getter (在 options 中)
+        amount() {
+          return this.getDataValue('stock') + 'kg'
+        },
+      },
+      setterMethods: {
+        // 设置 Setter (在 options 中)
+        amount(val) {
+          const idx = val.indexOf('kg')
+          const v = val.slice(0, idx)
+          this.setDataValue('stock', v)
+        },
+      },
+    },
+  )
+
+  // 同步 Fruit 表，强制同步：force: true，会先删除表
+  // let ret = await Fruit.sync({ force: true })
+  let ret = await Fruit.sync()
+  console.log('sync:', ret)
+
+  ret = await Fruit.create({
+    name: '香蕉',
+    price: 3.5,
+  })
+  console.log('create:', ret)
+
+  ret = await Fruit.findAll()
+  console.log('findAll', JSON.stringify(ret))
+
+  await Fruit.update(
+    { price: 4 }, // 改动
+    { where: { name: '香蕉' } }, // 查找条件
+  )
+
+  const Op = Sequelize.Op
+  ret = await Fruit.findAll({ where: { price: { [Op.lte]: 4, [Op.gt]: 2 } } })
+  console.log('findAll', JSON.stringify(ret, '', '\t'))
+
+  // 触发 getters
+  Fruit.findAll().then((fruits) =&gt; {
+    console.log(JSON.stringify(fruits))
+    // 修改amount，触发setterMethods
+    fruits[0].amount = '150kg'
+    fruits[0].save()
+  })
+})()
+</code></pre>
+<h3 id="模型配置选项">模型配置选项</h3>
+<pre><code class="language-js">const Fruit = sequelize.define(&quot;Fruit&quot;, {...}, {
+  timestamps: false, // 避免自动生成时间戳字段
+  tableName: 'xxx', // 指定表名
+  // underscored: true, // 蛇形命名，默认驼峰命名
+})
+</code></pre>
+<h3 id="使用-uuid-主键">使用 UUID 主键</h3>
+<pre><code class="language-js">id: { 
+  type: Sequelize.DataTypes.UUID,
+  type: Sequelize.DataTypes.UUIDV1, 
+  primaryKey: true, 
+}
+</code></pre>
+<h3 id="getters-setters">Getters &amp; Setters</h3>
+<p>可用于定义伪属性或映射到数据库字段的保护属性</p>
+<pre><code class="language-js">// 定义为属性的一部分
+{
+  name: {
+    type: Sequelize.STRING(20),
+    allowNull: false,
+    get() {
+      const fname = this.getDataValue('name')
+      const price = this.getDataValue('price')
+      const stock = this.getDataValue('stock')
+      return `${fname}-价格${price}-库存${stock}kg`
+    },
+  },
+  // ...
+},
+// 定义为模型选项
+{
+  // ...
+  getterMethods: {
+    amount() {
+      return this.getDataValue('stock') + 'kg'
+    },
+  },
+  setterMethods: {
+    amount(val) {
+      const idx = val.indexOf('kg')
+      const v = val.slice(0, idx)
+      this.setDataValue('stock', v)
+    },
+  },
+},
+// ...
+    
+// 触发 getters
+Fruit.findAll().then((fruits) =&gt; {
+  console.log(JSON.stringify(fruits))
+  // 修改amount，触发setterMethods
+  fruits[0].amount = '150kg'
+  fruits[0].save()
+})
+</code></pre>
+<h3 id="校验"><a href="https://sequelize.org/master/manual/models-definition.html#validations">校验</a></h3>
+<p>验证模型字段格式、内容。校验会在 create 、 update 和 save 时自动运行</p>
+<pre><code class="language-js">      price: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+        // 校验
+        validate: {
+          isFloat: { msg: '价格字段必须输入数字' },
+          min: { args: [0], msg: '价格字段的值必须大于0' },
+        },
+      },
+</code></pre>
+<h3 id="扩展模型方法">扩展模型方法</h3>
+<pre><code class="language-js">// 添加类方法
+Fruit.classify = function (name) {
+  const tropicFruits = ['⾹香蕉', '芒果', '椰⼦子'] // 热带水果
+  return tropicFruits.includes(name) ? '热带⽔水果' : '其他⽔水果'
+}
+// 添加实例方法
+Fruit.prototype.totalPrice = function (count) {
+  return (this.price * count).toFixed(2)
+}
+
+// 使用类方法
+['⾹香蕉', '草莓'].forEach((f) =&gt; console.log(f + '是' + Fruit.classify(f)))
+// 使用实例方法
+Fruit.findAll().then((fruits) =&gt; {
+  const [f1] = fruits
+  console.log(`买5kg${f1.name}需要￥${f1.totalPrice(5)}`)
+})
+</code></pre>
+<h3 id="查询记录">查询记录</h3>
+<pre><code class="language-js">// 通过属性查询
+Fruit.findOne({ where: { name: '⾹香蕉' } }).then((fruit) =&gt; {
+  // fruit是首个匹配项，若没有则为null
+  console.log(fruit.get())
+})
+// 指定查询字段
+Fruit.findOne({ attributes: ['name'] }).then((fruit) =&gt; {
+  // fruit是首个匹配项，若没有则为null
+  console.log(fruit.get())
+})
+// 获取数据和总条数
+Fruit.findAndCountAll().then((result) =&gt; {
+  console.log(result.count)
+  console.log(result.rows.length)
+})
+// 查询操作符
+const Op = Sequelize.Op
+Fruit.findAll({
+  // where: { price: { [Op.lt]:4 }, stock: { [Op.gte]: 100 } }
+  where: { price: { [Op.lt]: 4, [Op.gt]: 2 } },
+}).then((fruits) =&gt; {
+  console.log(fruits.length)
+})
+// 或语句
+Fruit.findAll({
+  // where: { [Op.or]:[{price: { [Op.lt]:4 }}, {stock: { [Op.gte]: 100 }}] }
+  where: { price: { [Op.or]: [{ [Op.gt]: 3 }, { [Op.lt]: 2 }] } },
+}).then((fruits) =&gt; {
+  console.log(fruits[0].get())
+})
+// 分页
+Fruit.findAll({ offset: 0, limit: 2 })
+// 排序
+Fruit.findAll({ order: [['price', 'DESC']] })
+// 聚合
+Fruit.max('price').then((max) =&gt; {
+  console.log('max', max)
+})
+Fruit.sum('price').then((sum) =&gt; {
+  console.log('sum', sum)
+})
+</code></pre>
+<h3 id="更新记录">更新记录</h3>
+<pre><code class="language-js">Fruit.findById(1).then((fruit) =&gt; {
+  // 方式1 查找-修改-save
+  fruit.price = 4
+  fruit.save().then(() =&gt; console.log('update!!!!'))
+})
+// 方式2 按条件全部更新
+Fruit.update({ price: 4 }, { where: { id: 1 } }).then((r) =&gt; {
+  console.log(r)
+  console.log('update!!!!')
+})
+</code></pre>
+<h3 id="删除记录">删除记录</h3>
+<pre><code class="language-js">// 方式1
+Fruit.findOne({ where: { id: 1 } }).then((r) =&gt; r.destroy())
+// 方式2
+Fruit.destroy({ where: { id: 1 } }).then((r) =&gt; console.log(r))
+</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -387,6 +1196,61 @@ const server = http.createServer((request, response) =&gt; {
 })
 
 server.listen(3000)
+</code></pre>
+<h2 id="利用文件系统实现数据持久化">利用文件系统实现数据持久化</h2>
+<pre><code class="language-js">const fs = require('fs')
+
+function get(key) {
+  fs.readFile('./db.json', (err, data) =&gt; {
+    const json = JSON.parse(data)
+    console.log(json[key])
+  })
+}
+
+function set(key, value) {
+  fs.readFile('./db.json', (err, data) =&gt; {
+    // 可能是空文件
+    const json = data ? JSON.parse(data) : {}
+    json[key] = value
+    fs.writeFile('./db.json', JSON.stringify(json), (err) =&gt; {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('写入成功')
+      }
+    })
+  })
+}
+
+/**
+ * 命令行接口
+ * set foo doo
+ * get foo
+ * quit
+ */
+const readline = require('readline')
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+})
+
+rl.on('line', function (input) {
+  const [op, key, value] = input.split(' ')
+  if (op === 'get') {
+    get(key)
+  } else if (op === 'set') {
+    set(key, value)
+  } else if (op === 'quit') {
+    rl.close()
+  } else {
+    console.log('无效指令')
+  }
+})
+
+rl.on('close', function () {
+  console.log('程序结束')
+  process.exit(0)
+})
 </code></pre>
 ]]></content>
     </entry>
@@ -1535,794 +2399,6 @@ npm start
 <h3 id="静态应用部署">静态应用部署</h3>
 <p>Nuxt.js 可依据路由配置将应用静态化，使得我们可以将应用部署至任意一个静态站点主机服务商。</p>
 <pre><code>npm run generate
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Vue 基础：测试]]></title>
-        <id>https://yuufen.com/blog/post/VkzI4KJ9x/</id>
-        <link href="https://yuufen.com/blog/post/VkzI4KJ9x/">
-        </link>
-        <updated>2020-03-16T01:03:54.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="测试分类">测试分类</h2>
-<ul>
-<li>黑盒测试
-<ul>
-<li><strong>E2E 测试</strong>，设计 N 个用例，测试某个功能的正确性</li>
-<li><strong>集成测试</strong>，集合多个测试过的单元一起测试</li>
-</ul>
-</li>
-<li>白盒测试
-<ul>
-<li><strong>单元测试</strong>，如针对一些内部核心实现逻辑编写测试代码</li>
-</ul>
-</li>
-</ul>
-<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1584914075235.png" alt="" loading="lazy"></figure>
-<h2 id="为什么要编写测试代码">为什么要编写测试代码</h2>
-<ul>
-<li>提供描述组件行为的文档</li>
-<li>节省手动测试的时间</li>
-<li>减少研发新特性时产生的 bug</li>
-<li>改进设计</li>
-<li>促进重构</li>
-</ul>
-<h2 id="准备工作">准备工作</h2>
-<p>要完成测试任务，需要测试框架（运行测试代码，如 Mocha）、 断言库（编写测试代码，如 Chai）和编程框架特有的测试套件。Vue 中的组件等测试代码的编写需要 <a href="https://vue-test-utils.vuejs.org/zh/">vue-text-utils</a> 套件支持。</p>
-<p>Jest 同时包含测试框架与断言库，所以演示代码使用 Jest，但是它们的语法基本一致。</p>
-<h3 id="新建-vue-项目时集成">新建 vue 项目时集成</h3>
-<p>选择特性 <code>Unit Testing</code> 和 <code>E2E Testing</code></p>
-<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1584924220583.png" alt="" loading="lazy"></figure>
-<p>单元测试解决方案选择 <code>Jest</code></p>
-<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1584924289071.png" alt="" loading="lazy"></figure>
-<p>端到端测试解决方案选择 <code>Cypress</code></p>
-<figure data-type="image" tabindex="4"><img src="https://yuufen.com/blog/post-images/1584924306319.png" alt="" loading="lazy"></figure>
-<h3 id="在已存在项目中集成">在已存在项目中集成</h3>
-<p>运行 <code>vue add @vue/unit-jest</code> 和 <code>vue add @vue/e2e-cypress</code></p>
-<h2 id="编写单元测试">编写单元测试</h2>
-<p>单元测试（unit testing），是指对软件中最小可测试单元进行检查和验证。</p>
-<ul>
-<li>test/unit/demo.spec.js（<code>*.spec.js</code> 是命名规范）</li>
-</ul>
-<pre><code class="language-js">function add(num1, num2) {
-  return num1 + num2
-}
-
-// 测试套件 test suite
-describe('demo', () =&gt; {
-  // 测试用例 test case
-  it('测试 add 函数', () =&gt; {
-    // 断言 assert
-    expect(add(1,3)).toBe(3)
-    expect(add('str',4)).toBe(5)
-    expect(add(1,3)).toBe(4)
-  })
-}) 
-</code></pre>
-<ul>
-<li><code>yarn test:unit</code></li>
-</ul>
-<h3 id="断言-api-简介">断言 API 简介</h3>
-<ul>
-<li>
-<p><code>describe</code>：定义测试套件</p>
-</li>
-<li>
-<p><code>it</code>：定义一个测试用例</p>
-</li>
-<li>
-<p><code>expect</code>：断言的判断条件</p>
-<blockquote>
-<p><a href="https://jestjs.io/docs/zh-Hans/expect">更多断言 API</a></p>
-</blockquote>
-</li>
-</ul>
-<h3 id="测试-vue-组件">测试 Vue 组件</h3>
-<ul>
-<li>创建一个 vue 组件 components/testDemo.vue</li>
-</ul>
-<pre><code class="language-vue">&lt;template&gt;
-  &lt;div&gt;
-    &lt;span&gt;{{ message }}&lt;/span&gt; &lt;button @click=&quot;changeMsg&quot;&gt;点击&lt;/button&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
-&lt;script&gt;
-export default {
-  data() {
-    return { message: 'vue-text' }
-  },
-  created() {
-    this.message = 'Demo'
-  },
-  methods: {
-    changeMsg() {
-      this.message = '按钮点击'
-    },
-  },
-}
-&lt;/script&gt;
-</code></pre>
-<ul>
-<li>tests/unit/compDemo.spec.js</li>
-</ul>
-<pre><code class="language-js">import Vue from 'vue'
-import TestDemo from '@/components/TestDemo.vue'
-
-import { mount } from '@vue/test-utils'
-
-describe('TestDemo', () =&gt; {
-  // 原始写法：
-
-  // 检查原始组件选项
-  it('存在 created 生命周期', () =&gt; {
-    expect(typeof TestDemo.created).toBe('function')
-  })
-
-  // 评估原始组件选项中的函数的结果
-  it('初始 data 是 vue-text', () =&gt; {
-    // 检查 data 函数存在性
-    expect(typeof TestDemo.data).toBe('function')
-    // 检查 data 返回的默认值
-    const defaultData = TestDemo.data()
-    expect(defaultData.message).toBe('Hello!')
-  })
-
-  it('mount 之后 data.message 是 Demo', () =&gt; {
-    const vm = new Vue(TestDemo).$mount()
-    expect(vm.message).toBe('Demo')
-  })
-
-  // 使用 vue test utils：
-    
-  it('按钮点击后', () =&gt; {
-    // 挂载组件
-    const wrapper = mount(TestDemo)
-    // 查找元素，触发事件
-    wrapper.find('button').trigger('click')
-    // 测试数据变化
-    expect(wrapper.vm.message).toBe('按钮点击')
-    // 测试 html 渲染结果
-    expect(wrapper.find('span').html()).toBe('&lt;span&gt;按钮点击&lt;/span&gt;')
-    // 等效的方式
-    expect(wrapper.find('span').text()).toBe('按钮点击')
-  })
-})
-</code></pre>
-<h3 id="测试覆盖率">测试覆盖率</h3>
-<p>在jest.conﬁg.js中添加</p>
-<pre><code class="language-js">module.exports = {
-  collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.{js,vue}'],
-}
-</code></pre>
-<p>执行 <code>yarn test:unit</code>，即可看到测试覆盖率：</p>
-<figure data-type="image" tabindex="5"><img src="https://yuufen.com/blog/post-images/1585008205915.png" alt="" loading="lazy"></figure>
-<blockquote>
-<p><code>%Stmts</code> - 语句覆盖率（statement coverage）：是不是每个语句都执行了？<br>
-<code>%Branch</code> - 分支覆盖率（branch coverage）：是不是每个 if 代码块都执行了？<br>
-<code>%Funcs</code> - 函数覆盖率（function coverage）：是不是每个函数都调用过了？<br>
-<code>%Lines</code> - 行覆盖率（line coverage）：是不是每一行都执行了？</p>
-</blockquote>
-<h3 id="e2e-测试">E2E 测试</h3>
-<p>借用浏览器的能力，站在用户测试人员的角度，输入框，点击按钮等，完全模拟用户，这个和具体的框架关系不⼤，完全模拟浏览器行为。</p>
-<ul>
-<li>修改 tests/e2e/spec/test.js</li>
-</ul>
-<pre><code class="language-js">// https://docs.cypress.io/api/introduction/api.html
-describe('端到端测试，抢测试⼈人员的饭碗', () =&gt; {
-  it('先访问⼀一下', () =&gt; {
-    cy.visit('/')
-    // cy.contains('h1', 'Welcome to Your Vue.js App')
-    cy.contains('span', 'Demo')
-  })
-})
-</code></pre>
-<p>测试未通过，因为没有使用 TestDemo.vue，修改 App.vue</p>
-<pre><code class="language-vue">&lt;div id=&quot;app&quot;&gt;   
-  &lt;img alt=&quot;Vue logo&quot; src=&quot;./assets/logo.png&quot;&gt; 
-  &lt;test-demo&gt;&lt;/test-demo&gt; 
-&lt;/div&gt;
-
-import Kaikeba from './components/Kaikeba.vue' 
-export default { 
-  name: 'app', 
-  components: { 
-    HelloWorld,Kaikeba
-  } 
-}
-</code></pre>
-<figure data-type="image" tabindex="6"><img src="https://yuufen.com/blog/post-images/1585012934606.png" alt="" loading="lazy"></figure>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Vue 基础：数据交互]]></title>
-        <id>https://yuufen.com/blog/post/LR9CET7_-/</id>
-        <link href="https://yuufen.com/blog/post/LR9CET7_-/">
-        </link>
-        <updated>2020-03-14T19:13:16.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="封装-request-api">封装 request / api</h2>
-<p>api service =&gt; request =&gt; local mock / easy-mock / service api</p>
-<blockquote>
-<p>主要问题分析：</p>
-<ol>
-<li>有时需要请求头、响应，进行统一预处理</li>
-<li>请求不同数据源时 url 会变化，需要能根据环境自动修改url</li>
-<li>可能出现的跨域问题</li>
-</ol>
-</blockquote>
-<h3 id="srcutilsrequestjs">src/utils/request.js</h3>
-<pre><code class="language-js">import axios from 'axios'
-import { MessageBox, Message } from 'element-ui'
-import store from '@/store'
-import { getToken } from '@/utils/auth'
-
-// 创建 axios 实例
-const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // url 基础地址，解决不同数据源 url 变化问题
-  // withCredentials: true, // 跨域时若要发送 cookie 需设置该项
-  timeout: 5000, // 超时
-})
-
-// 请求拦截
-service.interceptors.request.use(
-  (config) =&gt; {
-    // do something
-
-    if (store.getters.token) {
-      // 设置令牌请求头
-      // 后端采用默认配置（规范: http://www.rfcreader.com/#rfc6750_line188）：
-      config.headers['Authorization'] = 'Bearer' + getToken()
-      // // 后端自定义如：
-      // config.headers['x-token'] = getToken()
-    }
-    return config
-  },
-  (error) =&gt; {
-    // 请求错误预处理
-    // console.log(error) // for debug
-    return Promise.reject(error)
-  },
-)
-
-// 响应拦截
-service.interceptors.response.use(
-  // 通过自定义 code 判断响应状态，也可以通过 HTTP 状态码判定
-  (response) =&gt; {
-    // 仅返回数据部分
-    const res = response.data
-    // 使用自定义状态码判断错误：
-    // code 不为 1 则判定为错误
-    if (res.code !== 1) {
-      Message({
-        message: res.message || 'Error',
-        type: 'error',
-        duration: 5 * 1000,
-      })
-
-      // 假设：10008-非法令牌；10012-其他客户端已登录；10014-令牌过期
-      if (res.code === 10008 || res.code === 10012 || res.code === 10014) {
-        MessageBox.confirm('登陆状态异常，请重新登录', '确认登录信息', {
-          confirmButtonText: '重新登陆',
-          cancelButtonText: '取消',
-          type: 'warning',
-        }).then(() =&gt; {
-          store.dispatch('user/resetToken').then(() =&gt; {
-            location.reload()
-          })
-        })
-      }
-      return Promise.reject(new Error(res.message || 'Error'))
-    } else {
-      return res
-    }
-  },
-  (error) =&gt; {
-    // 使用错误码：
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000,
-    })
-  },
-)
-
-export default service
-</code></pre>
-<h3 id="srcapiuserjs">src/api/user.js</h3>
-<pre><code class="language-js">import request from '@/utils/request'
-
-export function login(data) {
-  return request({
-    url: '/user/login',
-    methods: 'post',
-    data,
-  })
-}
-
-export function getInfo() {
-  return request({
-    url: '/user/info',
-    methods: 'get',
-  })
-}
-</code></pre>
-<h3 id="srcstoreuserjs">src/store/user.js</h3>
-<pre><code class="language-js">  getters: {
-    roles: (state) =&gt; state.user.roles,
-+   token: (state) =&gt; state.user.token,
-    permission_routes: (state) =&gt; state.permission.routes,
-  },
-</code></pre>
-<h3 id="srcstoreuserjs-2">src/store/user.js</h3>
-<pre><code class="language-js">import { login, getInfo } from '@/api/user'
-
-const actions = {
-  // user login
-  login({ commit }, userInfo) {
-    // 调用接口，并处理结果，错误处理已拦截所以无需处理
-    return login(userInfo).then((res) =&gt; {
-      commit('SET_TOKEN', res.data)
-      setToken(res.data)
-    })
-  },
-  // get user info
-  getInfo({ commit, state }) {
-    return getInfo().then(({ data: roles }) =&gt; {
-      commit('SET_ROLES', roles)
-      return { roles }
-    })
-  },
-</code></pre>
-<h2 id="mock">mock</h2>
-<h3 id="本地-mock">本地 mock</h3>
-<p>vue.config.js</p>
-<pre><code class="language-js">// 处理 post 请求参数
-const bodyParser = require('body-parser')
-
-// ...
-
-module.exports = {
-  publicPath: '/practice',
-  devServer: {
-    port,
-    // 配置 mock 接口
-    // app 是 express 的实例
-    before: (app) =&gt; {
-      // 注册中间件，处理 post 参数
-      app.use(bodyParser.json())
-
-      app.post('/dev-api/user/login', (req, res) =&gt; {
-        const { username } = req.body
-
-        if (username === 'admin' || username === 'jerry') {
-          res.json({
-            code: 1,
-            data: username,
-          })
-        } else {
-          res.json({
-            code: 10204,
-            message: '用户名或密码错误',
-          })
-        }
-      })
-
-      // get 之前需要一个中间件来判断 token 合法性，这里没写
-      app.get('/dev-api/user/info', (req, res) =&gt; {
-        const auth = req.headers['authorization']
-        const roles = auth.split(' ')[1] === 'admin' ? ['admin'] : ['editor']
-        res.json({
-          code: 1,
-          data: roles,
-        })
-      })
-    },
-  },
-    
-  // ...
-</code></pre>
-<h3 id="easy-mock">easy-mock</h3>
-<p><a href="easy-mock.com">项目地址</a></p>
-<h2 id="解决跨域">解决跨域</h2>
-<blockquote>
-<p>如果请求的接口在另一台服务器上，开发时则需要在本地设置代理服务器，避免跨域问题</p>
-</blockquote>
-<h3 id="配置代理-vueconfigjs">配置代理 vue.config.js</h3>
-<pre><code class="language-js">const port = 7070
-const title = 'Vue Learning Record'
-
-const path = require('path')
-// 将传入的相对路径转换为绝对路径，跨平台
-function resolve(dir) {
-  return path.join(__dirname, dir)
-}
-
-module.exports = {
-  publicPath: '/practice',
-  devServer: {
-    port,
-    // 如果请求的接口在另一台服务器上，开发时则需要设置代理避免跨域问题
-    proxy: {
-      // 代理 /dev-api/user/login 到 http://127.0.0.1:3000/user/login
-      // 请求的还是 http://localhost:7070/..，之后的代理转发浏览器不可知
-      // 代理转发发生在 before 之后，所以会被 before 拦截，所以这俩互斥 
-      // 当使用绝对路径时，代理不生效
-      [process.env.VUE_APP_BASE_API]: {
-        target: `http://127.0.0.1:3000/`,
-        changeOrigin: true,  
-        pathRewrite: { // dev-api/user/login =&gt; /user/login
-          ['^' + process.env.VUE_APP_BASE_API]: ''
-        }
-        
-      }
-    },
-      
-    // ..
-</code></pre>
-<h3 id="创建一个独立接口服务器~serverindexjs">创建一个独立接口服务器，~/server/index.js</h3>
-<pre><code class="language-js">const express = require('express')
-const app = express()
-const bodyParser = require('body-parser')
-
-app.use(bodyParser.json())
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  }),
-)
-
-app.post('/user/login', (req, res) =&gt; {
-  const { username } = req.body
-  if (username === 'admin' || username === 'jerry') {
-    res.json({
-      code: 1,
-      data: username,
-    })
-  } else {
-    res.json({
-      code: 10204,
-      message: '⽤用户名或密码错误',
-    })
-  }
-})
-
-app.get('/user/info', (req, res) =&gt; {
-  const roles = req.headers['authorization'].split(' ')[1] ? ['admin'] : ['editor']
-  res.json({ code: 1, data: roles })
-})
-
-app.listen(3000)
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Vue 基础：动态导航菜单组件]]></title>
-        <id>https://yuufen.com/blog/post/SZ8FawuZz/</id>
-        <link href="https://yuufen.com/blog/post/SZ8FawuZz/">
-        </link>
-        <updated>2020-03-13T20:50:11.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="简单实现">简单实现</h2>
-<blockquote>
-<p>也可以使用 name，但是容易造成冲突，并且 name 属性不必要</p>
-</blockquote>
-<ul>
-<li>路由数据模板：</li>
-</ul>
-<pre><code class="language-js">export const constRoutes = [
-  {
-    path: '/login',
-    component: () =&gt; import('@/views/Login'),
-    hidden: true,
-  },
-  {
-    path: '/',
-    component: Layout,
-    redirect: '/home',
-    meta: {
-      title: '主页',
-    },
-    children: [
-      {
-        path: 'home',
-        component: () =&gt; import(/* webpackChunkName: &quot;home&quot; */ '@/views/Home'),
-        name: 'Home',
-        meta: {
-          title: 'Home', // 导航菜单项标题
-          icon: 'msg', // 导航菜单项图标
-        },
-      },
-    ],
-  },
-]
-</code></pre>
-<ul>
-<li>src/components/SideMenu/index.vue</li>
-</ul>
-<pre><code class="language-js">&lt;template&gt;
-  &lt;div id=&quot;app&quot;&gt;
-    &lt;ul&gt;
-      &lt;item
-        class=&quot;item&quot;
-        v-for=&quot;route in permission_routes&quot;
-        :key=&quot;route.path&quot;
-        :model=&quot;route&quot;
-        :base-path=&quot;route.path&quot;
-      &gt;&lt;/item&gt;
-    &lt;/ul&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
-
-&lt;script&gt;
-import Item from './Item'
-import { mapGetters } from 'vuex'
-
-export default {
-  name: 'SideMenu',
-  components: { Item },
-  computed: {
-    ...mapGetters(['permission_routes']),
-  },
-  mounted() {
-    console.log(this.permission_routes)
-  },
-}
-&lt;/script&gt;
-</code></pre>
-<ul>
-<li>src/components/SideMenu/Item.vue</li>
-</ul>
-<pre><code class="language-js">&lt;template&gt;
-  &lt;!-- hidden 选项存在则不显示 --&gt;
-  &lt;li v-if=&quot;!model.hidden&quot;&gt;
-    &lt;div @click=&quot;toggle&quot;&gt;
-      &lt;!-- 图标 --&gt;
-      &lt;Icon v-if=&quot;model.meta &amp;&amp; model.meta.icon&quot; :icon-class=&quot;model.meta.icon&quot;&gt;&lt;/Icon&gt;
-      &lt;!-- 标题 --&gt;
-      &lt;span v-if=&quot;isFolder&quot;&gt;
-        &lt;!-- 如果是父节点 --&gt;
-        &lt;span v-if=&quot;model.meta &amp;&amp; model.meta.title&quot;&gt;
-          {{ model.meta.title }}
-        &lt;/span&gt;
-        &lt;span&gt;{{ open ? '-' : '+' }}&lt;/span&gt;
-      &lt;/span&gt;
-      &lt;template v-else&gt;
-        &lt;!-- 如果是叶子节点，渲染链接 --&gt;
-        &lt;router-link v-if=&quot;model.meta &amp;&amp; model.meta.title&quot; :to=&quot;resolvePath(model.path)&quot;&gt;
-          {{ model.meta.title }}
-        &lt;/router-link&gt;
-      &lt;/template&gt;
-    &lt;/div&gt;
-
-    &lt;!-- 子树，递归组件 --&gt;
-    &lt;ul v-show=&quot;open&quot; v-if=&quot;isFolder&quot;&gt;
-      &lt;Item
-        class=&quot;item&quot;
-        v-for=&quot;route in model.children&quot;
-        :key=&quot;route.path&quot;
-        :model=&quot;route&quot;
-        :base-path=&quot;resolvePath(model.path)&quot;
-      &gt;&lt;/Item&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/template&gt;
-
-&lt;script&gt;
-import path from 'path'
-
-export default {
-  name: 'Item',
-  props: {
-    model: Object,
-    basePath: {
-      tpye: String,
-      default: '',
-    },
-  },
-  data() {
-    return {
-      open: false,
-    }
-  },
-  computed: {
-    // 判断是否有子树
-    isFolder: function() {
-      return this.model.children &amp;&amp; this.model.children.length
-    },
-  },
-  methods: {
-    // 考虑跨平台，拼接父 path 和子 path 为完整 path
-    resolvePath(routePath) {
-      return path.resolve(this.basePath, routePath)
-    },
-    toggle() {
-      if (this.isFolder) {
-        this.open = !this.open
-      }
-    },
-  },
-}
-&lt;/script&gt;
-</code></pre>
-<ul>
-<li>src/layout/index.js</li>
-</ul>
-<pre><code class="language-js">&lt;template&gt;
-  &lt;div class=&quot;app-wrapper&quot;&gt;
-    &lt;!-- &lt;sidebar class=&quot;sidebar-container&quot; /&gt; --&gt;
-    &lt;SideMenu&gt;&lt;/SideMenu&gt;
-    &lt;div class=&quot;main-container&quot;&gt;
-      &lt;router-view /&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
-
-&lt;script&gt;
-import SideMenu from '@/components/SideMenu'
-export default {
-  components: { SideMenu },
-}
-&lt;/script&gt;
-</code></pre>
-<ul>
-<li>src/store/index.js</li>
-</ul>
-<pre><code class="language-js">  getters: {
-    roles: (state) =&gt; state.user.roles,
-+   permission_routes: (state) =&gt; state.permission.routes,
-  },
-</code></pre>
-<h2 id="扩展">扩展</h2>
-<ul>
-<li>components/Sidebar/index.vue</li>
-</ul>
-<pre><code class="language-js">&lt;template&gt;
-  &lt;div&gt;
-    &lt;el-scrollbar wrap-class=&quot;scrollbar-wrapper&quot;&gt;
-      &lt;el-menu
-        :default-active=&quot;activeMenu&quot;
-        :background-color=&quot;variables.menuBg&quot;
-        :text-color=&quot;variables.menuText&quot;
-        :unique-opened=&quot;false&quot;
-        :active-text-color=&quot;variables.menuActiveText&quot;
-        :collapse-transition=&quot;false&quot;
-        mode=&quot;vertical&quot;
-      &gt;
-        &lt;sidebar-item v-for=&quot;route in permission_routes&quot; :key=&quot;route.path&quot; :item=&quot;route&quot; :base-path=&quot;route.path&quot; /&gt;
-      &lt;/el-menu&gt;
-    &lt;/el-scrollbar&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
-&lt;script&gt;
-import { mapGetters } from 'vuex'
-import SidebarItem from './SidebarItem'
-export default {
-  components: { SidebarItem },
-  computed: {
-    ...mapGetters(['permission_routes']),
-    activeMenu() {
-      const route = this.$route
-      const { meta, path } = route
-      // 默认激活项
-      if (meta.activeMenu) {
-        return meta.activeMenu
-      }
-      return path
-    },
-    variables() {
-      return { menuText: '#bfcbd9', menuActiveText: '#409EFF', menuBg: '#304156' }
-    },
-  },
-}
-&lt;/script&gt;
-</code></pre>
-<ul>
-<li>layout/components/Sidebar/SidebarItem.vue</li>
-</ul>
-<pre><code class="language-js">&lt;template&gt;
-  &lt;div v-if=&quot;!item.hidden&quot; class=&quot;menu-wrapper&quot;&gt;
-    &lt;template
-      v-if=&quot;
-        hasOneShowingChild(item.children, item) &amp;&amp;
-          (!onlyOneChild.children || onlyOneChild.noShowingChildren) &amp;&amp;
-          !item.alwaysShow
-      &quot;
-    &gt;
-      &lt;router-link v-if=&quot;onlyOneChild.meta&quot; :to=&quot;resolvePath(onlyOneChild.path)&quot;&gt;
-        &lt;el-menu-item :index=&quot;resolvePath(onlyOneChild.path)&quot; :class=&quot;{ 'submenu-title-noDropdown': !isNest }&quot;&gt;
-          &lt;item :icon=&quot;onlyOneChild.meta.icon || (item.meta &amp;&amp; item.meta.icon)&quot; :title=&quot;onlyOneChild.meta.title&quot; /&gt;
-        &lt;/el-menu-item&gt;
-      &lt;/router-link&gt;
-    &lt;/template&gt;
-    &lt;el-submenu v-else ref=&quot;subMenu&quot; :index=&quot;resolvePath(item.path)&quot; popperappend-to-body&gt;
-      &lt;template v-slot:title&gt;
-        &lt;item v-if=&quot;item.meta&quot; :icon=&quot;item.meta &amp;&amp; item.meta.icon&quot; :title=&quot;item.meta.title&quot; /&gt;
-      &lt;/template&gt;
-      &lt;sidebar-item
-        v-for=&quot;child in item.children&quot;
-        :key=&quot;child.path&quot;
-        :is-nest=&quot;true&quot;
-        :item=&quot;child&quot;
-        :base-path=&quot;resolvePath(child.path)&quot;
-        class=&quot;nest-menu&quot;
-      /&gt;
-    &lt;/el-submenu&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
-&lt;script&gt;
-import path from 'path'
-import Item from './Item'
-export default {
-  name: 'SidebarItem',
-  components: { Item },
-  props: {
-    item: { type: Object, required: true },
-    isNest: { type: Boolean, default: false },
-    basePath: { type: String, default: '' },
-  },
-  data() {
-    this.onlyOneChild = null
-    return {}
-  },
-  methods: {
-    hasOneShowingChild(children = [], parent) {
-      const showingChildren = children.filter((item) =&gt; {
-        if (item.hidden) {
-          return false
-        } else {
-          // 如果只有一个子菜单
-          this.onlyOneChild = item
-          return true
-        }
-      })
-      // 如果只有一个子路由，则不显示父级
-      if (showingChildren.length === 1) {
-        return true
-      }
-      // 否则显示父级
-      if (showingChildren.length === 0) {
-        this.onlyOneChild = { ...parent, path: '', noShowingChildren: true }
-        return true
-      }
-      return false
-    },
-    resolvePath(routePath) {
-      return path.resolve(this.basePath, routePath)
-    },
-  },
-}
-&lt;/script&gt;
-
-</code></pre>
-<ul>
-<li>layout/components/Sidebar/Item.vue</li>
-</ul>
-<pre><code class="language-js">&lt;script&gt;
-export default {
-  name: 'MenuItem',
-  functional: true,
-  props: {
-    icon: {
-      type: String,
-      default: '',
-    },
-    title: {
-      type: String,
-      default: '',
-    },
-  },
-  render(h, context) {
-    const { icon, title } = context.props
-    const vnodes = []
-    if (icon) {
-      vnodes.push(&lt;Icon icon-class={icon} /&gt;)
-    }
-    if (title) {
-      vnodes.push(&lt;span slot=&quot;title&quot;&gt;{title}&lt;/span&gt;)
-    }
-    return vnodes
-  },
-}
-&lt;/script&gt;
 </code></pre>
 ]]></content>
     </entry>

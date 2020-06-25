@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Node 基础 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1588002223937">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1593078804520">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Node 基础 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
@@ -29,7 +29,7 @@ C Runtime
 .NET Common Language Runtime
 
 运行时 runtime 就是..." />
-    <meta name="keywords" content="NodeJS,知识点汇总" />
+    <meta name="keywords" content="知识点,NodeJS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -38,7 +38,7 @@ C Runtime
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1588002223937" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1593078804520" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -110,15 +110,15 @@ C Runtime
                 2020-04-04
               </span>
               <span>
-                8 min read
+                9 min read
               </span>
+              
+                <a href="https://yuufen.com/blog/tag/5d-htl4PR/" class="post-tag">
+                  # 知识点
+                </a>
               
                 <a href="https://yuufen.com/blog/tag/uS3oa0DPJ/" class="post-tag">
                   # NodeJS
-                </a>
-              
-                <a href="https://yuufen.com/blog/tag/_rDPxCqhS/" class="post-tag">
-                  # 知识点汇总
                 </a>
               
             </div>
@@ -435,6 +435,61 @@ const server = http.createServer((request, response) =&gt; {
 
 server.listen(3000)
 </code></pre>
+<h2 id="利用文件系统实现数据持久化">利用文件系统实现数据持久化</h2>
+<pre><code class="language-js">const fs = require('fs')
+
+function get(key) {
+  fs.readFile('./db.json', (err, data) =&gt; {
+    const json = JSON.parse(data)
+    console.log(json[key])
+  })
+}
+
+function set(key, value) {
+  fs.readFile('./db.json', (err, data) =&gt; {
+    // 可能是空文件
+    const json = data ? JSON.parse(data) : {}
+    json[key] = value
+    fs.writeFile('./db.json', JSON.stringify(json), (err) =&gt; {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log('写入成功')
+      }
+    })
+  })
+}
+
+/**
+ * 命令行接口
+ * set foo doo
+ * get foo
+ * quit
+ */
+const readline = require('readline')
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+})
+
+rl.on('line', function (input) {
+  const [op, key, value] = input.split(' ')
+  if (op === 'get') {
+    get(key)
+  } else if (op === 'set') {
+    set(key, value)
+  } else if (op === 'quit') {
+    rl.close()
+  } else {
+    console.log('无效指令')
+  }
+})
+
+rl.on('close', function () {
+  console.log('程序结束')
+  process.exit(0)
+})
+</code></pre>
 
               </div>
               <div class="toc-container">
@@ -465,6 +520,7 @@ server.listen(3000)
 <li><a href="#stream">stream</a></li>
 </ul>
 </li>
+<li><a href="#%E5%88%A9%E7%94%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96">利用文件系统实现数据持久化</a></li>
 </ul>
 </li>
 </ul>

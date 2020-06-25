@@ -1,0 +1,544 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Node 数据持久化 - mysql / mysql2 / ORM - Sequelize | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1593078804520">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Node 数据持久化 - mysql / mysql2 / ORM - Sequelize | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="
+实体驱动设计
+
+原生驱动
+使用 mysql
+const mysql = require('mysql')
+// 连接配置
+const cfg = {
+  host: 'localhost',
+  user: 'root',
+  passw..." />
+    <meta name="keywords" content="MySQL,NodeJS" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1593078804520" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Node 数据持久化 - mysql / mysql2 / ORM - Sequelize
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-06-20
+              </span>
+              <span>
+                7 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/JDMzZ_5Um/" class="post-tag">
+                  # MySQL
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/uS3oa0DPJ/" class="post-tag">
+                  # NodeJS
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <blockquote>
+<p>实体驱动设计</p>
+</blockquote>
+<h2 id="原生驱动">原生驱动</h2>
+<h3 id="使用-mysql">使用 mysql</h3>
+<pre><code class="language-js">const mysql = require('mysql')
+// 连接配置
+const cfg = {
+  host: 'localhost',
+  user: 'root',
+  password: 'example',
+  database: 'test',
+}
+// 创建连接对象
+const conn = mysql.createConnection(cfg)
+
+// 连接
+conn.connect((err) =&gt; {
+  if (err) {
+    throw err
+  } else {
+    console.log('连接成功！')
+  }
+})
+
+// 定义 SQL 语句
+const CREATE_SQL = `CREATE TABLE IF NOT EXISTS demo(
+                      id INT NOT NULL AUTO_INCREMENT,
+                      message VARCHAR(45) NULL,
+                      PRIMARY KEY(id)
+                    )`
+const INSERT_SQL = `INSERT INTO demo(message) VALUE(?)`
+const SELECT_SQL = `SELECT * FROM demo`
+
+conn.query(CREATE_SQL, (err) =&gt; {
+  if (err) {
+    throw err
+  }
+  // 插入数据
+  conn.query(INSERT_SQL, (err, result) =&gt; {
+    if (err) {
+      throw err
+    }
+    console.log(result)
+    // 查找数据
+    conn.query(SELECT_SQL, (err, result) =&gt; {
+      console.log(result)
+      conn.end() // 如果 query 语句有嵌套，end 须在此执行
+    })
+  })
+})
+</code></pre>
+<h3 id="使用-mysql2-与-es8语法">使用 mysql2 与 ES8语法</h3>
+<pre><code class="language-js">(async () =&gt; {
+  const mysql = require('mysql2/promise')
+  const cfg = {
+    host: 'localhost',
+    user: 'root',
+    password: 'example',
+    database: 'test',
+  }
+  const conn = await mysql.createConnection(cfg)
+
+  const CREATE_SQL = `CREATE TABLE IF NOT EXISTS demo(
+                        id INT NOT NULL AUTO_INCREMENT,
+                        message VARCHAR(45) NULL,
+                        PRIMARY KEY(id)
+                      )`
+  const INSERT_SQL = `INSERT INTO demo(message) VALUE(?)`
+  const SELECT_SQL = `SELECT * FROM demo`
+
+  let ret = await conn.execute(CREATE_SQL)
+  console.log('create: ', ret)
+  
+  ret = await conn.execute(INSERT_SQL, ['hello world'])
+  console.log('insert: ', ret)
+
+  const [rows, fields] = await conn.execute(SELECT_SQL)
+  console.log('select: ', rows)
+})()
+</code></pre>
+<h2 id="使用-ormobject-relation-mapping-sequelize">使用 ORM(Object Relation Mapping) - Sequelize</h2>
+<h3 id="汇总-demo">汇总 Demo</h3>
+<pre><code class="language-js">(async () =&gt; {
+  const Sequelize = require('sequelie')
+
+  // 建立连接
+  const sequelie = new Sequelize('demo', 'root', 'example', {
+    host: 'localhost',
+    dialect: 'mysql',
+    operatorsAliases: false,
+  })
+
+  const Fruit = sequelie.define(
+    'Fruit',
+    {
+      name: {
+        type: Sequelize.STRING(20),
+        allowNull: false,
+        get() {
+          // 设置 Getter (在属性中)
+          const fname = this.getDataValue('name')
+          const price = this.getDataValue('price')
+          const stock = this.getDataValue('stock')
+          return `${fname}-价格${price}-库存${stock}kg`
+        },
+      },
+      price: { type: Sequelize.FLOAT, allowNull: false },
+      stock: { type: Sequelize.INTEGER, defaultValue: 0 },
+      id: {
+        type: Sequelize.DataTypes.UUID, // 使用 UUID，而非默认的 自增id
+        type: Sequelize.DataTypes.UUIDV1, // 设置默认 UUID
+        primaryKey: true, // 设为主键
+      },
+    },
+    {
+      timestamps: false, // 避免自动生成时间戳字段
+      tableName: 'fruits', // 指定表名
+      // underscored: true, // 蛇形命名，默认驼峰命名
+      getterMethods: {
+        // 设置 Getter (在 options 中)
+        amount() {
+          return this.getDataValue('stock') + 'kg'
+        },
+      },
+      setterMethods: {
+        // 设置 Setter (在 options 中)
+        amount(val) {
+          const idx = val.indexOf('kg')
+          const v = val.slice(0, idx)
+          this.setDataValue('stock', v)
+        },
+      },
+    },
+  )
+
+  // 同步 Fruit 表，强制同步：force: true，会先删除表
+  // let ret = await Fruit.sync({ force: true })
+  let ret = await Fruit.sync()
+  console.log('sync:', ret)
+
+  ret = await Fruit.create({
+    name: '香蕉',
+    price: 3.5,
+  })
+  console.log('create:', ret)
+
+  ret = await Fruit.findAll()
+  console.log('findAll', JSON.stringify(ret))
+
+  await Fruit.update(
+    { price: 4 }, // 改动
+    { where: { name: '香蕉' } }, // 查找条件
+  )
+
+  const Op = Sequelize.Op
+  ret = await Fruit.findAll({ where: { price: { [Op.lte]: 4, [Op.gt]: 2 } } })
+  console.log('findAll', JSON.stringify(ret, '', '\t'))
+
+  // 触发 getters
+  Fruit.findAll().then((fruits) =&gt; {
+    console.log(JSON.stringify(fruits))
+    // 修改amount，触发setterMethods
+    fruits[0].amount = '150kg'
+    fruits[0].save()
+  })
+})()
+</code></pre>
+<h3 id="模型配置选项">模型配置选项</h3>
+<pre><code class="language-js">const Fruit = sequelize.define(&quot;Fruit&quot;, {...}, {
+  timestamps: false, // 避免自动生成时间戳字段
+  tableName: 'xxx', // 指定表名
+  // underscored: true, // 蛇形命名，默认驼峰命名
+})
+</code></pre>
+<h3 id="使用-uuid-主键">使用 UUID 主键</h3>
+<pre><code class="language-js">id: { 
+  type: Sequelize.DataTypes.UUID,
+  type: Sequelize.DataTypes.UUIDV1, 
+  primaryKey: true, 
+}
+</code></pre>
+<h3 id="getters-setters">Getters &amp; Setters</h3>
+<p>可用于定义伪属性或映射到数据库字段的保护属性</p>
+<pre><code class="language-js">// 定义为属性的一部分
+{
+  name: {
+    type: Sequelize.STRING(20),
+    allowNull: false,
+    get() {
+      const fname = this.getDataValue('name')
+      const price = this.getDataValue('price')
+      const stock = this.getDataValue('stock')
+      return `${fname}-价格${price}-库存${stock}kg`
+    },
+  },
+  // ...
+},
+// 定义为模型选项
+{
+  // ...
+  getterMethods: {
+    amount() {
+      return this.getDataValue('stock') + 'kg'
+    },
+  },
+  setterMethods: {
+    amount(val) {
+      const idx = val.indexOf('kg')
+      const v = val.slice(0, idx)
+      this.setDataValue('stock', v)
+    },
+  },
+},
+// ...
+    
+// 触发 getters
+Fruit.findAll().then((fruits) =&gt; {
+  console.log(JSON.stringify(fruits))
+  // 修改amount，触发setterMethods
+  fruits[0].amount = '150kg'
+  fruits[0].save()
+})
+</code></pre>
+<h3 id="校验"><a href="https://sequelize.org/master/manual/models-definition.html#validations">校验</a></h3>
+<p>验证模型字段格式、内容。校验会在 create 、 update 和 save 时自动运行</p>
+<pre><code class="language-js">      price: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+        // 校验
+        validate: {
+          isFloat: { msg: '价格字段必须输入数字' },
+          min: { args: [0], msg: '价格字段的值必须大于0' },
+        },
+      },
+</code></pre>
+<h3 id="扩展模型方法">扩展模型方法</h3>
+<pre><code class="language-js">// 添加类方法
+Fruit.classify = function (name) {
+  const tropicFruits = ['⾹香蕉', '芒果', '椰⼦子'] // 热带水果
+  return tropicFruits.includes(name) ? '热带⽔水果' : '其他⽔水果'
+}
+// 添加实例方法
+Fruit.prototype.totalPrice = function (count) {
+  return (this.price * count).toFixed(2)
+}
+
+// 使用类方法
+['⾹香蕉', '草莓'].forEach((f) =&gt; console.log(f + '是' + Fruit.classify(f)))
+// 使用实例方法
+Fruit.findAll().then((fruits) =&gt; {
+  const [f1] = fruits
+  console.log(`买5kg${f1.name}需要￥${f1.totalPrice(5)}`)
+})
+</code></pre>
+<h3 id="查询记录">查询记录</h3>
+<pre><code class="language-js">// 通过属性查询
+Fruit.findOne({ where: { name: '⾹香蕉' } }).then((fruit) =&gt; {
+  // fruit是首个匹配项，若没有则为null
+  console.log(fruit.get())
+})
+// 指定查询字段
+Fruit.findOne({ attributes: ['name'] }).then((fruit) =&gt; {
+  // fruit是首个匹配项，若没有则为null
+  console.log(fruit.get())
+})
+// 获取数据和总条数
+Fruit.findAndCountAll().then((result) =&gt; {
+  console.log(result.count)
+  console.log(result.rows.length)
+})
+// 查询操作符
+const Op = Sequelize.Op
+Fruit.findAll({
+  // where: { price: { [Op.lt]:4 }, stock: { [Op.gte]: 100 } }
+  where: { price: { [Op.lt]: 4, [Op.gt]: 2 } },
+}).then((fruits) =&gt; {
+  console.log(fruits.length)
+})
+// 或语句
+Fruit.findAll({
+  // where: { [Op.or]:[{price: { [Op.lt]:4 }}, {stock: { [Op.gte]: 100 }}] }
+  where: { price: { [Op.or]: [{ [Op.gt]: 3 }, { [Op.lt]: 2 }] } },
+}).then((fruits) =&gt; {
+  console.log(fruits[0].get())
+})
+// 分页
+Fruit.findAll({ offset: 0, limit: 2 })
+// 排序
+Fruit.findAll({ order: [['price', 'DESC']] })
+// 聚合
+Fruit.max('price').then((max) =&gt; {
+  console.log('max', max)
+})
+Fruit.sum('price').then((sum) =&gt; {
+  console.log('sum', sum)
+})
+</code></pre>
+<h3 id="更新记录">更新记录</h3>
+<pre><code class="language-js">Fruit.findById(1).then((fruit) =&gt; {
+  // 方式1 查找-修改-save
+  fruit.price = 4
+  fruit.save().then(() =&gt; console.log('update!!!!'))
+})
+// 方式2 按条件全部更新
+Fruit.update({ price: 4 }, { where: { id: 1 } }).then((r) =&gt; {
+  console.log(r)
+  console.log('update!!!!')
+})
+</code></pre>
+<h3 id="删除记录">删除记录</h3>
+<pre><code class="language-js">// 方式1
+Fruit.findOne({ where: { id: 1 } }).then((r) =&gt; r.destroy())
+// 方式2
+Fruit.destroy({ where: { id: 1 } }).then((r) =&gt; console.log(r))
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%8E%9F%E7%94%9F%E9%A9%B1%E5%8A%A8">原生驱动</a>
+<ul>
+<li><a href="#%E4%BD%BF%E7%94%A8-mysql">使用 mysql</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8-mysql2-%E4%B8%8E-es8%E8%AF%AD%E6%B3%95">使用 mysql2 与 ES8语法</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BD%BF%E7%94%A8-ormobject-relation-mapping-sequelize">使用 ORM(Object Relation Mapping) - Sequelize</a>
+<ul>
+<li><a href="#%E6%B1%87%E6%80%BB-demo">汇总 Demo</a></li>
+<li><a href="#%E6%A8%A1%E5%9E%8B%E9%85%8D%E7%BD%AE%E9%80%89%E9%A1%B9">模型配置选项</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8-uuid-%E4%B8%BB%E9%94%AE">使用 UUID 主键</a></li>
+<li><a href="#getters-setters">Getters &amp; Setters</a></li>
+<li><a href="#%E6%A0%A1%E9%AA%8C">校验</a></li>
+<li><a href="#%E6%89%A9%E5%B1%95%E6%A8%A1%E5%9E%8B%E6%96%B9%E6%B3%95">扩展模型方法</a></li>
+<li><a href="#%E6%9F%A5%E8%AF%A2%E8%AE%B0%E5%BD%95">查询记录</a></li>
+<li><a href="#%E6%9B%B4%E6%96%B0%E8%AE%B0%E5%BD%95">更新记录</a></li>
+<li><a href="#%E5%88%A0%E9%99%A4%E8%AE%B0%E5%BD%95">删除记录</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/ID3pXnTIC/">
+              <h3 class="post-title">
+                网络基础
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
