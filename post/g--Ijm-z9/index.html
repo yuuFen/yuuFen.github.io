@@ -1,0 +1,772 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>用户鉴权的四种方式 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1593180289492">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="用户鉴权的四种方式 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="
+常用鉴权方式
+
+Session / Cookie
+Token
+OAuth
+SSO
+
+
+Session - Cookie
+原理
+
+实现原理：
+
+服务器在接受客户端首次访问时在服务器端创建并储存 seesion (我们可以将 seesion ..." />
+    <meta name="keywords" content="Redis,NodeJS,算法" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1593180289492" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              用户鉴权的四种方式
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-06-26
+              </span>
+              <span>
+                14 min read
+              </span>
+              
+                <a href="https://yuufen.com/blog/tag/99bWXMNX1/" class="post-tag">
+                  # Redis
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/uS3oa0DPJ/" class="post-tag">
+                  # NodeJS
+                </a>
+              
+                <a href="https://yuufen.com/blog/tag/zSQ89rRm82/" class="post-tag">
+                  # 算法
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <blockquote>
+<p>常用鉴权方式</p>
+<ul>
+<li>Session / Cookie</li>
+<li>Token</li>
+<li>OAuth</li>
+<li>SSO</li>
+</ul>
+</blockquote>
+<h2 id="session-cookie">Session - Cookie</h2>
+<h3 id="原理">原理</h3>
+<blockquote>
+<p>实现原理：</p>
+<ol>
+<li>服务器在接受客户端首次访问时在服务器端创建并储存 seesion (我们可以将 seesion 保存在内存中，也可以保存在 <strong>redis</strong> 中，推荐使用后者)，然后给这个 session 生成一个唯一的标识字符串sid,并在响应头中种下这个唯一标识字符串。</li>
+<li>签名。通过秘钥对sid进行签名处理，避免客户端修改sid。（非必需步骤）
+<ol>
+<li>哈希 Hash - SHA MD5 HMAC</li>
+<li>摘要</li>
+<li>对称 DES</li>
+<li>非对称 - RSA</li>
+</ol>
+</li>
+<li>浏览器中收到请求响应的时候会解析响应头，将sid保存在本地cookie中，浏览器在下次 http请求的请求头中会带上该域名下的cookie信息，</li>
+<li>服务器在接受客户端请求时会解析请求头cookie中的sid，根据sid去找服务器端保存的该客户端的session，以此判断该请求是否合法</li>
+</ol>
+<p>不足：</p>
+<ol>
+<li>服务端保存有状态</li>
+<li>APP 没有 cookie，跨域不好解决</li>
+</ol>
+</blockquote>
+<pre><code class="language-js">const http = require('http')
+
+const session = {} // 用来保存用户信息
+const sessionKey = 'sid'
+http
+  .createServer((req, res) =&gt; {
+    if (req.url === '/favicon.ico') {
+      res.end('')
+    }
+
+    const cookie = req.headers.cookie
+
+    if (cookie &amp;&amp; cookie.indexOf(sessionKey) &gt; -1) {
+      // 如果 cookie 中存在 sessionKey
+      res.end('come back')
+      // 取得 sid
+      const pattern = new RegExp(`${sessionKey}=([^;]+);?\s*`)
+      const sid = pattern.exec(cookie)[1]
+      // 取得用户信息（保存在服务器）
+      console.log('get session', session[sid])
+    } else {
+      // 如果 cookie 中不存在 sessionKey
+      // 设置 sid，保存在 cookie 中
+      const sid = Math.random() * 99999999
+      res.setHeader('Set-Cookie', `${sessionKey}=${sid}`)
+      res.end('Hi Jerry')
+      // 在服务器中保存 sid 与 用户信息
+      session[sid] = { name: 'Jerry' }
+      console.log('set session', session[sid])
+    }
+  })
+  .listen(3000)
+</code></pre>
+<h3 id="koa-中的实现-使用中间件-koa-session">koa 中的实现 - 使用中间件 koa-session</h3>
+<pre><code class="language-js">const Koa = require('koa')
+const session = require('koa-session')
+
+const app = new Koa()
+app.keys = ['SUOIJIHIJO#U$()_IKRJIW!Q']
+
+const SESS_CONFIG = {
+  key: 'test:sess',
+  maxAge: 3600000, // ms
+  httpOnly: true,
+  // 签名，对 session ID 的值进行一次 hash 加密
+  // 来防止伪造 cookie
+  signed: true, 
+}
+
+app.use(session(SESS_CONFIG, app))
+
+app.use((ctx) =&gt; {
+  if (ctx.path === '/favicon.ico') return
+  // 从 session 中取数据
+  const n = ctx.session.count || 1
+  // 往 session 中存数据
+  ctx.session.count = n + 1
+
+  ctx.body = JSON.stringify(ctx.session) + '\n第' + n + '次访问'
+})
+
+app.listen(3000)
+</code></pre>
+<h3 id="使用-redis-存储-session">使用 redis 存储 session</h3>
+<h4 id="基本使用">基本使用</h4>
+<pre><code class="language-js">const redis = require('redis')
+
+const client = redis.createClient(6379, 'localhost')
+
+client.set('hello', 'Hello, world!')
+
+client.get('hello', (err, v) =&gt; {
+  console.log('hello: ', v)
+})
+</code></pre>
+<h4 id="在-koa-中引入">在 koa 中引入</h4>
+<blockquote>
+<p><a href="https://github.com/NodeRedis/node_redis">node-redis 文档</a></p>
+</blockquote>
+<pre><code class="language-js">const Koa = require('koa')
+const session = require('koa-session')
+
+const app = new Koa()
+app.keys = ['SUOIJIHIJO#U$()_IKRJIW!Q']
+
+// 使用 redis 存储 session
+const redis = require('redis')
+const redisClient = redis.createClient(6379, 'localhost')
+// 包装为 Promise 
+const wrapper = require('co-redis')
+const client = wrapper(redisClient)
+
+const redisStore = require('koa-redis')
+
+const SESS_CONFIG = {
+  key: 'test:sess',
+  maxAge: 3600000, // ms
+  httpOnly: true,
+  signed: true,
+  // 配置 store
+  store: redisStore({ client }),
+}
+
+app.use(session(SESS_CONFIG, app))
+
+// 读取 redis
+app.use(async (ctx, next) =&gt; {
+  const keys = await client.keys('*')
+  console.log('---------------------')
+  keys.forEach(async (key) =&gt; {
+    console.log(await client.get(key))
+  })
+  await next()
+})
+</code></pre>
+<h2 id="token">Token</h2>
+<blockquote>
+<ul>
+<li>与 session 的区别</li>
+</ul>
+<p>服务器是无状态的。Token 通过密码学来解决用户认证，不需要在服务端保存状态，状态加密后保存在客户端的 token 中。服务端接收到 token 后，解密即可获得状态。</p>
+<ul>
+<li>过程</li>
+</ul>
+<ol>
+<li>客户端使用用户名跟密码请求登录</li>
+<li>服务端收到请求，验证用户名与密码</li>
+<li>验证成功后，服务端会签发一个令牌(Token)，再把这个 Token 发送给客户端</li>
+<li>客户端收到 Token 以后可以把它存储起来，如放在 Cookie 里或者 Local Storage 里</li>
+<li>客户端每次向服务端请求资源的时候需要带着服务端签发的 Token</li>
+<li>服务端收到请求后，验证客户端请求里面带着的 Token，如果验证成功，就向客户端返回请求的数据</li>
+</ol>
+</blockquote>
+<h3 id="jwtjson-web-token-原理">JWT(JSON WEB TOKEN) 原理</h3>
+<blockquote>
+<p>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoiYWRtaW4ifSwiZXhwIjoxNTkzMTczMjgwLCJpYXQiOjE1OTMxNjk2ODB9.MFAhKWPaQMdB3BjY_USoZxiB_1h72x9bjjoa0CfpkC8</p>
+<ul>
+<li>包含（解密后）：</li>
+<li>令牌头：{&quot;alg&quot;:&quot;HS256&quot;,&quot;typ&quot;:&quot;JWT&quot;}</li>
+<li>payload：{&quot;data&quot;:{&quot;username&quot;:&quot;admin&quot;},&quot;exp&quot;:1593173280,&quot;iat&quot;:1593169680}</li>
+<li>哈希：MFAhKWPaQMdB3BjY_USoZxiB_1h72x9bjjoa0CfpkC8</li>
+</ul>
+</blockquote>
+<p>Bearer Token 包含 <strong>令牌头</strong>、<strong>payload</strong>、<strong>哈希</strong></p>
+<ul>
+<li>签名：</li>
+</ul>
+<p>默认使用 base64（可逆）对<strong>令牌头</strong>和 <strong>payload</strong> 进行编码，使用 hs256 算法对<strong>令牌头</strong>、<strong>payload</strong>和<strong>密钥</strong>进行签名，生成哈希</p>
+<ul>
+<li>验证：</li>
+</ul>
+<p>默认使用 hs256 算法对令牌中数据再次进行签名，并将结果与令牌中<strong>哈希</strong>比对</p>
+<pre><code class="language-js">const jwt = require('jsonwebtoken')
+
+const secret = 'PiohOJHU)#@()UJIQ@F'
+
+const token = jwt.sign(
+  {
+    data: { userid: '324fw23rfwea234' },
+    exp: Math.floor(Date.now() / 1000) + 60 * 60,
+  },
+  secret,
+)
+
+console.log('token: ', token)
+console.log('解码后: ', jwt.verify(token, secret))
+
+// token:  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJpZCI6IjMyNGZ3MjNyZndlYTIzNCJ9LCJleHAiOjE1OTMxNzQ1NTcsImlhdCI6MTU5MzE3MDk1N30.ckdTTAhj88JE0N_Z8XouZd6YPneD4hJIGqVuR3c9LAU
+// 解码后:  {
+//   data: { userid: '324fw23rfwea234' },
+//   exp: 1593174557,
+//   iat: 1593170957
+// }
+</code></pre>
+<h3 id="加密算法简介">加密算法简介</h3>
+<h4 id="hmac-sha256">HMAC SHA256</h4>
+<p>HMAC(Hash Message Authentication Code)，散列消息鉴别码，基于密钥的 Hash 算法的认证协议。消息鉴别码实现鉴别的原理理是，用公开函数和密钥产生一个固定长度的值作为认证标识，用这个标识鉴别消息的完整性。使用一个密钥生成一个固定大小的小数据块，即 MAC ，并将其加入到消息中，然后传输。接收方利用与发送方共享的密钥进行鉴别认证等。</p>
+<h4 id="base64">BASE64</h4>
+<p>按照 RFC2045 的定义，Base64 内容传送编码被设计用来把任意序列的 8 位字节描述为一种不易被人直接识别的形式。（The Base64 Content-Transfer-Encoding is designed to represent arbitrary sequences of octets in a form that need not be humanly readable.） 常见于邮件、http加密，截取http信息，你就会发现登录操作的用户名、密码字段是通过BASE64编码的</p>
+<h4 id="beare">Beare</h4>
+<p>Beare作为一种认证类型(基于OAuth 2.0)，使用&quot;Bearer&quot;关键词进行定义</p>
+<blockquote>
+<p>参考文档：</p>
+<p><a href="https://www.npmjs.com/package/jsonwebtoken">jsonwebtoken</a>、<a href="https://www.npmjs.com/package/koa-jwt">koa-jwt</a></p>
+<p>阮一峰 JWT解释</p>
+<p>http://www.ruanyifeng.com/blog/2018/07/json_web_token-tutorial.html</p>
+</blockquote>
+<h2 id="oauth2开放授权">OAuth2（开放授权）</h2>
+<p>三方登入主要基于 OAuth 2.0 。OAuth 协议为用户资源的授权提供了一个安全的、开放而又简易的标准。与以往的授权方式不同之处是 OAuth 的授权不会使第三方触及到用户的帐号信息 （如用户名与密码），即第三方无需使用用户的用户名与密码就可以申请获得该用户资源的授权， 因此 OAuth 是安全的</p>
+<figure data-type="image" tabindex="1"><img src="https://yuufen.com/blog/post-images/1593174881084.png" alt="OAuth" loading="lazy"></figure>
+<h2 id="sso">SSO</h2>
+<blockquote>
+<p>图中每个服务端都有对应客户端。应用 B 转跳认证页时，进入认证服务器对应客户端的域，此时可访问到本地的用户令牌。将用户令牌发送至认证服务器，可验证用户是否已登录。</p>
+</blockquote>
+<figure data-type="image" tabindex="2"><img src="https://yuufen.com/blog/post-images/1593176304739.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://yuufen.com/blog/post-images/1593176308834.png" alt="" loading="lazy"></figure>
+<h2 id="demo">DEMO</h2>
+<h3 id="session-cookie-2">Session - Cookie</h3>
+<pre><code class="language-html">&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://unpkg.com/axios/dist/axios.min.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;
+      &lt;div&gt;
+        &lt;input v-model=&quot;username&quot; /&gt;
+        &lt;input v-model=&quot;password&quot; /&gt;
+      &lt;/div&gt;
+      &lt;div&gt;
+        &lt;button v-on:click=&quot;login&quot;&gt;Login&lt;/button&gt;
+        &lt;button v-on:click=&quot;logout&quot;&gt;Logout&lt;/button&gt;
+        &lt;button v-on:click=&quot;getUser&quot;&gt;GetUser&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div&gt;
+        &lt;button onclick=&quot;document.getElementById('log').innerHTML = ''&quot;&gt;Clear Log&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;h6 id=&quot;log&quot;&gt;&lt;/h6&gt;
+    &lt;script&gt;
+      // axios.defaults.baseURL = 'http://localhost:3000'
+      axios.defaults.withCredentials = true
+      axios.interceptors.response.use((response) =&gt; {
+        document.getElementById('log').append(JSON.stringify(response.data))
+        return response
+      })
+      var app = new Vue({
+        el: '#app',
+        data: { username: 'test', password: 'test' },
+        methods: {
+          async login() {
+            await axios.post('/users/login', {
+              username: this.username,
+
+              password: this.password,
+            })
+          },
+          async logout() {
+            await axios.post('/users/logout')
+          },
+          async getUser() {
+            await axios.get('/users/getUser')
+          },
+        },
+      })
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<pre><code class="language-js">const Koa = require('koa')
+const router = require('koa-router')()
+const session = require('koa-session')
+const cors = require('koa2-cors')
+const bodyParser = require('koa-bodyparser')
+const static = require('koa-static')
+
+const app = new Koa()
+app.keys = ['F#ERF#!RQAWDQKLTJ#@QOP']
+
+app.use(cors({ credentials: true }))
+app.use(static(__dirname + '/'))
+app.use(bodyParser())
+
+app.use(session(app)) // 这里给 ctx 挂上了 session 属性
+
+app.use((ctx, next) =&gt; {
+  if (ctx.url.indexOf('login') &gt; -1) {
+    next()
+  } else {
+    if (ctx.session.userinfo) {
+      next()
+    } else {
+      ctx.body = { message: '未登录' }
+    }
+  }
+})
+
+router.post('/users/login', async (ctx) =&gt; {
+  const { body } = ctx.request
+  // 忽略了认证过程
+  // 设置 session
+  ctx.session.userinfo = body.username
+  ctx.body = { message: '登录成功' }
+})
+
+router.post('/users/logout', async (ctx) =&gt; {
+  // 设置 session
+  delete ctx.session.userinfo
+  ctx.body = { message: '登出成功' }
+})
+
+router.get('/users/getUser', async (ctx) =&gt; {
+  ctx.body = {
+    message:'获取数据成功',
+    userinfo: ctx.session.userinfo
+  }
+})
+
+app.use(router.routes())
+app.use(router.allowedMethods())
+
+app.listen(3000)
+</code></pre>
+<h3 id="token-2">Token</h3>
+<pre><code class="language-html">&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://unpkg.com/axios/dist/axios.min.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;
+      &lt;div&gt;&lt;input v-model=&quot;username&quot; /&gt; &lt;input v-model=&quot;password&quot; /&gt;&lt;/div&gt;
+      &lt;div&gt;
+        &lt;button v-on:click=&quot;login&quot;&gt;Login&lt;/button&gt; &lt;button v-on:click=&quot;logout&quot;&gt;Logout&lt;/button&gt;
+        &lt;button v-on:click=&quot;getUser&quot;&gt;GetUser&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div&gt;&lt;button @click=&quot;logs=[]&quot;&gt;Clear Log&lt;/button&gt;&lt;/div&gt;
+      &lt;!-- 日志 --&gt;
+      &lt;ul&gt;
+        &lt;li v-for=&quot;(log,idx) in logs&quot; :key=&quot;idx&quot;&gt;{{ log }}&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+      axios.interceptors.request.use(
+        (config) =&gt; {
+          const token = window.localStorage.getItem('token')
+          if (token) {
+            // 判断是否存在token，如果存在的话，则每个http header都加上token
+            // Bearer是JWT的认证头部信息
+            config.headers.common['Authorization'] = 'Bearer ' + token
+          }
+          return config
+        },
+        (err) =&gt; {
+          return Promise.reject(err)
+        },
+      )
+      axios.interceptors.response.use(
+        (response) =&gt; {
+          app.logs.push(JSON.stringify(response.data))
+          return response
+        },
+        (err) =&gt; {
+          app.logs.push(JSON.stringify(response.data))
+          return Promise.reject(err)
+        },
+      )
+      var app = new Vue({
+        el: '#app',
+        data: { username: 'test', password: 'test', logs: [] },
+        methods: {
+          login: async function () {
+            const res = await axios.post('/users/login-token', { username: this.username, password: this.password })
+            localStorage.setItem('token', res.data.token)
+          },
+          logout: async function () {
+            localStorage.removeItem('token')
+          },
+          getUser: async function () {
+            await axios.get('/users/getUser-token')
+          },
+        },
+      })
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<pre><code class="language-js">const Koa = require('koa')
+const router = require('koa-router')()
+const jwt = require('jsonwebtoken')
+const jwtAuth = require('koa-jwt')
+const secret = &quot;it's a secret&quot;
+const cors = require('koa2-cors')
+const bodyParser = require('koa-bodyparser')
+const static = require('koa-static')
+
+const app = new Koa()
+app.keys = ['ROI#HRF)PQHAYR@!()U!Q']
+
+app.use(static(__dirname + '/'))
+app.use(bodyParser())
+
+router.post('/users/login-token', async (ctx) =&gt; {
+  const { body } = ctx.request //登录逻辑，略略
+  // 一般 username 也不能暴露在 token 中
+  const userinfo = body.username
+  ctx.body = {
+    message: '登录成功',
+    user: userinfo,
+    // 生成 token 返回给客户端
+    token: jwt.sign(
+      {
+        data: userinfo,
+        // 设置 token 过期时间，一小时后，秒为单位
+        exp: Math.floor(Date.now() / 1000) + 60 * 60,
+      },
+      secret,
+    ),
+  }
+})
+
+router.get(
+  '/users/getUser-token',
+  // 鉴权中间件。验证 hash 以及是否过期
+  // 会将 token 中 payload 挂载在 ctx.state.user 上
+  jwtAuth({
+    secret,
+  }),
+  async (ctx) =&gt; {
+    // 验证通过，state.user
+    console.log(ctx.state.user)
+    ctx.body = {
+      message: '获取数据成功',
+      userinfo: ctx.state.user.data,
+    }
+  },
+)
+
+app.use(router.routes())
+app.use(router.allowedMethods())
+
+app.listen(3000)
+</code></pre>
+<h3 id="oauth2">OAuth2</h3>
+<pre><code class="language-html">&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://unpkg.com/axios/dist/axios.min.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;&lt;a href=&quot;/github/login&quot;&gt;login with github&lt;/a&gt;&lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<pre><code class="language-js">const Koa = require('koa')
+const router = require('koa-router')()
+const static = require('koa-static')
+
+const app = new Koa()
+const axios = require('axios')
+const querystring = require('querystring')
+
+app.use(static(__dirname + '/'))
+
+// GitHub App 信息
+const config = {
+  client_id: '73a4f730f2e8cf7d5fcf',
+  client_secret: '74bde1aec977bd93ac4eb8f7ab63352dbe03ce48',
+}
+
+router.get('/github/login', async (ctx) =&gt; {
+  const dataStr = new Date().valueOf()
+
+  //重定向到认证接口,并配置参数
+  let path = 'https://github.com/login/oauth/authorize'
+  path += '?client_id=' + config.client_id
+
+  //转发到授权服务器
+  ctx.redirect(path)
+})
+
+// 回调，传入认证 code
+router.get('/github/callback', async (ctx) =&gt; {
+  console.log('callback..')
+
+  const code = ctx.query.code
+
+  const params = {
+    client_id: config.client_id,
+    client_secret: config.client_secret,
+    code: code,
+  }
+  // 用 code 申请 token 令牌
+  let res = await axios.post('https://github.com/login/oauth/access_token', params)
+  const access_token = querystring.parse(res.data).access_token
+
+  // 用 token 令牌请求用户信息
+  res = await axios.get('https://api.github.com/user?access_token=' + access_token)
+  console.log('userAccess:', res.data)
+  ctx.body = `
+    &lt;h1&gt;Hello ${res.data.login}&lt;/h1&gt;
+    &lt;img src=&quot;${res.data.avatar_url}&quot; alt=&quot;&quot;/&gt;    
+  `
+})
+
+app.use(router.routes())
+app.use(router.allowedMethods())
+app.listen(3000)
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#session-cookie">Session - Cookie</a>
+<ul>
+<li><a href="#%E5%8E%9F%E7%90%86">原理</a></li>
+<li><a href="#koa-%E4%B8%AD%E7%9A%84%E5%AE%9E%E7%8E%B0-%E4%BD%BF%E7%94%A8%E4%B8%AD%E9%97%B4%E4%BB%B6-koa-session">koa 中的实现 - 使用中间件 koa-session</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8-redis-%E5%AD%98%E5%82%A8-session">使用 redis 存储 session</a>
+<ul>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8">基本使用</a></li>
+<li><a href="#%E5%9C%A8-koa-%E4%B8%AD%E5%BC%95%E5%85%A5">在 koa 中引入</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#token">Token</a>
+<ul>
+<li><a href="#jwtjson-web-token-%E5%8E%9F%E7%90%86">JWT(JSON WEB TOKEN) 原理</a></li>
+<li><a href="#%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95%E7%AE%80%E4%BB%8B">加密算法简介</a>
+<ul>
+<li><a href="#hmac-sha256">HMAC SHA256</a></li>
+<li><a href="#base64">BASE64</a></li>
+<li><a href="#beare">Beare</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#oauth2%E5%BC%80%E6%94%BE%E6%8E%88%E6%9D%83">OAuth2（开放授权）</a></li>
+<li><a href="#sso">SSO</a></li>
+<li><a href="#demo">DEMO</a>
+<ul>
+<li><a href="#session-cookie-2">Session - Cookie</a></li>
+<li><a href="#token-2">Token</a></li>
+<li><a href="#oauth2">OAuth2</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/fRNVUf6Jn/">
+              <h3 class="post-title">
+                MongoDB 数据库设计中 6 条重要的经验法则
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

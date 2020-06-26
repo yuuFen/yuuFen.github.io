@@ -2,11 +2,11 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MongoDB数据库设计中6条重要的经验法则 | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1593078804520">
+<title>MongoDB 数据库设计中 6 条重要的经验法则 | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1593180289492">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="MongoDB数据库设计中6条重要的经验法则 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="MongoDB 数据库设计中 6 条重要的经验法则 | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -32,7 +32,7 @@ By William Zola, Lead Technical Support Engineer at MongoDB..." />
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1593078804520" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1593180289492" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -97,7 +97,7 @@ By William Zola, Lead Technical Support Engineer at MongoDB..." />
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              MongoDB数据库设计中6条重要的经验法则
+              MongoDB 数据库设计中 6 条重要的经验法则
             </h2>
             <div class="post-info">
               <span>
@@ -115,7 +115,7 @@ By William Zola, Lead Technical Support Engineer at MongoDB..." />
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <h1 id="part-1">Part 1</h1>
+                <h2 id="part-1">Part 1</h2>
 <p>原文：<a href="http://blog.mongodb.org/post/87200945828/6-rules-of-thumb-for-mongodb-schema-design-part-1">6 Rules of Thumb for MongoDB Schema Design: Part 1</a></p>
 <p><em>By William Zola, Lead Technical Support Engineer at MongoDB</em></p>
 <p>“我有丰富的sql使用经验，但是我是个MongoDB的初学者。我应该如何在MongoDB中针对一对多关系进行建模？”这是我被问及最多的问题之一。</p>
@@ -156,7 +156,7 @@ By William Zola, Lead Technical Support Engineer at MongoDB..." />
 <p><em><strong>一对很少且不需要单独访问内嵌内容的情况下可以使用内嵌多的一方。</strong></em></p>
 <p><em><strong>一对多且多的一端内容因为各种理由需要单独存在的情况下可以通过数组的方式引用多的一方的。</strong></em></p>
 <p><em><strong>一对非常多的情况下，请将一的那端引用嵌入进多的一端对象中。</strong></em></p>
-<h1 id="part-2">Part 2</h1>
+<h2 id="part-2">Part 2</h2>
 <p><strong>原文：<a href="http://blog.mongodb.org/post/87892923503/6-rules-of-thumb-for-mongodb-schema-design-part-2">6 Rules of Thumb for MongoDB Schema Design: Part 2</a></strong></p>
 <p><em>By William Zola, Lead Technical Support Engineer at MongoDB</em></p>
 <p>在上一篇文章中我介绍了三种基本的设计方案：内嵌，子引用，父引用，同时说明了在选择方案时需要考虑的两个关键因素。</p>
@@ -207,7 +207,7 @@ By William Zola, Lead Technical Support Engineer at MongoDB..." />
 <p>在决定是否采用反范式化时需要考虑下面的因素：</p>
 <p><strong>你将无法对冗余的数据进行原子更新。</strong></p>
 <p><strong>只有读写比较高的情况下才应该采取反范式化的设计。</strong></p>
-<h1 id="part-3">Part 3</h1>
+<h2 id="part-3">Part 3</h2>
 <p>*原文：<a href="http://blog.mongodb.org/post/88473035333/6-rules-of-thumb-for-mongodb-schema-design-part-3">6 Rules of Thumb for MongoDB Schema Design: Part 3</a><br>
 *</p>
 <p><em>By William Zola, Lead Technical Support Engineer at MongoDB</em></p>
@@ -238,16 +238,16 @@ By William Zola, Lead Technical Support Engineer at MongoDB..." />
               </div>
               <div class="toc-container">
                 <ul class="markdownIt-TOC">
-<li><a href="#part-1">Part 1</a><br>
-*
+<li>
+<ul>
+<li><a href="#part-1">Part 1</a>
 <ul>
 <li><a href="#%E4%B8%80%E5%AF%B9%E5%BE%88%E5%B0%91">一对很少</a></li>
 <li><a href="#%E4%B8%80%E5%AF%B9%E8%AE%B8%E5%A4%9A">一对许多</a></li>
 <li><a href="#%E4%B8%80%E5%AF%B9%E9%9D%9E%E5%B8%B8%E5%A4%9A">一对非常多</a></li>
 </ul>
 </li>
-<li><a href="#part-2">Part 2</a><br>
-*
+<li><a href="#part-2">Part 2</a>
 <ul>
 <li><a href="#%E5%8F%8C%E5%90%91%E5%85%B3%E8%81%94">双向关联</a></li>
 <li><a href="#%E5%9C%A8%E4%B8%80%E5%AF%B9%E5%A4%9A%E5%85%B3%E7%B3%BB%E4%B8%AD%E5%BA%94%E7%94%A8%E5%8F%8D%E8%8C%83%E5%BC%8F">在一对多关系中应用反范式</a>
@@ -260,11 +260,12 @@ By William Zola, Lead Technical Support Engineer at MongoDB..." />
 <li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
 </ul>
 </li>
-<li><a href="#part-3">Part 3</a><br>
-*
+<li><a href="#part-3">Part 3</a>
 <ul>
 <li><a href="#%E8%AE%BE%E8%AE%A1%E6%8C%87%E5%8D%97">设计指南</a></li>
 <li><a href="#%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1%E8%AE%BE%E8%AE%A1%E6%8C%87%E5%8D%97">数据建模设计指南</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

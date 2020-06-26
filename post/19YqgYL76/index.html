@@ -2,11 +2,11 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>实现简单的 SSR | YuuFen</title>
+<title>Node 数据持久化 - fs | YuuFen</title>
 <link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1593180289492">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="实现简单的 SSR | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="Node 数据持久化 - fs | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -20,14 +20,12 @@
 </script>
 
 
-    <meta name="description" content="渲染服务器
-server/index.js
-const express = require('express')
-const Vue = require('vue')
-const fs = require('fs')
+    <meta name="description" content="const fs = require('fs')
 
-// 创建 expr..." />
-    <meta name="keywords" content="源码,Vue,JS" />
+function get(key) {
+  fs.readFile('./db.json', (err, data) =&gt; {
+    const json = JSON.parse..." />
+    <meta name="keywords" content="NodeJS" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -101,156 +99,82 @@ const fs = require('fs')
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              实现简单的 SSR
+              Node 数据持久化 - fs
             </h2>
             <div class="post-info">
               <span>
-                2020-03-25
+                2020-06-20
               </span>
               <span>
-                2 min read
+                1 min read
               </span>
               
-                <a href="https://yuufen.com/blog/tag/bkBOcErCL/" class="post-tag">
-                  # 源码
-                </a>
-              
-                <a href="https://yuufen.com/blog/tag/BChgVxiCO/" class="post-tag">
-                  # Vue
-                </a>
-              
-                <a href="https://yuufen.com/blog/tag/clJDbkZpQ/" class="post-tag">
-                  # JS
+                <a href="https://yuufen.com/blog/tag/uS3oa0DPJ/" class="post-tag">
+                  # NodeJS
                 </a>
               
             </div>
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <h2 id="渲染服务器">渲染服务器</h2>
-<p>server/index.js</p>
-<pre><code class="language-js">const express = require('express')
-const Vue = require('vue')
-const fs = require('fs')
+                <pre><code class="language-js">const fs = require('fs')
 
-// 创建 express 实例
-const app = express()
+function get(key) {
+  fs.readFile('./db.json', (err, data) =&gt; {
+    const json = JSON.parse(data)
+    console.log(json[key])
+  })
+}
 
-const { createBundleRenderer } = require('vue-server-renderer')
-
-const bundle = require('../dist/server/vue-ssr-server-bundle.json')
-const clientManifest = require('../dist/server/vue-ssr-client-bundle.json')
-const renderer = createBundleRenderer(bundle, {
-  runInNewContext: false,
-  template: fs.readFileSync('./src/index.temp.html'),
-  clientManifest: clientManifest,
-})
-
-function renderToString(context) {
-  return new Promise((resolve, reject) =&gt; {
-    renderer.renderToString(context, (err, html) =&gt; {
+function set(key, value) {
+  fs.readFile('./db.json', (err, data) =&gt; {
+    // 可能是空文件
+    const json = data ? JSON.parse(data) : {}
+    json[key] = value
+    fs.writeFile('./db.json', JSON.stringify(json), (err) =&gt; {
       if (err) {
-        reject(err)
-        return
+        console.log(err)
+      } else {
+        console.log('写入成功')
       }
-      resolve(html)
     })
   })
 }
 
-// // 创建 vue 实例
-// const vm = new Vue({
-//   data: { cnt: 1 },
-//   template: `
-//     &lt;div&gt;{{cnt}}&lt;/div&gt;
-//   `,
-// })
+/**
+ * 命令行接口
+ * set foo doo
+ * get foo
+ * quit
+ */
+const readline = require('readline')
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+})
 
-// 客户端部署静态文件
-app.use(express.static('../dist/client'))
-// 声明服务端路由
-app.get('*', async function (req, res) {
-  try {
-    const context = {
-      title: 'ssr test',
-      url: req.url,
-    }
-    const html = await renderToString(context)
-    res.send(html)
-  } catch (err) {
-    res.status(500).send('Internal Server Error')
+rl.on('line', function (input) {
+  const [op, key, value] = input.split(' ')
+  if (op === 'get') {
+    get(key)
+  } else if (op === 'set') {
+    set(key, value)
+  } else if (op === 'quit') {
+    rl.close()
+  } else {
+    console.log('无效指令')
   }
 })
 
-app.listen(3000, () =&gt; {
-  console.log('渲染服务器启动成功')
+rl.on('close', function () {
+  console.log('程序结束')
+  process.exit(0)
 })
-</code></pre>
-<h2 id="打包入口文件">打包入口文件</h2>
-<h3 id="appjs">app.js</h3>
-<pre><code class="language-js">// 通用：创建 Vue 实例
-
-import Vue from 'vue'
-import App from './App.vue'
-import { createRouter } from './router'
-import { createStore } from './store'
-
-export function createApp(context) {
-  const router = createRouter()
-  const store = createStore()
-  const app = new Vue({
-    router,
-    store,
-    render: (h) =&gt; h(App),
-  })
-  return { app, router }
-}
-</code></pre>
-<h3 id="entry-clientjs">entry-client.js</h3>
-<pre><code class="language-js">import { createApp } from './app'
-
-const { app, router } = createApp()
-
-router.onReady(() =&gt; {
-  // 挂载
-  app.$mount('#app')
-})
-</code></pre>
-<h3 id="entry-serverjs">entry-server.js</h3>
-<pre><code class="language-js">import { createApp } from './app'
-
-export default (context) =&gt; {
-  // 返回 Promise，确保路由或组件准备就绪
-  return new Promise((resolve, reject) =&gt; {
-    // 创建 vue 实例
-    const { app, router } = createApp(context)
-    // 跳转首屏地址
-    router.push(context.url)
-    // 完成 promise
-    router.onReady(() =&gt; {
-      resolve(app)
-    }, reject)
-  })
-}
 </code></pre>
 
               </div>
               <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#%E6%B8%B2%E6%9F%93%E6%9C%8D%E5%8A%A1%E5%99%A8">渲染服务器</a></li>
-<li><a href="#%E6%89%93%E5%8C%85%E5%85%A5%E5%8F%A3%E6%96%87%E4%BB%B6">打包入口文件</a>
-<ul>
-<li><a href="#appjs">app.js</a></li>
-<li><a href="#entry-clientjs">entry-client.js</a></li>
-<li><a href="#entry-serverjs">entry-server.js</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
+                
               </div>
             </div>
           </article>
@@ -259,9 +183,9 @@ export default (context) =&gt; {
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://yuufen.com/blog/post/uhM7D6ItT/">
+            <a href="https://yuufen.com/blog/post/ID3pXnTIC/">
               <h3 class="post-title">
-                Vue 基础：结合 TS
+                网络基础
               </h3>
             </a>
           </div>

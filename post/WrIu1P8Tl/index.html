@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Node 数据持久化 - mongodb / ODM - mongoose | YuuFen</title>
-<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1593078804520">
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1593180289492">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Node 数据持久化 - mongodb / ODM - mongoose | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
@@ -36,7 +36,7 @@ db.fruits.save({name:'苹果'..." />
       <div class="main-content">
         <div class="site-header">
   <a href="https://yuufen.com/blog">
-  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1593078804520" alt="">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1593180289492" alt="">
   </a>
   <h1 class="site-title">
     YuuFen
@@ -108,7 +108,7 @@ db.fruits.save({name:'苹果'..." />
                 2020-06-24
               </span>
               <span>
-                8 min read
+                10 min read
               </span>
               
                 <a href="https://yuufen.com/blog/tag/xg63XOQYg/" class="post-tag">
@@ -473,6 +473,121 @@ console.log('findByAuthor', r)
 r = await BlogModel.findOne({ author: 'jerry' })
 console.log('blog留言数：', r.commentsCount)
 </code></pre>
+<h2 id="一个自动化生成-restful-api-的框架">一个自动化生成 Restful API 的框架</h2>
+<pre><code class="language-js">// index.js
+const Koa = require('koa')
+const app = new Koa()
+
+// 连接数据库以及加载模型
+const config = require('./conf')
+const { loadModel } = require('./framework/loader')
+loadModel(config)(app)
+
+const router = require('./framework/router')
+app.use(router)
+
+const bodyParser = require('koa-bodyparser')
+app.use(bodyParser())
+
+const port = 3000
+app.listen(port, () =&gt; {
+  console.log(`App started at port ${port}`)
+})
+</code></pre>
+<pre><code class="language-js">// config.js
+module.exports = {
+  db: {
+    url: 'mongodb://localhost:27017/test',
+    options: {
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+    },
+  },
+}
+</code></pre>
+<pre><code class="language-js">// framework/loader.js
+// 连接数据库，加载模型
+const fs = require('fs')
+const path = require('path')
+const mongoose = require('mongoose')
+
+function load(dir, cb) {
+  const url = path.resolve(__dirname, dir)
+  const files = fs.readdirSync(url)
+  files.forEach((filename) =&gt; {
+    filename = filename.replace('.js', '')
+    const file = require(url + '/' + filename)
+    cb(filename, file)
+  })
+}
+
+const loadModel = (config) =&gt; (app) =&gt; {
+  mongoose.connect(config.db.url, config.db.options)
+  const conn = mongoose.connection
+  conn.on('error', () =&gt; console.log('连接失败'))
+
+  app.$model = {}
+  load('../model', (filename, { schema }) =&gt; {
+    console.log('Load model:' + filename)
+    app.$model[filename] = mongoose.model(filename, schema)
+  })
+}
+
+module.exports = {
+  loadModel,
+}
+</code></pre>
+<pre><code class="language-js">// framework/router.js
+const router = require('koa-router')()
+
+const { init, get, create, update, del } = require('./api')
+
+router.get('/api/:list', init, get)
+router.post('/api/:list', init, create)
+router.put('/api/:list/:id', init, update)
+router.delete('/api/:list/:id', init, del)
+
+module.exports = router.routes()
+</code></pre>
+<pre><code class="language-js">// framework/api.js
+module.exports = {
+  async init(ctx, next) {
+    const model = ctx.app.$model[ctx.params.list]
+    if (model) {
+      ctx.list = model
+      await next()
+    } else {
+      ctx.body = `Can't find model ${ctx.params.list}`
+    }
+  },
+  async get(ctx) {
+    const res = await ctx.list.find({})
+    ctx.body = res
+  },
+  async create(ctx) {
+    const res = await ctx.list.create(ctx.request.body)
+    ctx.body = res
+  },
+  async update(ctx) {
+    const res = await ctx.list.updateOne({ _id: ctx.params.id }, ctx.request.body)
+    ctx.body = res
+  },
+  async del(ctx) {
+    const res = await ctx.list.deleteOne({ _id: ctx.params.id })
+    ctx.body = res
+  },
+}
+</code></pre>
+<pre><code class="language-js">// model/user.js
+const Mongoose = require('mongoose')
+
+module.exports = {
+  schema: new Mongoose.schema({
+    mobile: { type: String, required: true },
+    realName: { type: String, required: true },
+  }),
+}
+</code></pre>
 
               </div>
               <div class="toc-container">
@@ -509,6 +624,7 @@ console.log('blog留言数：', r.commentsCount)
 </li>
 </ul>
 </li>
+<li><a href="#%E4%B8%80%E4%B8%AA%E8%87%AA%E5%8A%A8%E5%8C%96%E7%94%9F%E6%88%90-restful-api-%E7%9A%84%E6%A1%86%E6%9E%B6">一个自动化生成 Restful API 的框架</a></li>
 </ul>
 </li>
 </ul>
