@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://yuufen.com/blog</id>
     <title>YuuFen</title>
-    <updated>2020-06-26T14:05:04.369Z</updated>
+    <updated>2020-07-20T10:36:52.784Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://yuufen.com/blog"/>
     <link rel="self" href="https://yuufen.com/blog/atom.xml"/>
@@ -31,6 +31,169 @@
 <p><a href="https://yuufen.com/" target="_blank" class="text-button">主页</a><a href="https://yuufen.com/blog" target="_blank" class="text-button">博客</a><a href="https://github.com/yuuFen" target="_blank" class="text-button">项目</a><a href="mailto:me@yuufen.com" class="text-button">给我发邮件</a></p>
 <h2 id="兴趣爱好">🎨 兴趣爱好</h2>
 <p><strong>摄影</strong>、羽毛球、轮滑，and playing!</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[实现一个简单的 react（createElement、Component、render）]]></title>
+        <id>https://yuufen.com/blog/post/YPz0GgfWl/</id>
+        <link href="https://yuufen.com/blog/post/YPz0GgfWl/">
+        </link>
+        <updated>2020-07-20T10:36:04.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="使用同原版">使用，同原版</h2>
+<pre><code class="language-jsx">import React, { Component } from './myReact/index'
+import ReactDOM from './myReact/reactDOM'
+import './index.css'
+
+// jsx 经过 babel 编译后为
+// React.createElement()
+
+class ClassComp extends Component {
+  render() {
+    return (
+      &lt;div className=&quot;border&quot;&gt;
+        我是{this.props.name}
+        {JSON.stringify(this.props.children)}
+        &lt;FuncComp name=&quot;函数666&quot; /&gt;
+      &lt;/div&gt;
+    )
+  }
+}
+
+function FuncComp(props) {
+  return &lt;div className=&quot;border&quot;&gt;我是{props.name}&lt;/div&gt;
+  // return React.createElement('div', { className: 'border' }, 我是, props.name)
+}
+
+const jsx = (
+  // React.createElement(&quot;div&quot;, null,
+  //    React.createElement(&quot;div&quot;, { className: &quot;border&quot; }, &quot;普通组件&quot;),
+  //    React.createElement(ClassComp, { name: &quot;类组件&quot; }),
+  //    React.createElement(FuncComp, { name: &quot;函数组件&quot; }),
+  // )
+  &lt;div&gt;
+    &lt;div className=&quot;border&quot;&gt;普通组件&lt;/div&gt;
+    &lt;ClassComp name=&quot;类组件&quot;&gt;
+      &lt;h1&gt;666&lt;/h1&gt;
+    &lt;/ClassComp&gt;
+    &lt;FuncComp name=&quot;函数组件&quot; /&gt;
+  &lt;/div&gt;
+)
+
+ReactDOM.render(jsx, document.getElementById('root'))
+</code></pre>
+<h2 id="createelement-生成虚拟-dom">createElement 生成虚拟 DOM</h2>
+<pre><code class="language-jsx">// myReact/index.js
+function createElement(type, props, ...children) {
+  // console.log('createElement: ', arguments)
+  // return vnode
+  props.children = children
+  let vtype
+  if (typeof type === 'string') {
+    vtype = 1
+  } else if (typeof type === 'function') {
+    vtype = type.isReactComponent ? 2 : 3
+  }
+
+  return {
+    vtype,
+    type,
+    props,
+  }
+}
+
+export default {
+  Component: Component,
+  createElement,
+}
+</code></pre>
+<h2 id="component-标记是否为-class-组件并设置-props">Component 标记是否为 class 组件，并设置 props</h2>
+<p><code>typeof class</code> 和 <code>typeof function</code> 结果都为 function，而他们返回 jsx 的调用方式不同，所以需要标记以区分</p>
+<pre><code class="language-jsx">// myReact/index.js
+export class Component {
+  static isReactComponent = {} // 使用空对象，方便扩展
+  constructor(props) {
+    this.props = props
+  }
+}
+</code></pre>
+<h2 id="render-将-vnode-转化为-node-并挂载">render 将 vnode 转化为 node 并挂载</h2>
+<p>使用虚拟节点防止多次回流重绘。递归遍历子节点。</p>
+<p>没有处理 <code>{ props.children }</code></p>
+<pre><code class="language-jsx">// myReact/reactDOM.js
+function render(vnode, container) {
+  console.log('render: ', arguments)
+  // 使用虚拟节点防止多次回流重绘
+  const fragment = document.createDocumentFragment()
+  // vnode =&gt; node
+  mount(vnode, fragment)
+  // container.appendChild(node )
+  container.appendChild(fragment)
+}
+
+// vnode =&gt; node
+function mount(vnode, container) {
+  const { vtype } = vnode
+  if (!vtype) {
+    mountText(vnode, container) // 处理文本节点
+  }
+  if (vtype === 1) {
+    mountHtml(vnode, container) // 处理原生标签
+  }
+  if (vtype === 3) {
+    mountFunc(vnode, container) // 处理函数组件
+  }
+  if (vtype === 2) {
+    mountClass(vnode, container) // 处理类组件
+  }
+}
+
+// 挂载文本节点
+function mountText(vnode, container) {
+  const node = document.createTextNode(vnode)
+  container.appendChild(node)
+}
+
+// 挂载原生标签
+function mountHtml(vnode, container) {
+  const { type, props } = vnode
+  const node = document.createElement(type)
+
+  const { children, ...rest } = props
+  // 递归遍历子元素，挂载在该 node
+  children.map((item) =&gt; {
+    mount(item, node)
+  })
+  // 处理特殊属性
+  Object.keys(rest).map((item) =&gt; {
+    if (item === 'className') {
+      node.setAttribute('class', rest[item])
+    }
+  })
+
+  container.appendChild(node)
+}
+
+// 挂载函数组件
+function mountFunc(vnode, container) {
+  const { type, props } = vnode
+
+  const node = type(props) // return vnode
+  // console.log(node)
+  mount(node, container)
+}
+
+// 挂载类组件
+function mountClass(vnode, container) {
+  const { type, props } = vnode
+  const cmp = new type(props)
+  const node = cmp.render()
+  mount(node, container)
+}
+
+export default {
+  render,
+}
+</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -2294,120 +2457,6 @@ function replaceVNode(prev, next, container) {
 </code></pre>
 <h2 id="vue-中的优化">Vue 中的优化</h2>
 <p>对常见的修改：新增、删除、倒序排列做了特定优化，详细见之前文章。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[实现简单的 SSR]]></title>
-        <id>https://yuufen.com/blog/post/s-05vytU3/</id>
-        <link href="https://yuufen.com/blog/post/s-05vytU3/">
-        </link>
-        <updated>2020-03-25T02:49:07.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="渲染服务器">渲染服务器</h2>
-<p>server/index.js</p>
-<pre><code class="language-js">const express = require('express')
-const Vue = require('vue')
-const fs = require('fs')
-
-// 创建 express 实例
-const app = express()
-
-const { createBundleRenderer } = require('vue-server-renderer')
-
-const bundle = require('../dist/server/vue-ssr-server-bundle.json')
-const clientManifest = require('../dist/server/vue-ssr-client-bundle.json')
-const renderer = createBundleRenderer(bundle, {
-  runInNewContext: false,
-  template: fs.readFileSync('./src/index.temp.html'),
-  clientManifest: clientManifest,
-})
-
-function renderToString(context) {
-  return new Promise((resolve, reject) =&gt; {
-    renderer.renderToString(context, (err, html) =&gt; {
-      if (err) {
-        reject(err)
-        return
-      }
-      resolve(html)
-    })
-  })
-}
-
-// // 创建 vue 实例
-// const vm = new Vue({
-//   data: { cnt: 1 },
-//   template: `
-//     &lt;div&gt;{{cnt}}&lt;/div&gt;
-//   `,
-// })
-
-// 客户端部署静态文件
-app.use(express.static('../dist/client'))
-// 声明服务端路由
-app.get('*', async function (req, res) {
-  try {
-    const context = {
-      title: 'ssr test',
-      url: req.url,
-    }
-    const html = await renderToString(context)
-    res.send(html)
-  } catch (err) {
-    res.status(500).send('Internal Server Error')
-  }
-})
-
-app.listen(3000, () =&gt; {
-  console.log('渲染服务器启动成功')
-})
-</code></pre>
-<h2 id="打包入口文件">打包入口文件</h2>
-<h3 id="appjs">app.js</h3>
-<pre><code class="language-js">// 通用：创建 Vue 实例
-
-import Vue from 'vue'
-import App from './App.vue'
-import { createRouter } from './router'
-import { createStore } from './store'
-
-export function createApp(context) {
-  const router = createRouter()
-  const store = createStore()
-  const app = new Vue({
-    router,
-    store,
-    render: (h) =&gt; h(App),
-  })
-  return { app, router }
-}
-</code></pre>
-<h3 id="entry-clientjs">entry-client.js</h3>
-<pre><code class="language-js">import { createApp } from './app'
-
-const { app, router } = createApp()
-
-router.onReady(() =&gt; {
-  // 挂载
-  app.$mount('#app')
-})
-</code></pre>
-<h3 id="entry-serverjs">entry-server.js</h3>
-<pre><code class="language-js">import { createApp } from './app'
-
-export default (context) =&gt; {
-  // 返回 Promise，确保路由或组件准备就绪
-  return new Promise((resolve, reject) =&gt; {
-    // 创建 vue 实例
-    const { app, router } = createApp(context)
-    // 跳转首屏地址
-    router.push(context.url)
-    // 完成 promise
-    router.onReady(() =&gt; {
-      resolve(app)
-    }, reject)
-  })
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>

@@ -1,0 +1,353 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>实现一个简单的 react（createElement、Component、render） | YuuFen</title>
+<link rel="shortcut icon" href="https://yuufen.com/blog/favicon.ico?v=1595241404184">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://yuufen.com/blog/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="实现一个简单的 react（createElement、Component、render） | YuuFen - Atom Feed" href="https://yuufen.com/blog/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159952313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-159952313-1');
+</script>
+
+
+    <meta name="description" content="使用，同原版
+import React, { Component } from './myReact/index'
+import ReactDOM from './myReact/reactDOM'
+import './index.css'..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://yuufen.com/blog">
+  <img class="avatar" src="https://yuufen.com/blog/images/avatar.png?v=1595241404184" alt="">
+  </a>
+  <h1 class="site-title">
+    YuuFen
+  </h1>
+  <p class="site-description">
+    希望你可以记住我
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/yuuFen" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://twitter.com/Dob789" target="_blank">
+          <i class="ri-twitter-line"></i>
+        </a>
+      
+    
+      
+        <a href="https://weibo.com/u/6625495890" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              实现一个简单的 react（createElement、Component、render）
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-07-20
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="使用同原版">使用，同原版</h2>
+<pre><code class="language-jsx">import React, { Component } from './myReact/index'
+import ReactDOM from './myReact/reactDOM'
+import './index.css'
+
+// jsx 经过 babel 编译后为
+// React.createElement()
+
+class ClassComp extends Component {
+  render() {
+    return (
+      &lt;div className=&quot;border&quot;&gt;
+        我是{this.props.name}
+        {JSON.stringify(this.props.children)}
+        &lt;FuncComp name=&quot;函数666&quot; /&gt;
+      &lt;/div&gt;
+    )
+  }
+}
+
+function FuncComp(props) {
+  return &lt;div className=&quot;border&quot;&gt;我是{props.name}&lt;/div&gt;
+  // return React.createElement('div', { className: 'border' }, 我是, props.name)
+}
+
+const jsx = (
+  // React.createElement(&quot;div&quot;, null,
+  //    React.createElement(&quot;div&quot;, { className: &quot;border&quot; }, &quot;普通组件&quot;),
+  //    React.createElement(ClassComp, { name: &quot;类组件&quot; }),
+  //    React.createElement(FuncComp, { name: &quot;函数组件&quot; }),
+  // )
+  &lt;div&gt;
+    &lt;div className=&quot;border&quot;&gt;普通组件&lt;/div&gt;
+    &lt;ClassComp name=&quot;类组件&quot;&gt;
+      &lt;h1&gt;666&lt;/h1&gt;
+    &lt;/ClassComp&gt;
+    &lt;FuncComp name=&quot;函数组件&quot; /&gt;
+  &lt;/div&gt;
+)
+
+ReactDOM.render(jsx, document.getElementById('root'))
+</code></pre>
+<h2 id="createelement-生成虚拟-dom">createElement 生成虚拟 DOM</h2>
+<pre><code class="language-jsx">// myReact/index.js
+function createElement(type, props, ...children) {
+  // console.log('createElement: ', arguments)
+  // return vnode
+  props.children = children
+  let vtype
+  if (typeof type === 'string') {
+    vtype = 1
+  } else if (typeof type === 'function') {
+    vtype = type.isReactComponent ? 2 : 3
+  }
+
+  return {
+    vtype,
+    type,
+    props,
+  }
+}
+
+export default {
+  Component: Component,
+  createElement,
+}
+</code></pre>
+<h2 id="component-标记是否为-class-组件并设置-props">Component 标记是否为 class 组件，并设置 props</h2>
+<p><code>typeof class</code> 和 <code>typeof function</code> 结果都为 function，而他们返回 jsx 的调用方式不同，所以需要标记以区分</p>
+<pre><code class="language-jsx">// myReact/index.js
+export class Component {
+  static isReactComponent = {} // 使用空对象，方便扩展
+  constructor(props) {
+    this.props = props
+  }
+}
+</code></pre>
+<h2 id="render-将-vnode-转化为-node-并挂载">render 将 vnode 转化为 node 并挂载</h2>
+<p>使用虚拟节点防止多次回流重绘。递归遍历子节点。</p>
+<p>没有处理 <code>{ props.children }</code></p>
+<pre><code class="language-jsx">// myReact/reactDOM.js
+function render(vnode, container) {
+  console.log('render: ', arguments)
+  // 使用虚拟节点防止多次回流重绘
+  const fragment = document.createDocumentFragment()
+  // vnode =&gt; node
+  mount(vnode, fragment)
+  // container.appendChild(node )
+  container.appendChild(fragment)
+}
+
+// vnode =&gt; node
+function mount(vnode, container) {
+  const { vtype } = vnode
+  if (!vtype) {
+    mountText(vnode, container) // 处理文本节点
+  }
+  if (vtype === 1) {
+    mountHtml(vnode, container) // 处理原生标签
+  }
+  if (vtype === 3) {
+    mountFunc(vnode, container) // 处理函数组件
+  }
+  if (vtype === 2) {
+    mountClass(vnode, container) // 处理类组件
+  }
+}
+
+// 挂载文本节点
+function mountText(vnode, container) {
+  const node = document.createTextNode(vnode)
+  container.appendChild(node)
+}
+
+// 挂载原生标签
+function mountHtml(vnode, container) {
+  const { type, props } = vnode
+  const node = document.createElement(type)
+
+  const { children, ...rest } = props
+  // 递归遍历子元素，挂载在该 node
+  children.map((item) =&gt; {
+    mount(item, node)
+  })
+  // 处理特殊属性
+  Object.keys(rest).map((item) =&gt; {
+    if (item === 'className') {
+      node.setAttribute('class', rest[item])
+    }
+  })
+
+  container.appendChild(node)
+}
+
+// 挂载函数组件
+function mountFunc(vnode, container) {
+  const { type, props } = vnode
+
+  const node = type(props) // return vnode
+  // console.log(node)
+  mount(node, container)
+}
+
+// 挂载类组件
+function mountClass(vnode, container) {
+  const { type, props } = vnode
+  const cmp = new type(props)
+  const node = cmp.render()
+  mount(node, container)
+}
+
+export default {
+  render,
+}
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E4%BD%BF%E7%94%A8%E5%90%8C%E5%8E%9F%E7%89%88">使用，同原版</a></li>
+<li><a href="#createelement-%E7%94%9F%E6%88%90%E8%99%9A%E6%8B%9F-dom">createElement 生成虚拟 DOM</a></li>
+<li><a href="#component-%E6%A0%87%E8%AE%B0%E6%98%AF%E5%90%A6%E4%B8%BA-class-%E7%BB%84%E4%BB%B6%E5%B9%B6%E8%AE%BE%E7%BD%AE-props">Component 标记是否为 class 组件，并设置 props</a></li>
+<li><a href="#render-%E5%B0%86-vnode-%E8%BD%AC%E5%8C%96%E4%B8%BA-node-%E5%B9%B6%E6%8C%82%E8%BD%BD">render 将 vnode 转化为 node 并挂载</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://yuufen.com/blog/post/g--Ijm-z9/">
+              <h3 class="post-title">
+                用户鉴权的四种方式
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://yuufen.com/blog/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
